@@ -83,7 +83,7 @@ struct Volume {
     char     desc[128];                     // Human-readable description of the volume format.
     char     native_desc[128];              // Native description of the volume format, if any.
 
-    unsigned depth;                         // How many containers deep this volue is found (0 = root)
+    unsigned depth;                         // How many containers deep this volume is found (0 = root)
     unsigned partition_count;               // total count of sub-partitions; 0 if this is a data partition
     Volume*  parent_partition;              // the enclosing partition; NULL if the root partition map
     Volume*  partitions[128];               // partition records
