@@ -198,27 +198,27 @@
 			children = (
 				9B1936EB1A941E9D000E8995 /* Apple */,
 				9B1936F41A941E9D000E8995 /* btree */,
-				9B1936FD1A941E9D000E8995 /* catalog.c */,
 				9B1936FE1A941E9D000E8995 /* catalog.h */,
-				9B1936FF1A941E9D000E8995 /* extents.c */,
+				9B1936FD1A941E9D000E8995 /* catalog.c */,
 				9B1937001A941E9D000E8995 /* extents.h */,
-				9B1937011A941E9D000E8995 /* hfs.c */,
+				9B1936FF1A941E9D000E8995 /* extents.c */,
 				9B1937021A941E9D000E8995 /* hfs.h */,
-				9B1937031A941E9D000E8995 /* hfs_btree.c */,
+				9B1937011A941E9D000E8995 /* hfs.c */,
 				9B1937041A941E9D000E8995 /* hfs_btree.h */,
-				9B1937051A941E9D000E8995 /* hfs_endian.c */,
+				9B1937031A941E9D000E8995 /* hfs_btree.c */,
 				9B1937061A941E9D000E8995 /* hfs_endian.h */,
-				9B1937071A941E9D000E8995 /* hfs_extentlist.c */,
+				9B1937051A941E9D000E8995 /* hfs_endian.c */,
 				9B1937081A941E9D000E8995 /* hfs_extentlist.h */,
-				9B1937091A941E9D000E8995 /* hfs_io.c */,
+				9B1937071A941E9D000E8995 /* hfs_extentlist.c */,
 				9B19370A1A941E9D000E8995 /* hfs_io.h */,
-				9B19370B1A941E9D000E8995 /* output_hfs.c */,
+				9B1937091A941E9D000E8995 /* hfs_io.c */,
 				9B19370C1A941E9D000E8995 /* output_hfs.h */,
-				9B19370D1A941E9D000E8995 /* range.c */,
+				9B19370B1A941E9D000E8995 /* output_hfs.c */,
 				9B19370E1A941E9D000E8995 /* range.h */,
+				9B19370D1A941E9D000E8995 /* range.c */,
 				9B19370F1A941E9D000E8995 /* types.h */,
-				9B1937101A941E9D000E8995 /* unicode.c */,
 				9B1937111A941E9D000E8995 /* unicode.h */,
+				9B1937101A941E9D000E8995 /* unicode.c */,
 			);
 			path = hfs;
 			sourceTree = "<group>";
@@ -232,8 +232,8 @@
 				9B1936EE1A941E9D000E8995 /* hfs_macos_defs.h */,
 				9B1936EF1A941E9D000E8995 /* hfs_types.h */,
 				9B1936F21A941E9D000E8995 /* hfs_unistr.h */,
-				9B46A6691AA279B7000E8995 /* utfconv.c */,
 				9B46A66A1AA279B7000E8995 /* utfconv.h */,
+				9B46A6691AA279B7000E8995 /* utfconv.c */,
 				9B46A66B1AA279B7000E8995 /* utfconvdata.h */,
 				9B1936F31A941E9D000E8995 /* vfs_journal.h */,
 			);
@@ -243,14 +243,14 @@
 		9B1936F41A941E9D000E8995 /* btree */ = {
 			isa = PBXGroup;
 			children = (
-				9B1936F51A941E9D000E8995 /* btree.c */,
 				9B1936F61A941E9D000E8995 /* btree.h */,
-				9B1936F71A941E9D000E8995 /* btree_endian.c */,
+				9B1936F51A941E9D000E8995 /* btree.c */,
 				9B1936F81A941E9D000E8995 /* btree_endian.h */,
-				9B1936F91A941E9D000E8995 /* cache.c */,
+				9B1936F71A941E9D000E8995 /* btree_endian.c */,
 				9B1936FA1A941E9D000E8995 /* cache.h */,
-				9B1936FB1A941E9D000E8995 /* output.c */,
+				9B1936F91A941E9D000E8995 /* cache.c */,
 				9B1936FC1A941E9D000E8995 /* output.h */,
+				9B1936FB1A941E9D000E8995 /* output.c */,
 			);
 			path = btree;
 			sourceTree = "<group>";
@@ -258,12 +258,12 @@
 		9B1937141A941E9D000E8995 /* operations */ = {
 			isa = PBXGroup;
 			children = (
+				9B19371A1A941E9D000E8995 /* operations.h */,
+				9B1937191A941E9D000E8995 /* operations.c */,
 				9B1937151A941E9D000E8995 /* cnid.c */,
 				9B1937161A941E9D000E8995 /* extract_file.c */,
 				9B1937171A941E9D000E8995 /* free_space.c */,
 				9B1937181A941E9D000E8995 /* hfs_summary.c */,
-				9B1937191A941E9D000E8995 /* operations.c */,
-				9B19371A1A941E9D000E8995 /* operations.h */,
 				9B19371B1A941E9D000E8995 /* path_info.c */,
 			);
 			path = operations;
@@ -272,13 +272,13 @@
 		9B19371F1A941E9D000E8995 /* hfsplus */ = {
 			isa = PBXGroup;
 			children = (
-				9B1937201A941E9D000E8995 /* attributes.c */,
-				9B1937211A941E9D000E8995 /* attributes.h */,
 				9B1937221A941E9D000E8995 /* hfsplus.h */,
-				9B1937231A941E9D000E8995 /* hotfiles.c */,
+				9B1937211A941E9D000E8995 /* attributes.h */,
+				9B1937201A941E9D000E8995 /* attributes.c */,
 				9B1937241A941E9D000E8995 /* hotfiles.h */,
-				9B1937251A941E9D000E8995 /* journal.c */,
+				9B1937231A941E9D000E8995 /* hotfiles.c */,
 				9B1937261A941E9D000E8995 /* journal.h */,
+				9B1937251A941E9D000E8995 /* journal.c */,
 			);
 			path = hfsplus;
 			sourceTree = "<group>";
@@ -286,10 +286,10 @@
 		9B1937271A941E9D000E8995 /* logging */ = {
 			isa = PBXGroup;
 			children = (
-				9B1937281A941E9D000E8995 /* debug.c */,
 				9B1937291A941E9D000E8995 /* debug.h */,
-				9B19372A1A941E9D000E8995 /* logging.c */,
+				9B1937281A941E9D000E8995 /* debug.c */,
 				9B19372B1A941E9D000E8995 /* logging.h */,
+				9B19372A1A941E9D000E8995 /* logging.c */,
 			);
 			path = logging;
 			sourceTree = "<group>";
@@ -298,23 +298,23 @@
 			isa = PBXGroup;
 			children = (
 				9B19374F1A941E9D000E8995 /* _endian.h */,
-				9B1937501A941E9D000E8995 /* apm.c */,
 				9B1937511A941E9D000E8995 /* apm.h */,
-				9B1937521A941E9D000E8995 /* corestorage.c */,
+				9B1937501A941E9D000E8995 /* apm.c */,
 				9B1937531A941E9D000E8995 /* corestorage.h */,
+				9B1937521A941E9D000E8995 /* corestorage.c */,
 				9B1937541A941E9D000E8995 /* crc32 */,
-				9B1937571A941E9D000E8995 /* gpt.c */,
 				9B1937581A941E9D000E8995 /* gpt.h */,
-				9B1937591A941E9D000E8995 /* mbr.c */,
+				9B1937571A941E9D000E8995 /* gpt.c */,
 				9B19375A1A941E9D000E8995 /* mbr.h */,
-				9B19375B1A941E9D000E8995 /* output.c */,
+				9B1937591A941E9D000E8995 /* mbr.c */,
 				9B19375C1A941E9D000E8995 /* output.h */,
-				9B19375D1A941E9D000E8995 /* utilities.c */,
+				9B19375B1A941E9D000E8995 /* output.c */,
 				9B19375E1A941E9D000E8995 /* utilities.h */,
-				9B19375F1A941E9D000E8995 /* volume.c */,
+				9B19375D1A941E9D000E8995 /* utilities.c */,
 				9B1937601A941E9D000E8995 /* volume.h */,
-				9B1937611A941E9D000E8995 /* volumes.c */,
+				9B19375F1A941E9D000E8995 /* volume.c */,
 				9B1937621A941E9D000E8995 /* volumes.h */,
+				9B1937611A941E9D000E8995 /* volumes.c */,
 			);
 			path = volumes;
 			sourceTree = "<group>";
@@ -322,8 +322,8 @@
 		9B1937541A941E9D000E8995 /* crc32 */ = {
 			isa = PBXGroup;
 			children = (
-				9B1937551A941E9D000E8995 /* crc32.c */,
 				9B1937561A941E9D000E8995 /* crc32.h */,
+				9B1937551A941E9D000E8995 /* crc32.c */,
 			);
 			path = crc32;
 			sourceTree = "<group>";
@@ -343,10 +343,10 @@
 				9B61B0161A957321000E8995 /* .gitignore */,
 				9B61B0171A957321000E8995 /* LICENSE */,
 				9B61B0181A957321000E8995 /* Makefile */,
-				9B61B0191A957321000E8995 /* crc32c.c */,
 				9B61B01A1A957321000E8995 /* crc32c.h */,
-				9B61B01B1A957321000E8995 /* crc32c_tables.c */,
+				9B61B0191A957321000E8995 /* crc32c.c */,
 				9B61B01C1A957321000E8995 /* crc32c_tables.h */,
+				9B61B01B1A957321000E8995 /* crc32c_tables.c */,
 				9B61B01D1A957321000E8995 /* tests */,
 			);
 			path = crc32c;
@@ -373,10 +373,10 @@
 			children = (
 				9B61B0281A957321000E8995 /* .gitignore */,
 				9B61B0291A957321000E8995 /* LICENSE */,
-				9B61B02A1A957321000E8995 /* memdmp.c */,
 				9B61B02B1A957321000E8995 /* memdmp.h */,
-				9B61B02C1A957321000E8995 /* output.c */,
+				9B61B02A1A957321000E8995 /* memdmp.c */,
 				9B61B02D1A957321000E8995 /* output.h */,
+				9B61B02C1A957321000E8995 /* output.c */,
 			);
 			path = memdmp;
 			sourceTree = "<group>";
