@@ -18,6 +18,7 @@ out_ctx OCMake(bool decimal_sizes, unsigned indent_step, char* prefix)
 {
     out_ctx ctx = {
         .decimal_sizes = decimal_sizes,
+        .wideAttributes = false,
         .indent_level  = 0,
         .indent_step   = 2,
         .prefix        = prefix,
@@ -85,12 +86,21 @@ int PrintAttribute(out_ctx* ctx, const char* label, const char* format, ...)
 
     vsprintf(str, format, argp);
 
-    if (label == NULL)
-        bytes = Print(ctx, "%-23s. %s", "", str);
-    else if ( memcmp(label, spc, 2) == 0 )
-        bytes = Print(ctx, "%-23s  %s", "", str);
-    else
-        bytes = Print(ctx, "%-23s= %s", label, str);
+    if (!ctx->wideAttributes) {
+        if (label == NULL)
+            bytes = Print(ctx, "%-23s. %s", "", str);
+        else if ( memcmp(label, spc, 2) == 0 )
+            bytes = Print(ctx, "%-23s  %s", "", str);
+        else
+            bytes = Print(ctx, "%-23s= %s", label, str);
+    } else {
+        if (label == NULL)
+            bytes = Print(ctx, "%-30s. %s", "", str);
+        else if ( memcmp(label, spc, 2) == 0 )
+            bytes = Print(ctx, "%-30s  %s", "", str);
+        else
+            bytes = Print(ctx, "%-30s= %s", label, str);
+    }
 
     va_end(argp);
     return bytes;

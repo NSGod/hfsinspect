@@ -19,7 +19,8 @@ struct out_ctx {
     char     indent_string[32];
     char*    prefix;
     bool     decimal_sizes;
-    uint8_t  _reserved[7];
+    bool     wideAttributes;
+    uint8_t  _reserved[6];
 };
 typedef struct out_ctx out_ctx;
 
