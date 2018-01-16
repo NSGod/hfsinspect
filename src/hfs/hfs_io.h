@@ -19,7 +19,7 @@ extern hfs_forktype_t HFSResourceForkType;
 ssize_t hfs_read            (void* buffer, const HFSPlus* hfs, size_t size, size_t offset) __attribute__((nonnull));
 ssize_t hfs_read_blocks     (void* buffer, const HFSPlus* hfs, size_t block_count, size_t start_block) __attribute__((nonnull));
 
-FILE* fopen_hfs           (HFSPlus* hfs) __attribute__((nonnull));
+//FILE* fopen_hfs           (HFSPlus* hfs) __attribute__((nonnull));
 
 #pragma mark HFS Fork
 

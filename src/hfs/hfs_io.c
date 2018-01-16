@@ -40,6 +40,7 @@ ssize_t hfs_read_blocks(void* buffer, const HFSPlus* hfs, size_t block_count, si
     return vol_read(hfs->vol, buffer, block_count * hfs->block_size, start_block * hfs->block_size);
 }
 
+/*
 #pragma mark funopen - HFSVolume
 
 typedef struct HFSVolumeCookie {
@@ -60,7 +61,7 @@ ssize_t hfs_readfn(void* c, char* buf, size_t nbytes)
     bytes = hfs_read(buf, cookie->hfs, nbytes, offset);
     if (bytes > 0) cookie->cursor += bytes;
 
-    return bytes;
+    return (int)bytes;
 }
 
 #if defined (BSD)
@@ -119,15 +120,15 @@ FILE* fopen_hfs(HFSPlus* hfs)
     return funopen(cookie, hfs_readfn, NULL, hfs_seekfn, hfs_closefn);
 #else
 
-    /*
-       FILE *fopencookie(void *cookie, const char *mode, cookie_io_functions_t io_funcs);
-       struct cookie_io_functions_t {
-         cookie_read_function_t  *read;
-         cookie_write_function_t *write;
-         cookie_seek_function_t  *seek;
-         cookie_close_function_t *close;
-       };
-     */
+    
+//       FILE *fopencookie(void *cookie, const char *mode, cookie_io_functions_t io_funcs);
+//       struct cookie_io_functions_t {
+//         cookie_read_function_t  *read;
+//         cookie_write_function_t *write;
+//         cookie_seek_function_t  *seek;
+//         cookie_close_function_t *close;
+//       };
+
     cookie_io_functions_t fc_hfs_funcs = {
         hfs_readfn,
         NULL,
@@ -137,6 +138,7 @@ FILE* fopen_hfs(HFSPlus* hfs)
     return fopencookie(cookie, "r", fc_hfs_funcs);
 #endif
 }
+*/
 
 #pragma mark HFS Fork
 

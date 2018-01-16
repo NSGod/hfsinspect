@@ -58,7 +58,7 @@ bool HFSPlusCatalogRecordIsFolderAlias  (const HFSPlusCatalogRecord* record) __a
 bool HFSPlusCatalogRecordIsAlias        (const HFSPlusCatalogRecord* record) __attribute__((nonnull));
 
 HFSPlusCatalogKey HFSPlusCatalogKeyFromFSSpec (FSSpec spec);
-FSSpec            HFSPlusFSSpecFromCatalogKey (HFSPlusCatalogKey key);
+//FSSpec            HFSPlusFSSpecFromCatalogKey (HFSPlusCatalogKey key);
 
 #pragma mark Low Level Commands
 
