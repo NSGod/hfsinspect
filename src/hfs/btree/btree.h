@@ -49,7 +49,7 @@ struct _BTree {
     uint8_t*               nodeBitmap;
     size_t                 nodeBitmapSize;
     btree_key_compare_func keyCompare;          // Function used to compare the keys in this tree.
-    btree_get_node_func    getNode;             // Fetch and swap a node for this tree.
+    btree_get_node_func    getNode;             // Fetch and byte-swap a node for this tree.
     BTNodeDescriptor       nodeDescriptor;      // For the header node
     BTHeaderRec            headerRecord;        // From the header node
     bt_nodeid_t            treeID;

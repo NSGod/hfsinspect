@@ -15,6 +15,7 @@
 #include "hfs/unicode.h"
 #include "volumes/utilities.h"     // commonly-used utility functions
 #include "logging/logging.h"       // console printing routines
+#include <sys/mount.h>             // getmntinfo
 
 
 const uint32_t kAliasCreator            = 'MACS';
@@ -246,6 +247,8 @@ int hfsplus_catalog_compare_keys_bc(const HFSPlusCatalogKey* key1, const HFSPlus
     return result;
 }
 
+#pragma mark - Names/Paths
+
 int HFSPlusGetCNIDName(hfs_str* name, FSSpec spec)
 {
     const HFSPlus*    hfs      = spec.hfs;
@@ -278,6 +281,117 @@ int HFSPlusGetCNIDName(hfs_str* name, FSSpec spec)
     HFSPlusCatalogThread* threadRecord = (HFSPlusCatalogThread*)recordValue;
 
     return hfsuc_to_str(name, &threadRecord->nodeName);
+}
+
+int HFSPlusGetCNIDPath(hfs_str* path, FSSpec spec)
+{
+    const HFSPlus*      hfs     = spec.hfs;
+
+    // get path prefix for files on this volume
+    static char* pathPrefix = NULL;
+
+    if (pathPrefix == NULL) {
+        SALLOC(pathPrefix, PATH_MAX+1);
+
+        struct statfs* stats = NULL;
+        int count = getmntinfo(&stats, 0);
+
+        // make a copy of devicePath in case we need to change it
+        char devicePath[PATH_MAX+1] = "";
+        (void)strlcpy(devicePath, hfs->vol->source, PATH_MAX);
+
+    PREFIX:
+        for (int i = 0; i < count; i++) {
+            struct statfs volumeStats = stats[i];
+            if (strcmp(devicePath, volumeStats.f_mntfromname) == 0) {
+                strlcpy(pathPrefix, volumeStats.f_mntonname, PATH_MAX);
+                // if it's not the root volume, add a trailing slash
+                if (strlen(pathPrefix) > 1) {
+                    (void)strlcat(pathPrefix, "/", PATH_MAX);
+                }
+            }
+        }
+
+        if (strlen(pathPrefix) == 0) {
+            // if our volume is using the raw disk path, try the regular device
+            if (strstr(devicePath, "/dev/rdisk") != NULL) {
+                char *newDevicePath = NULL;
+                SALLOC(newDevicePath, PATH_MAX + 1);
+                (void)strlcat(newDevicePath, "/dev/disk", PATH_MAX);
+                (void)strlcat(newDevicePath, &devicePath[10], PATH_MAX);
+                info("No match for %s in getmntinfo(); trying %s instead.", devicePath, newDevicePath);
+                (void)strlcpy(devicePath, newDevicePath, PATH_MAX);
+                SFREE(newDevicePath);
+                goto PREFIX;
+                
+            } else {
+                // unknown?
+                (void)strlcpy(pathPrefix, "/?/", PATH_MAX);
+            }
+        }
+    }
+
+    char fullPath[PATH_MAX+1]     = "";
+
+    hfs_cnid_t              originalCNID    = spec.parentID;
+    hfs_cnid_t              parentID        = spec.parentID;
+    HFSPlusCatalogRecord    catalogRecord   = {0};
+    int                     found           = 0;
+
+    while (parentID != kHFSRootFolderID) {
+        found = !(HFSPlusGetCatalogRecordByFSSpec(&catalogRecord, spec) < 0);
+        if ( !found ) {
+            debug("Record NOT found:");
+            hfs_str str = "";
+            hfsuc_to_str(&str, &spec.name);
+            debug("(%u:%s) not found", spec.parentID, str);
+            break;
+        }
+
+        switch (catalogRecord.record_type) {
+            case kHFSPlusFolderRecord:
+            case kHFSPlusFileRecord:
+            {
+                break;
+            }
+
+            case kHFSPlusFolderThreadRecord:
+            case kHFSPlusFileThreadRecord:
+            {
+                hfs_str itemName = "";
+                hfsuc_to_str(&itemName, &catalogRecord.catalogThread.nodeName);
+
+                char tempPath[PATH_MAX+1] = "";
+
+                (void)strlcpy(tempPath, (const char *)itemName, PATH_MAX);
+
+                if (catalogRecord.record_type == kHFSPlusFolderThreadRecord) {
+                    // If the original target CNID is a folder, don't add a trailing slash.
+                    if (parentID != originalCNID) (void)strlcat(tempPath, "/", PATH_MAX);
+                    (void)strlcat(tempPath, fullPath, PATH_MAX);
+                }
+
+                (void)strlcpy(fullPath, tempPath, PATH_MAX);
+
+                spec.parentID   = catalogRecord.catalogThread.parentID;
+                break;
+            }
+
+            default:
+            {
+                error("Unknown Catalog Record Type (%d).", catalogRecord.record_type);
+                break;
+            }
+        }
+
+        parentID = spec.parentID;
+    }
+    
+    if (found) {
+        (void)strlcpy((char *)path, pathPrefix, PATH_MAX);
+        (void)strlcat((char *)path, fullPath, PATH_MAX);
+    }
+    return (found ? 0 : -1);
 }
 
 #pragma mark - Searching

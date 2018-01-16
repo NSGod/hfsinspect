@@ -170,9 +170,7 @@ void show_version()
 }
 
 /* hfsdebug-lite args remaining...
-   -0,        --freespace     display all free extents on the volume
    -e,        --examples      display some usage examples
-   -f,        --fragmentation display all fragmented files on the volume
    -H,        --hotfiles      display the hottest files on the volume; requires
                                 the -t (--top=TOP) option for the number to list
    -l TYPE,   --list=TYPE     specify an HFS+ B-Tree's leaf nodes' type, where
@@ -185,10 +183,6 @@ void show_version()
                                  type supported for the Attributes B-Tree
    -m,        --mountdata     display a mounted volume's in-memory data
    -S,        --summary_rsrc  calculate and display volume usage summary
-   -t TOP,    --top=TOP       specify the number of most fragmented files
-                                 to display (when used with the --fragmentation
-                                 option), or the number of largest files to display
-                                 (when used with the --summary option)
    -x FILTERDYLIB, --filter=FILTERDYLIB
                              run the filter implemented in the dynamic library
                                  whose path is FILTERDYLIB. Alternatively,
@@ -201,7 +195,7 @@ void show_version()
 
 void print_usage()
 {
-    char* help = "[-hv] [-d path | -p path | -V fspath] [-0DjlrSs] [-b btree [-n nid]] [-P path] [-F parent:name] [-o file] path";
+    char* help = "[-hv] [-d path | -p path | -V fspath] [-DjlrSB] [-0sf [-v] [-t top]] [-b btree [-n nid]] [-P path] [-c cnid] [-F parent:name] [-o file] path";
     fprintf(stderr, "usage: %s %s\n", PROGRAM_NAME, help);
 }
 
@@ -210,8 +204,10 @@ void print_help()
     char* help = "\n"
                  "    -h,         --help          Show help and quit. \n"
                  "    -v,         --version       Show version information and quit. \n"
+                 "    -v,         --verbose       When combined with other options, -v is interpreted to mean --verbose, which\n"
+                 "                                    increases the verbosity of output of those options (see below).\n"
                  "    -S          --si            Use base 1000 SI data size measurements instead of the traditional base 1024.\n"
-                 "                --debug         Set to be overwhelmed with useless data.\n"
+                 "    -B          --debug         Set to be overwhelmed with useless data.\n"
                  "\n"
                  "SOURCES: \n"
                  "hfsinspect will use the root filesystem by default, or the filesystem containing a target file in some cases. If you wish to\n"
@@ -222,12 +218,21 @@ void print_help()
                  "    -p          --path          Locate the record for the given path on a mounted filesystem.\n"
                  "\n"
                  "INFO: \n"
-                 "    By default, hfsinspect will just show you the volume header and quit.  Use the following options to get more specific data.\n"
+                 "    By default, hfsinspect will just show you the volume header and quit. Use the following options to get more specific data.\n"
                  "\n"
                  "    -l,         --list          If the specified FSOB is a folder, list the contents. \n"
                  "    -D,         --disk-info     Show any available information about the disk, including partitions and volume headers.\n"
                  "    -0,         --freespace     Show a summary of the used/free space and extent count based on the allocation file.\n"
+                 "                                   When the -t/--top option is added, will list the largest contiguous freespace segments.\n"
+                 "                                   When the -v/--verbose option is added, will list all contiguous freespace segments.\n"
                  "    -s,         --summary       Show a summary of the files on the disk.\n"
+                 "                                   When the -t/--top option is added, will list the largest files found.\n"
+                 "    -f,         --fragmentation Show a summary of the fragmented files on the disk.\n"
+                 "                                   When the -t/--top option is added, will list the most fragmented files.\n"
+                 "                                   When the -v/--verbose option is added, will list all fragmented files.\n"
+                 "    -t TOP,     --top TOP       Specify the number of largest contiguous freespace segments to display (when used with the -0/--freespace option),\n"
+                 "                                   the number of largest files to display (when used with the -s/--summary option), or\n"
+                 "                                   the number of most fragmented files to display (when used with the -f/--fragmentation option).\n"
                  "    -r,         --volumeheader  Dump the volume header. \n"
                  "    -j,         --journal       Dump the volume's journal info block structure. \n"
                  "    -b NAME,    --btree NAME    Specify which HFS+ B-Tree to work with. Supported options: attributes, catalog, extents, or hotfiles. \n"
@@ -269,6 +274,7 @@ int main (int argc, char* const* argv)
     /* options descriptor */
     struct option longopts[] = {
         { "version",        no_argument,            NULL,                   'v' },
+        { "verbose",        no_argument,            NULL,                   'v' },
         { "help",           no_argument,            NULL,                   'h' },
         { "si",             no_argument,            NULL,                   'S' },
         { "debug",          no_argument,            NULL,                   'B' },
@@ -283,6 +289,9 @@ int main (int argc, char* const* argv)
         { "disk-info",      no_argument,            NULL,                   'D' },
         { "freespace",      no_argument,            NULL,                   '0' },
         { "summary",        no_argument,            NULL,                   's' },
+        { "fragmentation",  no_argument,            NULL,                   'f' },
+        { "top",            required_argument,      NULL,                   't' },
+        
         { "btree",          required_argument,      NULL,                   'b' },
         { "node",           required_argument,      NULL,                   'n' },
         { "cnid",           required_argument,      NULL,                   'c' },
@@ -295,7 +304,7 @@ int main (int argc, char* const* argv)
     };
 
     /* short options */
-    char*         shortopts = "0ShvjlrsDd:n:b:p:P:F:V:c:o:y:L";
+    char*         shortopts = "0ShvjlrsDd:n:b:p:P:F:V:c:o:y:LBft:";
 
     int           opt;
     while ((opt = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1) {
@@ -326,7 +335,12 @@ int main (int argc, char* const* argv)
 
             case 'v':
             {
-                show_version();
+                if (argc == 2) {
+                    show_version();
+                } else {
+                    options.verbose = true;
+                    break;
+                }
             }
 
             case 'h':
@@ -466,6 +480,20 @@ int main (int argc, char* const* argv)
                 break;
             }
 
+            case 'f':
+            {
+                set_mode(&options, HIModeShowFragmentation);
+                break;
+            }
+
+            case 't':
+            {
+                int count = sscanf(optarg, "%u", &options.topCount);
+                if (count == 0) fatal("option -t/--top requires a numeric argument");
+
+                break;
+            }
+
             case '0':
             {
                 set_mode(&options, HIModeFreeSpace);
@@ -585,6 +613,7 @@ OPEN:
         info("Was running as root.  Now running as %u/%u.", geteuid(), getegid());
     }
 
+#pragma mark - OPERATIONS:
 #pragma mark Yank FS
     // Pull the essential files from the disk for inspection or transport.
     if (check_mode(&options, HIModeYankFS)) {
@@ -719,10 +748,21 @@ NOPE:
     // Volume summary
     if (check_mode(&options, HIModeShowSummary)) {
         debug("Printing summary.");
-        VolumeSummary summary = generateVolumeSummary(&options);
-        PrintVolumeSummary(ctx, &summary);
+        VolumeSummary* summary = createVolumeSummary(&options);
+        assert(summary != NULL);
+        PrintVolumeSummary(ctx, summary);
+        freeVolumeSummary(summary);
     }
 
+    // Volume fragmentation summary
+    if (check_mode(&options, HIModeShowFragmentation)) {
+        debug("Printing fragmentation summary.");
+        VolumeFragmentationSummary* summary = createVolumeFragmentationSummary(&options);
+        assert(summary != NULL);
+        PrintVolumeFragmentationSummary(ctx, summary);
+        freeVolumeFragmentationSummary(summary);
+    }
+    
     // Show volume info
     if (check_mode(&options, HIModeShowVolumeInfo)) {
         debug("Printing volume header.");

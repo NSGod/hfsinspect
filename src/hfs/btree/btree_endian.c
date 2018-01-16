@@ -23,11 +23,11 @@ void swap_BTNodeDescriptor(BTNodeDescriptor* record)
     if ((signed)record->bLink < -1)
         warning("Invalid backward link: %d", (signed)record->bLink);
 
-    // noswap: record->kind is a short
+    // noswap: record->kind is a byte
     if ((record->kind < kBTLeafNode) || (record->kind > kBTMapNode))
         warning("invalid node type: %d", record->kind);
 
-    // noswap: record->height is a short
+    // noswap: record->height is a byte
     if (record->height > 16)
         warning("invalid node height: %d", record->kind);
 

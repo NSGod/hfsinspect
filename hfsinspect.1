@@ -1,4 +1,4 @@
-.Dd December 1, 2014
+.Dd January 16, 2018
 .Dt HFSINSPECT 1
 .Os
 .Sh NAME
@@ -9,13 +9,15 @@ Forthcoming.
 ..
 .Sh SYNOPSIS
 .Nm
-.Op Fl hvDjlrs
-.Op Fl d Ar path | Fl V Ar mountpoint
+.Op Fl hvDjlrSB
+.Op Fl d Ar DEV | Fl V Ar VOLUME
+.Op Fl sf0 Fl t Ar TOP
 .Op Fl o Ar outpath
 .Op Fl b Ar attributes | Ar catalog | Ar extents | Ar hotfile
-.Op Fl n Ar nodenum
-.Op Fl c Ar cnid | Fl F Ar parent:name
+.Op Fl n Ar NNUM
+.Op Fl c Ar CNID | Fl F Ar parent:name
 .Op Fl p Ar localpath | Fl P Ar virtualpath
+.Op Fl y Ar DIR
 .Sh DESCRIPTION
 .Ss GENERAL
 .Bl -tag -offset indent -width "123456789012345"
@@ -23,29 +25,81 @@ Forthcoming.
 Show help and quit.
 .It Fl v , Cm --version
 Show version information and quit.
+.It Fl v , Cm --verbose
+When combined with other options,
+.Fl v
+is interpreted to mean
+.Fl -verbose,
+which increases the verbosity of output of those options (see below).
+.It Fl S , Cm --si
+Use base 1000 SI data size measurements instead of the traditional base 1024.
+.It Fl B , Cm --debug
+Set to be overwhelmed with useless data.
 .El
-.Ss SOURCE
+.Ss SOURCES
 .Nm
 will use the root filesystem by default, or the filesystem containing a target file in some cases. If you wish to
 specify a specific device or volume, you can with the following options:
 .Bl -tag -offset indent -width "123456789012345"
 .It Fl d , Cm --device Ar DEV
-Path to device or file containing an HFS+ filesystem.  The source may be either a bare HFS+ filesystem or include a partition map (APT, MBR, or GPT), in which case
+Path to device or file containing an HFS+ filesystem. The source may be either a bare HFS+ filesystem or include a partition map (APT, MBR, or GPT), in which case
 .Nm
 will use the first HFS+ volume it finds.
 .Nm
 also fully supports HFSX (both case-preserving and case-sensitive modes) and HFS-wrapped HFS+ volumes.
 .It Fl V , Cm --volume Ar VOLUME
 Use the path to a mounted disk or any file on the disk to use a mounted volume.
+.It Fl p , Cm --path Ar PATH
+Locate the record for the given path on a mounted filesystem.
 .El
 .Ss DISK AND VOLUME INFORMATION
-By default, 
+By default,
 .Nm
-will just show you the volume header and quit.  Use the following options to get more specific data about the volume and filesystem.
+will just show you the volume header and quit. Use the following options to get more specific data about the volume and filesystem.
 .Bl -tag -offset indent -width "123456789012345"
 .It Fl D , Cm --disk-info
 Show any available information about the disk, including partitions and volume headers.
-.It Fl r , Cm --volume
+.It Fl 0 , Cm --freespace
+Show a summary of the used/free space and extent count based on the allocation file. When the
+.Fl t
+/
+.Fl -top
+option is added, will list the largest contiguous freespace segments. When the
+.Fl v
+/
+.Fl -verbose
+option is added, will list all contiguous freespace segments.
+.It Fl s , Cm --summary
+Show a summary of the files on the disk. When the
+.Fl t
+/
+.Fl -top
+option is added, will list the largest files found.
+.It Fl f , Cm --fragmentation
+Show a summary of the fragmented files on the disk. When the
+.Fl t
+/
+.Fl -top
+option is added, will list the most fragmented files. When the
+.Fl v
+/
+.Fl -verbose
+option is added, will list all fragmented files.
+.It Fl t , Cm --top Ar TOP
+Specify the number of largest contiguous freespace segments to display (when used with the
+.Fl 0
+/
+.Fl -freespace
+option), the number of largest files to display (when used with the
+.Fl s
+/
+.Fl -summary 
+option), or the number of most fragmented files to display (when used with the
+.Fl f
+/
+.Fl -fragmentation
+option).
+.It Fl r , Cm --volumeheader
 Display the HFS Plus volume header.
 .It Fl j , Cm --journal
 Display the volume's journal structure.
@@ -55,7 +109,9 @@ Display the volume's journal structure.
 .It Fl b , Cm --btree Ar NAME
 Specify which HFS+ B-Tree to work with. Supported options: attributes, catalog, extents, or hotfile.
 .It Fl n , Cm --node Ar NNUM
-Dump an HFS+ B-Tree node by ID (must specify tree with -b).
+Dump an HFS+ B-Tree node by ID (must specify tree with
+.Fl b
+).
 .El
 .Ss FILE AND DIRECTORY INFORMATION
 .Bl -tag -offset indent -width "123456789012345"
@@ -67,15 +123,25 @@ Lookup and display a record by its FSSpec (
 ).
 .It Fl l , Cm --list
 If the specified FSOB is a folder, list the contents.
+.It Fl P , Cm --vol-path Ar PATH
+Locate a record by its path on the given device's filesystem.
+.It Fl y , Cm --yank Ar DIR
+Yank all the filesystem files and put then in the specified directory.
 .El
-.Ss FORK EXTRACTION
-You can optionally have 
+.Ss OUTPUT
+You can optionally have
 .Nm
 dump any fork it finds as the result of an operation. This includes B-Trees or file forks.
 Use a command like "-b catalog -o catalog.dump" to extract the catalog file from the boot drive, for instance.
 .Bl -tag -offset indent -width "123456789012345"
 .It Fl o , Cm --output Ar PATH
-Use with -b or -p to dump a raw data fork (when used with -b, will dump the HFS+ tree file).
+Use with 
+.Fl b 
+or 
+.Fl p 
+to dump a raw data fork (when used with
+.Fl b
+, will dump the HFS+ tree file).
 .El
 .Sh ENVIRONMENT
 .Bl -tag -width "NOCOLOR" -offset indent
@@ -108,6 +174,7 @@ Feel the firehose.
 .Xr fdisk 8 ,
 .Xr gpt 8 , 
 .Xr pdisk 8 ,
+.Xr hfs.util 8 ,
 .Sh STANDARDS
 .Rs
 .%T "HFS Plus Volume Format"

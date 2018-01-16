@@ -8,7 +8,7 @@
 
 #include "operations.h"
 #include "volumes/utilities.h"     // commonly-used utility functions
-
+#include "memdmp/output.h"
 
 int compare_ranked_files(const void* a, const void* b)
 {
@@ -20,13 +20,21 @@ int compare_ranked_files(const void* a, const void* b)
     return result;
 }
 
-VolumeSummary generateVolumeSummary(HIOptions* options)
+VolumeSummary* createVolumeSummary(HIOptions* options)
 {
     /*
        Walk the leaf catalog nodes and gather various stats about the volume as a whole.
      */
 
-    VolumeSummary summary = {0};
+    VolumeSummary* summary = NULL;
+    SALLOC(summary, sizeof(VolumeSummary));
+
+    summary->topLargestFileCount = options->topCount;
+
+    if (summary->topLargestFileCount) {
+        SALLOC(summary->topLargestFiles, summary->topLargestFileCount * sizeof(Rank));
+    }
+
     HFSPlus*      hfs     = options->hfs;
 
     BTreePtr      catalog = NULL;
@@ -41,10 +49,10 @@ VolumeSummary generateVolumeSummary(HIOptions* options)
         }
 
         // Process node
-        debug("Processing node %d", cnid); summary.nodeCount++;
+        debug("Processing node %d", cnid); summary->nodeCount++;
 
         for(unsigned recNum = 0; recNum < node->nodeDescriptor->numRecords; recNum++) {
-            summary.recordCount++;
+            summary->recordCount++;
 
             BTreeKeyPtr           recordKey   = NULL;
             void*                 recordValue = NULL;
@@ -54,38 +62,40 @@ VolumeSummary generateVolumeSummary(HIOptions* options)
             switch (record->record_type) {
                 case kHFSPlusFileRecord:
                 {
-                    summary.fileCount++;
+                    summary->fileCount++;
 
                     HFSPlusCatalogFile* file = &record->catalogFile;
 
                     // hard links
-                    if (HFSPlusCatalogFileIsHardLink(record)) { summary.hardLinkFileCount++; continue; }
-                    if (HFSPlusCatalogFolderIsHardLink(record)) { summary.hardLinkFolderCount++; continue; }
+                    if (HFSPlusCatalogFileIsHardLink(record)) { summary->hardLinkFileCount++; continue; }
+                    if (HFSPlusCatalogFolderIsHardLink(record)) { summary->hardLinkFolderCount++; continue; }
 
                     // symlink
-                    if (HFSPlusCatalogRecordIsSymLink(record)) { summary.symbolicLinkCount++; continue; }
+                    if (HFSPlusCatalogRecordIsSymLink(record)) { summary->symbolicLinkCount++; continue; }
 
                     // alias
-                    if (file->userInfo.fdFlags & kIsAlias) { summary.aliasCount++; continue; }
+                    if (file->userInfo.fdFlags & kIsAlias) summary->aliasCount++;
 
                     // invisible
-                    if (file->userInfo.fdFlags & kIsInvisible) { summary.invisibleFileCount++; continue; }
+                    if (file->userInfo.fdFlags & kIsInvisible) summary->invisibleFileCount++;
 
                     // file sizes
-                    if ((file->dataFork.logicalSize == 0) && (file->resourceFork.logicalSize == 0)) { summary.emptyFileCount++; continue; }
+                    if ((file->dataFork.logicalSize == 0) && (file->resourceFork.logicalSize == 0)) { summary->emptyFileCount++; continue; }
 
                     if (file->dataFork.logicalSize)
-                        generateForkSummary(options, &summary.dataFork, file, &file->dataFork, HFSDataForkType);
+                        generateForkSummary(options, &summary->dataFork, file, &file->dataFork, HFSDataForkType);
 
                     if (file->resourceFork.logicalSize)
-                        generateForkSummary(options, &summary.resourceFork, file, &file->resourceFork, HFSResourceForkType);
+                        generateForkSummary(options, &summary->resourceFork, file, &file->resourceFork, HFSResourceForkType);
 
                     size_t fileSize = file->dataFork.logicalSize + file->resourceFork.logicalSize;
 
-                    if (summary.largestFiles[0].measure < fileSize) {
-                        summary.largestFiles[0].measure = fileSize;
-                        summary.largestFiles[0].cnid    = file->fileID;
-                        qsort(summary.largestFiles, 10, sizeof(Rank), compare_ranked_files);
+                    if (summary->topLargestFileCount) {
+                        if (summary->topLargestFiles[0].measure < fileSize) {
+                            summary->topLargestFiles[0].measure = fileSize;
+                            summary->topLargestFiles[0].cnid    = file->fileID;
+                            qsort(summary->topLargestFiles, summary->topLargestFileCount, sizeof(Rank), compare_ranked_files);
+                        }
                     }
 
                     break;
@@ -93,10 +103,10 @@ VolumeSummary generateVolumeSummary(HIOptions* options)
 
                 case kHFSPlusFolderRecord:
                 {
-                    summary.folderCount++;
+                    summary->folderCount++;
 
                     HFSPlusCatalogFolder* folder = &record->catalogFolder;
-                    if (folder->valence == 0) summary.emptyDirectoryCount++;
+                    if (folder->valence == 0) summary->emptyDirectoryCount++;
 
                     break;
                 }
@@ -126,14 +136,14 @@ VolumeSummary generateVolumeSummary(HIOptions* options)
 
         if ((count % iter_size) == 0) {
             // Update status
-            size_t space     = summary.dataFork.logicalSpace + summary.resourceFork.logicalSpace;
+            size_t space     = summary->dataFork.logicalSpace + summary->resourceFork.logicalSpace;
             char   size[128] = {0};
             (void)format_size(options->hfs->vol->ctx, size, space, 128);
 
             fprintf(stdout, "\r%0.2f%% (files: %ju; directories: %ju; size: %s)",
                     ((float)count / (float)catalog->headerRecord.leafRecords) * 100.,
-                    (intmax_t)summary.fileCount,
-                    (intmax_t)summary.folderCount,
+                    (intmax_t)summary->fileCount,
+                    (intmax_t)summary->folderCount,
                     size
                     );
             fflush(stdout);
@@ -143,6 +153,12 @@ VolumeSummary generateVolumeSummary(HIOptions* options)
     }
 
     return summary;
+}
+
+void freeVolumeSummary(VolumeSummary* summary)
+{
+    SFREE(summary->topLargestFiles);
+    SFREE(summary);
 }
 
 void generateForkSummary(HIOptions* options, ForkSummary* forkSummary, const HFSPlusCatalogFile* file, const HFSPlusForkData* fork, hfs_forktype_t type)
@@ -206,18 +222,29 @@ void PrintVolumeSummary(out_ctx* ctx, const VolumeSummary* summary)
     PrintForkSummary    (ctx, &summary->resourceFork);
     EndSection(ctx);
 
-    BeginSection  (ctx, "Largest Files");
-    print("# %10s %10s", "Size", "CNID");
-    for (unsigned i = 9; i > 0; i--) {
-        if (summary->largestFiles[i].cnid == 0) continue;
+    if (summary->topLargestFileCount) {
+        BeginSection  (ctx, "Largest Files");
+        _print_reset(stdout);
+        _print_gray(stdout, 23, false);
+        _print_color(stdout, 0, 0, 0, true);
+        Print(ctx,"%4s %10s %13s  %s", "#", "CNID", "Size", "Path");
+        _print_reset(stdout);
+        for (int64_t i = summary->topLargestFileCount - 1; i >= 0; i--) {
+            if (summary->topLargestFiles[i].cnid == 0) continue;
 
-        char    size[50];
-        (void)format_size(ctx, size, summary->largestFiles[i].measure, 50);
-        hfs_str name = "";
-        HFSPlusGetCNIDName(&name, (FSSpec){get_hfs_volume(), summary->largestFiles[i].cnid});
-        print("%d %10s %10u %s", 10-i, size, summary->largestFiles[i].cnid, name);
+            char    size[50];
+            (void)format_size(ctx, size, summary->topLargestFiles[i].measure, 50);
+            hfs_str fullPath = "";
+            int result = HFSPlusGetCNIDPath(&fullPath, (FSSpec){ get_hfs_volume(), summary->topLargestFiles[i].cnid } );
+            if (result < 0) strlcpy((char *)fullPath, "<unknown>", PATH_MAX);
+            _print_reset(stdout);
+            _print_gray(stdout, 23, false);
+            _print_color(stdout, 0, 0, 0, true);
+            Print(ctx, "%4lld %10u %13s  %s", summary->topLargestFileCount - i, summary->topLargestFiles[i].cnid, size, fullPath);
+            _print_reset(stdout);
+        }
+        EndSection(ctx); // largest files
     }
-    EndSection(ctx); // largest files
 
     EndSection(ctx); // volume summary
 }

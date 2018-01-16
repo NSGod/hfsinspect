@@ -43,8 +43,11 @@ int HFSPlusGetCatalogInfoByPath (FSSpecPtr spec, HFSPlusCatalogRecord* catalogRe
 /** Looks up the thread record for the CNID, follows it to the record, then returns the name of that record. */
 int HFSPlusGetCNIDName (hfs_str* name, FSSpec spec) __attribute__((nonnull));
 
+/** Constructs a full POSIX-style path to the FSOB. */
+int HFSPlusGetCNIDPath (hfs_str* path, FSSpec spec) __attribute__((nonnull));
+
 /** Tries to follow all possible references from a catalog record, but only once. Returns 1 if the FSSpec refers to a new record, 0 if the source was not a reference, and -1 on error. */
-int HFSPlusGetTargetOfCatalogRecord (FSSpec* targetSpec, const HFSPlusCatalogRecord* sourceRecord, const HFSPlus* hfs);
+//int HFSPlusGetTargetOfCatalogRecord (FSSpec* targetSpec, const HFSPlusCatalogRecord* sourceRecord, const HFSPlus* hfs);
 
 bool HFSPlusCatalogFileIsHardLink       (const HFSPlusCatalogRecord* record) __attribute__((nonnull));
 bool HFSPlusCatalogFolderIsHardLink     (const HFSPlusCatalogRecord* record) __attribute__((nonnull));

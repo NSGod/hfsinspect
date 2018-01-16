@@ -45,9 +45,9 @@
 //#include <kern/locks.h>
 //#include <sys/disk.h>
 
-#ifndef	_MACH_I386_BOOLEAN_H_
-typedef bool boolean_t;
-#endif
+//#ifndef	_MACH_I386_BOOLEAN_H_
+//typedef bool boolean_t;
+//#endif
 
 typedef struct _blk_info {
     int32_t    bsize;
@@ -111,7 +111,8 @@ typedef struct transaction {
     struct transaction *next;          // list of tr's (either completed or to be free'd)
     uint32_t            sequence_num;
 	struct jnl_trim_list trim;
-    boolean_t		delayed_header_write;
+    bool                delayed_header_write;
+//    boolean_t		delayed_header_write;
 } transaction;
 
 

@@ -44,6 +44,7 @@ enum HIModes {
     HIModeShowDiskInfo,
     HIModeYankFS,
     HIModeFreeSpace,
+    HIModeShowFragmentation,
 };
 
 // Configuration context
@@ -64,6 +65,9 @@ typedef struct HIOptions {
     char                file_path[PATH_MAX];
     char                record_filename[PATH_MAX];
     char                extract_path[PATH_MAX];
+
+    uint32_t            topCount;
+    bool                verbose;
 } HIOptions;
 
 void set_mode (HIOptions* options, int mode);
@@ -77,7 +81,6 @@ void    showPathInfo(HIOptions* options);
 void    showCatalogRecord(HIOptions* options, FSSpec spec, bool followThreads);
 ssize_t extractFork(const HFSPlusFork* fork, const char* extractPath);
 void    extractHFSPlusCatalogFile(const HFSPlus* hfs, const HFSPlusCatalogFile* file, const char* extractPath);
-
 
 // For volume statistics
 typedef struct Rank {
@@ -109,18 +112,58 @@ typedef struct VolumeSummary {
     uint64_t    invisibleFileCount;
     uint64_t    emptyFileCount;
     uint64_t    emptyDirectoryCount;
-
-    Rank        largestFiles[10];
-    Rank        mostFragmentedFiles[10];
-
+    
+    Rank        *topLargestFiles;
+    uint64_t    topLargestFileCount;
+    
     ForkSummary dataFork;
     ForkSummary resourceFork;
 } VolumeSummary;
 
+// For volume fragmentation statistics
+typedef struct FragmentedFile {
+    uint64_t    logicalSize;
+    uint32_t    cnid;
+    uint32_t    fragmentCount;
+} FragmentedFile;
 
-VolumeSummary generateVolumeSummary(HIOptions* options);
+typedef struct VolumeFragmentationSummary {
+    uint64_t        nodeCount;
+    uint64_t        recordCount;
+    uint64_t        fileCount;
+    uint64_t        folderCount;
+    uint64_t        aliasCount;
+    uint64_t        hardLinkFileCount;
+    uint64_t        hardLinkFolderCount;
+    uint64_t        symbolicLinkCount;
+    uint64_t        invisibleFileCount;
+    uint64_t        emptyFileCount;
+    uint64_t        emptyDirectoryCount;
+
+    uint64_t        dataForksLogicalSize;
+    uint64_t        resourceForksLogicalSize;
+    uint64_t        fragmentedDataForkCount;
+    uint64_t        fragmentedResourceForkCount;
+    uint32_t        blockSize;
+    uint64_t        filesLargerThanBlockSizeCount;
+    uint64_t        fragmentedFileCount;
+
+    FragmentedFile  *topFragementedFiles;
+    uint64_t        topFragementedFilesCount;
+    
+} VolumeFragmentationSummary;
+
+VolumeSummary* createVolumeSummary(HIOptions* options);
+void          freeVolumeSummary(VolumeSummary* summary) _NONNULL;
 void          generateForkSummary(HIOptions* options, ForkSummary* forkSummary, const HFSPlusCatalogFile* file, const HFSPlusForkData* fork, hfs_forktype_t type);
 void          PrintVolumeSummary             (out_ctx* ctx, const VolumeSummary* summary) _NONNULL;
 void          PrintForkSummary               (out_ctx* ctx, const ForkSummary* summary) _NONNULL;
+
+VolumeFragmentationSummary*     createVolumeFragmentationSummary(HIOptions* options);
+void                            freeVolumeFragmentationSummary(VolumeFragmentationSummary* summary) _NONNULL;
+void                            generateFragmentedFile(HIOptions* options, FragmentedFile* fragmentedFile, const HFSPlusCatalogFile* file);
+void          PrintFragmentedFork(out_ctx* ctx, const HFSPlusFork* hfsfork) _NONNULL;
+void          PrintVolumeFragmentationSummary(out_ctx* ctx, const VolumeFragmentationSummary* summary) _NONNULL;
+void          PrintFragmentedFile(out_ctx* ctx, uint64_t index, const FragmentedFile* file) _NONNULL;
 
 #endif
