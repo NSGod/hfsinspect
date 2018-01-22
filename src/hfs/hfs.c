@@ -14,7 +14,7 @@
 
 int hfs_load_mbd(Volume* vol, HFSMasterDirectoryBlock* mdb)
 {
-    trace("vol (%p), mdb (%p)", vol, mdb);
+    trace("vol (%p), mdb (%p)", (void *)vol, (void *)mdb);
 
     // On IA32, using Clang, the swap function needs a little scratch space
     // so we read into a larger area, swap there, then copy out.
@@ -33,7 +33,7 @@ int hfs_load_mbd(Volume* vol, HFSMasterDirectoryBlock* mdb)
 
 int hfsplus_load_header(Volume* vol, HFSPlusVolumeHeader* vh)
 {
-    trace("vol (%p), vh (%p)", vol, vh);
+    trace("vol (%p), vh (%p)", (void *)vol, (void *)vh);
 
     if ( vol_read(vol, vh, sizeof(HFSPlusVolumeHeader), 1024) < 0)
         return -1;
@@ -44,7 +44,7 @@ int hfsplus_load_header(Volume* vol, HFSPlusVolumeHeader* vh)
 }
 
 int hfs_close(HFSPlus* hfs) {
-    trace("hfs (%p)", hfs);
+    trace("hfs (%p)", (void *)hfs);
     debug("Closing volume.");
     int result = vol_close(hfs->vol);
     return result;
@@ -55,7 +55,7 @@ int hfs_open(HFSPlus* hfs, Volume* vol)
     int type   = 0;
     int result = 0;
 
-    trace("hfs (%p), vol (%p)", hfs, vol);
+    trace("hfs (%p), vol (%p)", (void *)hfs, (void *)vol);
 
     // Test to see if we support the volume.
     result = hfs_test(vol);
@@ -105,7 +105,7 @@ int hfs_test(Volume* vol)
     HFSMasterDirectoryBlock mdb  = {0};
     HFSPlusVolumeHeader     vh   = {0};
 
-    trace("vol (%p)", vol);
+    trace("vol (%p)", (void *)vol);
 
     debug("hfs_test");
 
@@ -149,7 +149,7 @@ Volume* hfsplus_find(Volume* vol)
     Volume* result = NULL;
     int     test   = 0;
 
-    trace("vol (%p)", vol);
+    trace("vol (%p)", (void *)vol);
 
     debug("hfsplus_find");
 
@@ -180,7 +180,7 @@ bool hfs_get_HFSMasterDirectoryBlock(HFSMasterDirectoryBlock* vh, const HFSPlus*
     void*   buffer = NULL;
     ssize_t size   = 0;
 
-    trace("vh (%p), hfs (%p)", vh, hfs);
+    trace("vh (%p), hfs (%p)", (void *)vh, (void *)hfs);
 
     if (hfs->vol) {
         SALLOC(buffer, 2048)
@@ -208,7 +208,7 @@ bool hfs_get_HFSMasterDirectoryBlock(HFSMasterDirectoryBlock* vh, const HFSPlus*
 
 bool hfsplus_get_JournalInfoBlock(JournalInfoBlock* block, const HFSPlus* hfs)
 {
-    trace("block (%p), hfs (%p)", block, hfs);
+    trace("block (%p), hfs (%p)", (void *)block, (void *)hfs);
 
     if (hfs->vh.journalInfoBlock) {
         void*   buffer     = NULL;
@@ -237,7 +237,7 @@ bool hfsplus_get_journalheader(journal_header* header, JournalInfoBlock* info, c
 {
     ssize_t nbytes = 0;
 
-    trace("header (%p), info (%p), hfs (%p)", header, info, hfs);
+    trace("header (%p), info (%p), hfs (%p)", (void *)header, (void *)info, (void *)hfs);
 
     if (info->flags & kJIJournalInFSMask && info->offset) {
         nbytes = hfs_read(header, hfs, sizeof(journal_header), info->offset);

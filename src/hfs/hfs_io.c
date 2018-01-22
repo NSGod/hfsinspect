@@ -23,7 +23,7 @@ hfs_forktype_t HFSResourceForkType = 0xFF;
 
 ssize_t hfs_read(void* buffer, const HFSPlus* hfs, size_t size, size_t offset)
 {
-    trace("buffer (%p), hfs (%p), size %zu, offset %zu", buffer, hfs, size, offset);
+    trace("buffer (%p), hfs (%p), size %zu, offset %zu", (void *)buffer, (void *)hfs, size, offset);
 
     ASSERT_PTR(buffer);
     ASSERT_PTR(hfs);
@@ -208,7 +208,7 @@ int hfsplus_get_special_fork(HFSPlusFork** fork, const HFSPlus* hfs, bt_nodeid_t
 
 int hfsfork_make (HFSPlusFork** fork, const HFSPlus* hfs, const HFSPlusForkData forkData, hfs_forktype_t forkType, bt_nodeid_t cnid)
 {
-    trace("fork %p; hfs %p; forkData (%u blocks); forkType %02x; cnid %u", fork, hfs, forkData.totalBlocks, forkType, cnid);
+    trace("fork %p; hfs %p; forkData (%u blocks); forkType %02x; cnid %u", (void *)fork, (void *)hfs, forkData.totalBlocks, forkType, cnid);
     ASSERT_PTR(fork);
     ASSERT_PTR(hfs);
 

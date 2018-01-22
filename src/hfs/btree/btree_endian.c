@@ -112,7 +112,7 @@ int swap_BTreeNode(BTreeNodePtr node)
     off_t          record_max = (node->nodeSize - ((numRecords+1) * sizeof(BTRecOffset)));
 
     {
-        int prev = record_max;
+        off_t prev = record_max;
         for(unsigned i = 0; i < numRecords; i++) {
             BTRecOffset recOffset = offsets[i];
             if ((recOffset < record_min) || (recOffset > record_max)) {

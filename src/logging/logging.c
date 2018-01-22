@@ -242,7 +242,7 @@ int PrintLine(enum LogLevel level, const char* file, const char* function, unsig
 
         debug_info   = ALLOC(term_width);
         debug_len    = snprintf(debug_info, term_width, "[%s:%u %s()]", basename((char*)file), line_no, function);
-        debug_offset = (term_width-1) - debug_len;
+        debug_offset = (term_width-1) - (int)debug_len;
 
         if (debug_offset > 0) {
             memcpy((char*)(out_line + debug_offset), debug_info, debug_len);

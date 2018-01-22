@@ -211,7 +211,7 @@ int apm_load(Volume* vol)
         size_t  length      = header.partition_length * sector_size;
 
         Volume* partition   = vol_make_partition(vol, partitionID - 1, offset, length);
-        partition->sector_size  = sector_size;
+        partition->sector_size  = (uint32_t)sector_size;
         partition->sector_count = header.partition_length;
 
         memcpy(partition->desc, &header.name, 32);

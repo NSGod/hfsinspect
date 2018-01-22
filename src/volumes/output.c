@@ -197,7 +197,7 @@ int format_dump(out_ctx* ctx, char* out, const char* value, unsigned base, size_
     assert(nbytes > 0);
     if (out != NULL) assert(length > 0);
 
-    return memstr(out, base, value, nbytes, length);
+    return (int)memstr(out, base, value, nbytes, length);
 }
 
 int format_size(out_ctx* ctx, char* out, size_t value, size_t length)
@@ -226,7 +226,7 @@ int format_size(out_ctx* ctx, char* out, size_t value, size_t length)
 
     snprintf(out, length, "%0.2Lf %s", displaySize, sizeLabel);
 
-    return strlen(out);
+    return (int)strlen(out);
 }
 
 int format_blocks(out_ctx* ctx, char* out, size_t blocks, size_t block_size, size_t length)
@@ -271,7 +271,7 @@ int format_uint_hex(char* out, uint64_t value, uint8_t padding, size_t length)
 int format_uuid(char* out, const unsigned char value[16])
 {
     uuid_unparse(value, out);
-    return strlen(out);
+    return (int)strlen(out);
 }
 
 int format_uint_chars(char* out, const char* value, size_t nbytes, size_t length)
@@ -283,6 +283,6 @@ int format_uint_chars(char* out, const char* value, size_t nbytes, size_t length
     memcpy(out, value, nbytes);
     out[nbytes] = '\0';
 #endif
-    return strlen(out);
+    return (int)strlen(out);
 }
 

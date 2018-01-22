@@ -66,8 +66,8 @@ int hfsplus_attributes_compare_keys (const HFSPlusAttrKey* key1, const HFSPlusAt
     hfsuc_to_str(&key2Name, &key2UniStr);
 
     trace("compare: key1 (%p) (%u, %u, '%s'), key2 (%p) (%u, %u, '%s')",
-          key1, key1->fileID, key1->attrNameLen, key1Name,
-          key2, key2->fileID, key2->attrNameLen, key2Name);
+          (void *)key1, key1->fileID, key1->attrNameLen, key1Name,
+          (void *)key2, key2->fileID, key2->attrNameLen, key2Name);
 
     if ( (result = cmp(key1->fileID, key2->fileID)) != 0) {
         trace("* %d: File ID difference.", result);

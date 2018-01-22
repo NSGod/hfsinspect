@@ -13,6 +13,34 @@
 #include "logging/logging.h"    // console printing routines
 
 
+typedef struct GPTPartitionName {
+    uuid_string_t uuid;
+    char          name[100];
+    VolType       voltype;
+    VolType       volsubtype;
+} __attribute__((packed, aligned(2))) GPTPartitionName;
+
+static GPTPartitionName gpt_partition_types[] = {
+    {"00000000-0000-0000-0000-000000000000", "Unused",                          kVolTypeSystem,         kSysFreeSpace},
+
+    {"024DEE41-33E7-11D3-9D69-0008C781F39F", "MBR Partition Scheme",            kVolTypePartitionMap,   kPMTypeMBR},
+    {"C12A7328-F81F-11D2-BA4B-00A0C93EC93B", "EFI System Partition",            kVolTypeSystem,         kSysEFI},
+    {"21686148-6449-6E6F-744E-656564454649", "BIOS Boot Partition",             kVolTypeSystem,         kSysReserved},
+    {"D3BFE2DE-3DAF-11DF-BA40-E3A556D89593", "Intel Fast Flash",                kVolTypeSystem,         kSysReserved},
+
+    {"48465300-0000-11AA-AA11-00306543ECAC", "Mac OS Extended (HFS+)",          kVolTypeUserData,       kFSTypeHFSPlus},
+    {"55465300-0000-11AA-AA11-00306543ECAC", "Apple UFS",                       kVolTypeUserData,       kFSTypeUFS},
+    {"6A898CC3-1DD2-11B2-99A6-080020736631", "Apple ZFS",                       kVolTypeUserData,       kFSTypeZFS},
+    {"52414944-0000-11AA-AA11-00306543ECAC", "Apple RAID Partition",            kVolTypeUserData,       kTypeUnknown},
+    {"52414944-5F4F-11AA-AA11-00306543ECAC", "Apple RAID Partition (offline)",  kVolTypeUserData,       kTypeUnknown},
+    {"426F6F74-0000-11AA-AA11-00306543ECAC", "OS X Recovery Partition",         kVolTypeUserData,       kSysRecovery},
+    {"4C616265-6C00-11AA-AA11-00306543ECAC", "Apple Label",                     kVolTypeUserData,       kTypeUnknown},
+    {"5265636F-7665-11AA-AA11-00306543ECAC", "Apple TV Recovery Partition",     kVolTypeUserData,       kSysRecovery},
+    {"53746F72-6167-11AA-AA11-00306543ECAC", "Core Storage Volume",             kVolTypePartitionMap,   kPMCoreStorage},
+    {"7C3457EF-0000-11AA-AA11-00306543ECAC", "Apple Filesystem (APFS)",         kVolTypeUserData,       kTypeUnknown},
+    {{0}, {0}, 0, 0},
+};
+
 void        _gpt_swap_uuid          (uuid_t* uuid_p, const uuid_t* uuid);
 const char* _gpt_partition_type_str (uuid_t uuid, VolType* hint);
 int         _gpt_valid_header       (GPTHeader header);
@@ -144,7 +172,7 @@ int _gpt_load_header(Volume* vol, GPTHeader* header_out, GPTPartitionRecord* ent
 
         // Look for the signature.
         if (memcmp(&header.signature, GPT_SIG, 8) == 0) {
-            vol->sector_size = block_size;
+            vol->sector_size = (uint32_t)block_size;
             break;
         }
     }

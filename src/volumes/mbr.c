@@ -13,6 +13,48 @@
 #include "logging/logging.h"    // console printing routines
 
 
+unsigned kMBRTypeGPTProtective = 0xEE;
+unsigned kMBRTypeAppleBoot     = 0xAB;
+unsigned kMBRTypeAppleHFS      = 0xAF;
+
+struct MBRPartitionName {
+    uint16_t type;
+    bool     lba;
+    char     name[100];
+    VolType  voltype;
+    VolType  volsubtype;
+};
+typedef struct MBRPartitionName MBRPartitionName;
+
+static MBRPartitionName mbr_partition_types[] = {
+    {0x00, 0, "Free",                           kVolTypeSystem,         kSysFreeSpace},
+    {0x01, 0, "MS FAT12",                       kVolTypeUserData,       kFSTypeFAT12},
+    {0x04, 0, "MS FAT16",                       kVolTypeUserData,       kFSTypeFAT16},
+    {0x05, 0, "Extended partition (CHS)",       kVolTypePartitionMap,   kTypeUnknown},
+    {0x06, 0, "MS FAT16B",                      kVolTypeUserData,       kFSTypeFAT16B},
+    {0x07, 0, "MS NTFS/exFAT; IBM IFS/HPFS",    kVolTypeUserData,       kFSTypeExFAT},
+    {0x08, 0, "MS FAT12/16 CHS",                kVolTypeUserData,       kFSTypeFAT12},
+    {0x0b, 0, "MS FAT32 CHS",                   kVolTypeUserData,       kFSTypeFAT32},
+    {0x0c, 1, "MS FAT32X LBA",                  kVolTypeUserData,       kFSTypeFAT32},
+    {0x0e, 1, "MS FAT16X LBA",                  kVolTypeUserData,       kFSTypeFAT16},
+    {0x0f, 1, "Extended partition (LBA)",       kVolTypePartitionMap,   kTypeUnknown},
+
+    {0x82, 1, "Linux Swap",                     kVolTypeSystem,         kSysSwapSpace},
+    {0x83, 1, "Linux Filesystem",               kVolTypeUserData,       kTypeUnknown},
+    {0x85, 1, "Linux Extended Boot Record",     kVolTypeSystem,         kSysReserved},
+    {0x8e, 1, "Linux LVM",                      kVolTypeSystem,         kSysReserved},
+
+    {0x93, 1, "Linux Hidden",                   kVolTypeSystem,         kSysReserved},
+
+    {0xa8, 1, "Apple UFS",                      kVolTypeUserData,       kFSTypeUFS},
+    {0xab, 1, "Apple Boot",                     kVolTypeSystem,         kSysReserved},
+    {0xaf, 1, "Apple HFS",                      kVolTypeUserData,       kFSTypeHFS},
+
+    {0xee, 1, "GPT Protective MBR",             kVolTypePartitionMap,   kPMTypeGPT},
+    {0xef, 1, "EFI system partition",           kVolTypeSystem,         kSysEFI},
+    {0, 0, {'\0'}, 0, 0},
+};
+
 int mbr_load_header(Volume* vol, MBR* mbr)
 {
     if ( vol_read(vol, (void*)mbr, sizeof(MBR), 0) < 0 )

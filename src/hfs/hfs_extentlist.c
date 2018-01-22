@@ -79,7 +79,7 @@ bool extentlist_find(ExtentList* list, size_t logical_block, size_t* offset, siz
 {
     Extent* extent = NULL;
 
-    trace("list (%p), logical_block %zu, offset (%p), length (%p)", list, logical_block, offset, length);
+    trace("list (%p), logical_block %zu, offset (%p), length (%p)", (void *)list, logical_block, (void *)offset, (void *)length);
 
     TAILQ_FOREACH(extent, list, extents) {
         range lrange = make_range(extent->logicalStart, extent->blockCount);
@@ -112,7 +112,7 @@ void extentlist_free(ExtentList* list)
 {
     Extent* e = NULL;
 
-    trace("list (%p)", list);
+    trace("list (%p)", (void *)list);
 
     while ( (e = TAILQ_FIRST(list)) ) {
         TAILQ_REMOVE(list, e, extents);

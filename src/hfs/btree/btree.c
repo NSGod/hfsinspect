@@ -297,7 +297,7 @@ int btree_get_node(BTreeNodePtr* outNode, const BTreePtr tree, bt_nodeid_t nodeN
         if (bytes_read < 0) {
             error("Error reading from fork.");
             btree_free_node(node);
-            return bytes_read; // fpread has set errno
+            return (int)bytes_read; // fpread has set errno
         }
 
         if ((size_t)bytes_read != node->nodeSize) {

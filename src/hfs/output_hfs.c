@@ -440,7 +440,7 @@ int _genModeString(char* modeString, uint16_t mode)
 
     modeString[10] = '\0';
 
-    return strlen(modeString);
+    return (int)strlen(modeString);
 }
 
 void PrintHFSPlusBSDInfo(out_ctx* ctx, const HFSPlusBSDInfo* record, bool isHardLink)
@@ -1373,6 +1373,6 @@ int format_hfs_chars(out_ctx* ctx, char* out, const char* value, size_t nbytes, 
     memcpy(out, value, nbytes);
     out[nbytes] = '\0';
 #endif
-    return strlen(out);
+    return (int)strlen(out);
 }
 

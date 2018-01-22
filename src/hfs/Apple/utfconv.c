@@ -205,7 +205,7 @@ utf8_encodelen(const u_int16_t * ucsp, size_t ucslen, u_int16_t altslash, int fl
 	int decompose = (flags & UTF_DECOMPOSED);
 	size_t len;
 
-	charcnt = ucslen / 2;
+	charcnt = (int)ucslen / 2;
 	len = 0;
 
 	while (charcnt-- > 0) {
@@ -281,7 +281,7 @@ utf8_encodestr(const u_int16_t * ucsp, size_t ucslen, u_int8_t * utf8p,
 	bufend = bufstart + buflen;
 	if (nullterm)
 		--bufend;
-	charcnt = ucslen / 2;
+	charcnt = (int)ucslen / 2;
 
 	while (charcnt-- > 0) {
 		if (extra > 0) {

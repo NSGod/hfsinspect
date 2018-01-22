@@ -35,7 +35,7 @@ int cs_verify_block(const CSVolumeHeader* vh, const void* block, size_t nbytes)
         if (bh->checksum == 0) return 0;
 
         nbytes = bh->block_size;
-        crc    = cs_crc32c(bh->checksum_seed, block, nbytes);
+        crc    = cs_crc32c(bh->checksum_seed, block, (uint32_t)nbytes);
 
         if (crc != bh->checksum) {
             warning("corrupt CS block: CRC: %#x; expected: %#x\n", crc, bh->checksum);
@@ -232,7 +232,7 @@ int cs_dump(Volume* vol)
         if (block_number == 0) continue;
 
         memset(buf, 0, block_size);
-        bytes        = cs_get_metadata_block(&buf, vol, header, block_number);
+        bytes        = cs_get_metadata_block(&buf, vol, header, (unsigned)block_number);
 
         if (bytes < 0) continue;
 
@@ -300,7 +300,7 @@ void cs_dump_all_blocks(Volume* vol, CSVolumeHeader* vh)
     for (; block_number < total_blocks; block_number++) {
         memset(buf, 0, block_size);
 
-        ssize_t bytes = cs_get_metadata_block(&buf, vol, vh, block_number);
+        ssize_t bytes = cs_get_metadata_block(&buf, vol, vh, (unsigned)block_number);
         if (bytes < 0) {
             fprintf(stderr, "Invalid block at %#jx\n", (intmax_t)block_number);
             continue;

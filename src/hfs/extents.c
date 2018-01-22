@@ -17,7 +17,7 @@
 
 int hfsplus_get_extents_btree(BTreePtr* tree, const HFSPlus* hfs)
 {
-    trace("tree (%p), hfs (%p)", tree, hfs);
+    trace("tree (%p), hfs (%p)", (void *)tree, (void *)hfs);
 
     assert(tree);
     assert(hfs);
@@ -58,7 +58,7 @@ int hfsplus_extents_get_node(BTreeNodePtr* out_node, const BTreePtr bTree, bt_no
     BTreeNodePtr node = NULL;
     out_ctx      ctx  = OCMake(0, 2, "extents");
 
-    trace("out_node (%p), bTree (%p), nodeNum %u", out_node, bTree, nodeNum);
+    trace("out_node (%p), bTree (%p), nodeNum %u", (void *)out_node, (void *)bTree, nodeNum);
 
     assert(out_node);
     assert(bTree);
@@ -79,7 +79,7 @@ int hfsplus_extents_get_node(BTreeNodePtr* out_node, const BTreePtr bTree, bt_no
             HFSPlusExtentKey* key    = (HFSPlusExtentKey*)record.key;
             swap_HFSPlusExtentKey(key);
             if (key->keyLength != kHFSPlusExtentKeyMaximumLength) {
-                warning("Invalid extent key! (%#08x != %#08x @ (%p))", key->keyLength, kHFSPlusExtentKeyMaximumLength, key);
+                warning("Invalid extent key! (%#08x != %#08x @ (%p))", key->keyLength, kHFSPlusExtentKeyMaximumLength, (void *)key);
                 VisualizeHFSPlusExtentKey(&ctx, key, "Bad Key", 0);
                 continue;
             }
@@ -111,7 +111,7 @@ int hfsplus_extents_find_record(HFSPlusExtentRecord* record, hfs_block_t* record
     HFSPlusExtentKey*    returnedKey    = NULL;
     HFSPlusExtentRecord* returnedRecord = NULL;
 
-    trace("record (%p), record_start_block (%p), fork (%p), startBlock %zu", record, record_start_block, fork, startBlock);
+    trace("record (%p), record_start_block (%p), fork (%p), startBlock %zu", (void *)record, (void *)record_start_block, (void *)fork, startBlock);
     debug("Finding extents record for CNID %d with start block %zu", fork->cnid, startBlock);
 
     if ( hfsplus_get_extents_btree(&extentsTree, hfs) < 0)
@@ -173,8 +173,8 @@ RETURN:
 int hfsplus_extents_compare_keys(const HFSPlusExtentKey* key1, const HFSPlusExtentKey* key2)
 {
     trace("key1 (%p) (%u, %u, %u, %u), key2 (%p) (%u, %u, %u, %u)",
-          key1, key1->keyLength, key1->forkType, key1->fileID, key1->startBlock,
-          key2, key2->keyLength, key2->forkType, key2->fileID, key2->startBlock
+          (void *)key1, key1->keyLength, key1->forkType, key1->fileID, key1->startBlock,
+          (void *)key2, key2->keyLength, key2->forkType, key2->fileID, key2->startBlock
           );
 
     // debug("compare extent keys");
@@ -193,7 +193,7 @@ bool hfsplus_extents_get_extentlist_for_fork(ExtentList* list, const HFSPlusFork
 {
     unsigned blocks = 0;
 
-    trace("list (%p), fork (%p)", list, fork);
+    trace("list (%p), fork (%p)", (void *)list, (void *)fork);
 
     extentlist_add_record(list, fork->forkData.extents);
 

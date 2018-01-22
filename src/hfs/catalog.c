@@ -31,7 +31,7 @@ int32_t FastUnicodeCompare ( register const uint16_t* str1, register uint32_t le
 
 int hfsplus_get_catalog_btree(BTreePtr* tree, const HFSPlus* hfs)
 {
-    trace("tree (%p), hfs (%p)", tree, hfs);
+    trace("tree (%p), hfs (%p)", (void *)tree, (void *)hfs);
     debug("Getting catalog B-Tree");
 
     static BTreePtr cachedTree;
@@ -79,7 +79,7 @@ int hfsplus_get_catalog_btree(BTreePtr* tree, const HFSPlus* hfs)
 
 int hfsplus_catalog_get_node(BTreeNodePtr* out_node, const BTreePtr bTree, bt_nodeid_t nodeNum)
 {
-    trace("out_node (%p), bTree (%p), nodeNum %u", out_node, bTree, nodeNum);
+    trace("out_node (%p), bTree (%p), nodeNum %u", (void *)out_node, (void *)bTree, nodeNum);
     assert(out_node);
     assert(bTree);
     assert(bTree->treeID == kHFSCatalogFileID);
@@ -172,7 +172,7 @@ int8_t hfsplus_catalog_find_record(BTreeNodePtr* node, BTRecNum* recordID, FSSpe
     bt_nodeid_t    parentFolder = spec.parentID;
     HFSUniStr255   name         = spec.name;
 
-    trace("node (%p), recordID (%p), spec (%p, %u, (%u))", node, recordID, spec.hfs, spec.parentID, spec.name.length);
+    trace("node (%p), recordID (%p), spec (%p, %u, (%u))", (void *)node, (void *)recordID, (void *)spec.hfs, spec.parentID, spec.name.length);
 
     hfsuc_to_str(&record_name, &name);
     debug("Searching catalog for %d:%s", parentFolder, record_name);
@@ -204,8 +204,8 @@ int hfsplus_catalog_compare_keys_cf(const HFSPlusCatalogKey* key1, const HFSPlus
     int result = 0;
 
     trace("key1 (%p) (%u, %u), key2 (%p) (%u, %u)",
-          key1, key1->keyLength, key1->parentID,
-          key2, key2->keyLength, key2->parentID);
+          (void *)key1, key1->keyLength, key1->parentID,
+          (void *)key2, key2->keyLength, key2->parentID);
 
     if ( (result = cmp(key1->parentID, key2->parentID)) != 0) return result;
 
@@ -224,8 +224,8 @@ int hfsplus_catalog_compare_keys_bc(const HFSPlusCatalogKey* key1, const HFSPlus
     hfsuc_to_str(&key2Name, &key2->nodeName);
 
     trace("BC compare: key1 (%p) (%u, %u, '%s'), key2 (%p) (%u, %u, '%s')",
-          key1, key1->parentID, key1->nodeName.length, key1Name,
-          key2, key2->parentID, key2->nodeName.length, key2Name);
+          (void *)key1, key1->parentID, key1->nodeName.length, key1Name,
+          (void *)key2, key2->parentID, key2->nodeName.length, key2Name);
 
     if ( (result = cmp(key1->parentID, key2->parentID)) != 0) {
         trace("* Different parents")
@@ -260,7 +260,7 @@ int HFSPlusGetCNIDName(hfs_str* name, FSSpec spec)
     BTRecNum          recordID = 0;
     HFSPlusCatalogKey key      = {0};
 
-    trace("name %p, spec (%p, %u, (%u))", name, spec.hfs, spec.parentID, spec.name.length);
+    trace("name %p, spec (%p, %u, (%u))", (void *)name, (void *)spec.hfs, spec.parentID, spec.name.length);
 
     key.parentID  = cnid;
     key.keyLength = kHFSPlusCatalogKeyMinimumLength;
@@ -439,7 +439,7 @@ int HFSPlusGetCNIDPath(hfs_str* path, FSSpec spec)
 
 int HFSPlusGetCatalogInfoByPath(FSSpecPtr out_spec, HFSPlusCatalogRecord* out_catalogRecord, const char* path, const HFSPlus* hfs)
 {
-    trace("out_spec (%p), out_catalogRecord (%p), path '%s', hfs (%p)", out_spec, out_catalogRecord, path, hfs);
+    trace("out_spec (%p), out_catalogRecord (%p), path '%s', hfs (%p)", (void *)out_spec, (void *)out_catalogRecord, path, (void *)hfs);
 
     debug("Finding record for path: %s", path);
 
@@ -536,7 +536,7 @@ int HFSPlusGetCatalogInfoByPath(FSSpecPtr out_spec, HFSPlusCatalogRecord* out_ca
 
 HFSPlusCatalogKey HFSPlusCatalogKeyFromFSSpec(FSSpec spec)
 {
-    trace("spec (%p, %u, (%u)", spec.hfs, spec.parentID, spec.name.length);
+    trace("spec (%p, %u, (%u)", (void *)spec.hfs, spec.parentID, spec.name.length);
 
     HFSPlusCatalogKey catalogKey = {0};
     catalogKey.parentID  = spec.parentID;
@@ -566,7 +566,7 @@ int HFSPlusGetCatalogRecordByFSSpec(HFSPlusCatalogRecord* catalogRecord, FSSpec 
     bool              result      = false;
     BTNodeRecord      record      = {0};
 
-    trace("catalogRecord (%p), spec (%p, %u, (%u)", catalogRecord, spec.hfs, spec.parentID, spec.name.length);
+    trace("catalogRecord (%p), spec (%p, %u, (%u)", (void *)catalogRecord, (void *)spec.hfs, spec.parentID, spec.name.length);
 
     if ( hfsplus_get_catalog_btree(&catalogTree, hfs) < 0 ) return -1;
 
@@ -591,7 +591,7 @@ int HFSPlusGetCatalogInfoByCNID(FSSpec* out_spec, HFSPlusCatalogRecord* out_cata
     FSSpec               spec          = { .hfs = hfs, .parentID = cnid };
     HFSPlusCatalogRecord catalogRecord = {0};
 
-    trace("out_spec (%p), out_catalogRecord (%p), hfs (%p), cnid %u", out_spec, out_catalogRecord, hfs, cnid);
+    trace("out_spec (%p), out_catalogRecord (%p), hfs (%p), cnid %u", (void *)out_spec, (void *)out_catalogRecord, (void *)hfs, cnid);
 
     if ( HFSPlusGetCatalogRecordByFSSpec(&catalogRecord, spec) < 0 )
         return -1;
@@ -614,7 +614,7 @@ int HFSPlusGetCatalogInfoByCNID(FSSpec* out_spec, HFSPlusCatalogRecord* out_cata
 
 bool HFSPlusCatalogFileIsHardLink(const HFSPlusCatalogRecord* record)
 {
-    trace("record (%p)", record);
+    trace("record (%p)", (void *)record);
 
     return (
         (record->record_type == kHFSPlusFileRecord) &&
@@ -624,7 +624,7 @@ bool HFSPlusCatalogFileIsHardLink(const HFSPlusCatalogRecord* record)
 
 bool HFSPlusCatalogFolderIsHardLink(const HFSPlusCatalogRecord* record)
 {
-    trace("record (%p)", record);
+    trace("record (%p)", (void *)record);
 
     return (
         (record->record_type == kHFSPlusFileRecord) &&
@@ -634,14 +634,14 @@ bool HFSPlusCatalogFolderIsHardLink(const HFSPlusCatalogRecord* record)
 
 bool HFSPlusCatalogRecordIsHardLink(const HFSPlusCatalogRecord* record)
 {
-    trace("record (%p)", record);
+    trace("record (%p)", (void *)record);
 
     return ( HFSPlusCatalogFileIsHardLink(record) || HFSPlusCatalogFolderIsHardLink(record) );
 }
 
 bool HFSPlusCatalogRecordIsSymLink(const HFSPlusCatalogRecord* record)
 {
-    trace("record (%p)", record);
+    trace("record (%p)", (void *)record);
 
     return (
         (record->record_type == kHFSPlusFileRecord)
@@ -652,7 +652,7 @@ bool HFSPlusCatalogRecordIsSymLink(const HFSPlusCatalogRecord* record)
 
 bool HFSPlusCatalogRecordIsFileAlias(const HFSPlusCatalogRecord* record)
 {
-    trace("record (%p)", record);
+    trace("record (%p)", (void *)record);
 
     return (
         (record->record_type == kHFSPlusFileRecord)
@@ -664,7 +664,7 @@ bool HFSPlusCatalogRecordIsFileAlias(const HFSPlusCatalogRecord* record)
 
 bool HFSPlusCatalogRecordIsFolderAlias(const HFSPlusCatalogRecord* record)
 {
-    trace("record (%p)", record);
+    trace("record (%p)", (void *)record);
 
     return (
         (record->record_type == kHFSPlusFileRecord)
@@ -676,7 +676,7 @@ bool HFSPlusCatalogRecordIsFolderAlias(const HFSPlusCatalogRecord* record)
 
 bool HFSPlusCatalogRecordIsAlias(const HFSPlusCatalogRecord* record)
 {
-    trace("record (%p)", record);
+    trace("record (%p)", (void *)record);
 
     return ( HFSPlusCatalogRecordIsFileAlias(record) || HFSPlusCatalogRecordIsFolderAlias(record) );
 }

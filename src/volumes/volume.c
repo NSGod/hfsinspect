@@ -29,7 +29,7 @@ int vol_open(Volume* vol, const char* path, int mode, off_t offset, size_t lengt
     struct stat s = {0};
     FILE*       f = NULL;
 
-    trace("vol (%p), path '%s', mode %#o, offset %zd, length %zu, block_size %zu", vol, path, mode, offset, length, block_size);
+    trace("vol (%p), path '%s', mode %#o, offset %zd, length %zu, block_size %zu", (void *)vol, path, mode, offset, length, block_size);
 
     assert(vol);
     assert(path);
@@ -51,7 +51,7 @@ int vol_open(Volume* vol, const char* path, int mode, off_t offset, size_t lengt
 
     if (length && block_size) {
         vol->length       = length;
-        vol->sector_size  = block_size;
+        vol->sector_size  = (uint32_t)block_size;
         vol->sector_count = (length / block_size);
     } else {
         vol->length       = s.st_size;
@@ -137,7 +137,7 @@ ssize_t vol_blk_get(const Volume* vol, void* buf, size_t count, off_t start, siz
     ssize_t rval = 0;
     off_t   off  = 0;
 
-    trace("vol (%p), start %zd, count %zu, blksz %zu, buf (%p)", vol, start, count, blksz, buf);
+    trace("vol (%p), start %zd, count %zu, blksz %zu, buf (%p)", (void *)vol, start, count, blksz, buf);
 
     // Determine offset based on block size.
     off  = (start * blksz) + vol->offset;
