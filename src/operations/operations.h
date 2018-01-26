@@ -45,29 +45,33 @@ enum HIModes {
     HIModeYankFS,
     HIModeFreeSpace,
     HIModeShowFragmentation,
+    HIModeInspectBlockRange,
 };
 
 // Configuration context
 typedef struct HIOptions {
-    HFSPlus*            hfs;
-    BTreePtr            tree;
-    FILE*               extract_fp;
-    HFSPlusFork*        extract_HFSPlusFork;
-    HFSPlusCatalogFile* extract_HFSPlusCatalogFile;
+    HFSPlus*            hfs;                            // 8
+    BTreePtr            tree;                           // 8
+    FILE*               extract_fp;                     // 8
+    HFSPlusFork*        extract_HFSPlusFork;            // 8
+    HFSPlusCatalogFile* extract_HFSPlusCatalogFile;     // 8
 
-    uint32_t            mode;
-    bt_nodeid_t         record_parent;
-    bt_nodeid_t         cnid;
-    bt_nodeid_t         node_id;
-    BTreeTypes          tree_type;
+    uint32_t            mode;                           // 4
+    bt_nodeid_t         record_parent;                  // 4
+    bt_nodeid_t         cnid;                           // 4
+    bt_nodeid_t         node_id;                        // 4
+    BTreeTypes          tree_type;                      // 4
 
-    char                device_path[PATH_MAX];
-    char                file_path[PATH_MAX];
-    char                record_filename[PATH_MAX];
-    char                extract_path[PATH_MAX];
+    char                device_path[PATH_MAX];          // 1024
+    char                file_path[PATH_MAX];            // 1024
+    char                record_filename[PATH_MAX];      // 1024
+    char                extract_path[PATH_MAX];         // 1024
 
-    uint32_t            topCount;
-    bool                verbose;
+    uint32_t            topCount;                       // 4
+    uint64_t            blockRangeStart;                // 8
+    uint64_t            blockRangeCount;                // 8
+    
+    bool                verbose;                        // 1
 } HIOptions;
 
 void set_mode (HIOptions* options, int mode);
@@ -81,6 +85,7 @@ void    showPathInfo(HIOptions* options);
 void    showCatalogRecord(HIOptions* options, FSSpec spec, bool followThreads);
 ssize_t extractFork(const HFSPlusFork* fork, const char* extractPath);
 void    extractHFSPlusCatalogFile(const HFSPlus* hfs, const HFSPlusCatalogFile* file, const char* extractPath);
+void    inspectBlockRange(HIOptions* options);
 
 // For volume statistics
 typedef struct Rank {

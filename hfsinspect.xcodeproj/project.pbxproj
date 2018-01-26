@@ -48,6 +48,7 @@
 		9B61B0371A957321000E8995 /* memdmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 9B61B02A1A957321000E8995 /* memdmp.c */; };
 		9B61B0381A957321000E8995 /* output.c in Sources */ = {isa = PBXBuildFile; fileRef = 9B61B02C1A957321000E8995 /* output.c */; };
 		9BDB3BBD1AAF51C5000E8995 /* FastUnicodeCompare.c in Sources */ = {isa = PBXBuildFile; fileRef = 9BDB3BBC1AAF51C5000E8995 /* FastUnicodeCompare.c */; };
+		C1113D2F20176BD500CBBDB4 /* hfs_inspect_blocks.c in Sources */ = {isa = PBXBuildFile; fileRef = C1113D2E20176BD500CBBDB4 /* hfs_inspect_blocks.c */; };
 		C1A06CC81FF96EB300D642AF /* hfs_fragmentation.c in Sources */ = {isa = PBXBuildFile; fileRef = C1A06CC71FF96EB300D642AF /* hfs_fragmentation.c */; };
 /* End PBXBuildFile section */
 
@@ -167,6 +168,7 @@
 		9BAC71F1182D48F80001A1A3 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = SOURCE_ROOT; };
 		9BBA85031735AFD400273AE9 /* hfsinspect */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = hfsinspect; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BDB3BBC1AAF51C5000E8995 /* FastUnicodeCompare.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FastUnicodeCompare.c; sourceTree = "<group>"; };
+		C1113D2E20176BD500CBBDB4 /* hfs_inspect_blocks.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hfs_inspect_blocks.c; sourceTree = "<group>"; };
 		C1A06CC71FF96EB300D642AF /* hfs_fragmentation.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hfs_fragmentation.c; sourceTree = "<group>"; };
 		C1A06CC91FFBF5F300D642AF /* hfsinspect.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = hfsinspect.1; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.man; };
 /* End PBXFileReference section */
@@ -267,6 +269,7 @@
 				9B1937151A941E9D000E8995 /* cnid.c */,
 				9B1937161A941E9D000E8995 /* extract_file.c */,
 				9B1937171A941E9D000E8995 /* free_space.c */,
+				C1113D2E20176BD500CBBDB4 /* hfs_inspect_blocks.c */,
 				9B1937181A941E9D000E8995 /* hfs_summary.c */,
 				C1A06CC71FF96EB300D642AF /* hfs_fragmentation.c */,
 				9B19371B1A941E9D000E8995 /* path_info.c */,
@@ -516,6 +519,7 @@
 				9B19376B1A941EC5000E8995 /* hfs.c in Sources */,
 				9B1937711A941EC5000E8995 /* range.c in Sources */,
 				C1A06CC81FF96EB300D642AF /* hfs_fragmentation.c in Sources */,
+				C1113D2F20176BD500CBBDB4 /* hfs_inspect_blocks.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

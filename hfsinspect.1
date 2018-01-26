@@ -18,6 +18,7 @@ Forthcoming.
 .Op Fl c Ar CNID | Fl F Ar parent:name
 .Op Fl p Ar localpath | Fl P Ar virtualpath
 .Op Fl y Ar DIR
+.Op Fl i Ar STARTBLOCK:BLOCKCOUNT
 .Sh DESCRIPTION
 .Ss GENERAL
 .Bl -tag -offset indent -width "123456789012345"
@@ -99,6 +100,10 @@ option), or the number of most fragmented files to display (when used with the
 /
 .Fl -fragmentation
 option).
+.It Fl i , Cm --inspect Ar STARTBLOCK:BLOCKCOUNT
+Inspect a block range on a volume and list the files or freespace found within. The
+.Ar BLOCKCOUNT
+operand is optional, and can be omitted to search to the end of the volume (e.g. 1000000:).
 .It Fl r , Cm --volumeheader
 Display the HFS Plus volume header.
 .It Fl j , Cm --journal

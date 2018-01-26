@@ -195,7 +195,7 @@ void show_version()
 
 void print_usage()
 {
-    char* help = "[-hv] [-d path | -p path | -V fspath] [-DjlrSB] [-0sf [-v] [-t top]] [-b btree [-n nid]] [-P path] [-c cnid] [-F parent:name] [-o file] path";
+    char* help = "[-hv] [-d path | -p path | -V fspath] [-DjlrSB] [-0sf [-v] [-t top]] [-b btree [-n nid]] [-P path] [-c cnid] [-i startBlock:blockCount] [-F parent:name] [-o file] path";
     fprintf(stderr, "usage: %s %s\n", PROGRAM_NAME, help);
 }
 
@@ -233,6 +233,10 @@ void print_help()
                  "    -t TOP,     --top TOP       Specify the number of largest contiguous freespace segments to display (when used with the -0/--freespace option),\n"
                  "                                   the number of largest files to display (when used with the -s/--summary option), or\n"
                  "                                   the number of most fragmented files to display (when used with the -f/--fragmentation option).\n"
+                 "    -i RANGE,   --inspect RANGE Inspect a block range on a volume and lists the files or freespace found within. \n"
+                 "                                   RANGE should be of the form startBlock:blockCount (eg. 10000000:800000).\n"
+                 "                                   The blockCount operand is optional, and can be omitted to search to the end\n"
+                 "                                   of the volume (eg. 10000000:).\n"
                  "    -r,         --volumeheader  Dump the volume header. \n"
                  "    -j,         --journal       Dump the volume's journal info block structure. \n"
                  "    -b NAME,    --btree NAME    Specify which HFS+ B-Tree to work with. Supported options: attributes, catalog, extents, or hotfiles. \n"
@@ -290,6 +294,7 @@ int main (int argc, char* const* argv)
         { "freespace",      no_argument,            NULL,                   '0' },
         { "summary",        no_argument,            NULL,                   's' },
         { "fragmentation",  no_argument,            NULL,                   'f' },
+        { "inspect",        required_argument,      NULL,                   'i' },
         { "top",            required_argument,      NULL,                   't' },
         
         { "btree",          required_argument,      NULL,                   'b' },
@@ -304,7 +309,7 @@ int main (int argc, char* const* argv)
     };
 
     /* short options */
-    char*         shortopts = "0ShvjlrsDd:n:b:p:P:F:V:c:o:y:LBft:";
+    char*         shortopts = "0ShvjlrsDd:n:b:p:P:F:V:c:o:y:LBft:i:";
 
     int           opt;
     while ((opt = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1) {
@@ -483,6 +488,24 @@ int main (int argc, char* const* argv)
             case 'f':
             {
                 set_mode(&options, HIModeShowFragmentation);
+                break;
+            }
+
+            case 'i':
+            {
+                set_mode(&options, HIModeInspectBlockRange);
+
+                char* option, * tofree;
+                option = tofree = strdup(optarg);
+                char* blockStart    = strsep(&option, ":");
+                char* blockCount      = strsep(&option, ":");
+
+                if (blockStart && strlen(blockStart))   sscanf(blockStart, "%llu", &options.blockRangeStart);
+                if (blockCount && strlen(blockCount))   sscanf(blockCount, "%llu", &options.blockRangeCount);
+
+                SFREE(tofree);
+
+
                 break;
             }
 
@@ -787,6 +810,12 @@ NOPE:
                 warning("Consistency error: volume attributes indicate it is journaled but the journal info block is empty!");
             }
         }
+    }
+
+    // Inspect Block Range
+    if (check_mode(&options, HIModeInspectBlockRange)) {
+        debug("Inspecting block range.");
+        inspectBlockRange(&options);
     }
 
 #pragma mark Allocation Requests

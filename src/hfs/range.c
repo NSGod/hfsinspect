@@ -65,3 +65,15 @@ range range_intersection(range a, range b)
     return r;
 }
 
+range range_union(range a, range b)
+{
+    // Returns a range going from the minimum of their 2 minimums, going to a max of their max's
+    range r = {0};
+
+    r.start = MIN(a.start, b.start);
+    r.count = MAX(range_max(a), range_max(b)) - r.start;
+
+    return r;
+}
+
+

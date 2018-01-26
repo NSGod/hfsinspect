@@ -21,8 +21,10 @@ typedef struct range {
 typedef range* range_ptr;
 
 range  make_range          (size_t start, size_t count);
+bool   range_equal         (range a, range b);
 bool   range_contains      (size_t pos, range test);
 size_t range_max           (range r);
 range  range_intersection  (range a, range b);
+range  range_union         (range a, range b);
 
 #endif
