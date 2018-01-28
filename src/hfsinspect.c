@@ -571,11 +571,21 @@ OPEN:
                 goto OPEN;
             }
             die(errno, "vol_qopen");
-
-        } else {
-            error("could not open %s", options.device_path);
-            die(errno, "vol_qopen");
+        } else if (errno == ENOENT) {
+            // If the device has been specified in short form ('disk0s1' instead of '/dev/disk0s1') then deal accordingly.
+            if (strstr(options.device_path, "/dev/") == NULL) {
+                char *newDevicePath = NULL;
+                SALLOC(newDevicePath, PATH_MAX + 1);
+                (void)strlcat(newDevicePath, "/dev/", PATH_MAX);
+                (void)strlcat(newDevicePath, options.device_path, PATH_MAX);
+                info("Expanding '%s' to '%s'", options.device_path, newDevicePath);
+                (void)strlcpy(options.device_path, newDevicePath, PATH_MAX);
+                SFREE(newDevicePath);
+                goto OPEN;
+            }
         }
+        error("could not open %s", options.device_path);
+        die(errno, "vol_qopen");
     }
 
 #pragma mark Disk Summary
