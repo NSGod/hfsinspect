@@ -56,6 +56,7 @@ bool HFSPlusCatalogRecordIsSymLink      (const HFSPlusCatalogRecord* record) __a
 bool HFSPlusCatalogRecordIsFileAlias    (const HFSPlusCatalogRecord* record) __attribute__((nonnull));
 bool HFSPlusCatalogRecordIsFolderAlias  (const HFSPlusCatalogRecord* record) __attribute__((nonnull));
 bool HFSPlusCatalogRecordIsAlias        (const HFSPlusCatalogRecord* record) __attribute__((nonnull));
+bool HFSPlusCatalogRecordIsCompressed   (const HFSPlusCatalogRecord* record) __attribute__((nonnull));
 
 HFSPlusCatalogKey HFSPlusCatalogKeyFromFSSpec (FSSpec spec);
 //FSSpec            HFSPlusFSSpecFromCatalogKey (HFSPlusCatalogKey key);

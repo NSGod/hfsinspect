@@ -681,3 +681,13 @@ bool HFSPlusCatalogRecordIsAlias(const HFSPlusCatalogRecord* record)
     return ( HFSPlusCatalogRecordIsFileAlias(record) || HFSPlusCatalogRecordIsFolderAlias(record) );
 }
 
+bool HFSPlusCatalogRecordIsCompressed(const HFSPlusCatalogRecord* record)
+{
+    trace("record (%p)", (void *)record);
+
+    return (
+            (record->record_type == kHFSPlusFileRecord)
+            && (record->catalogFile.bsdInfo.ownerFlags & UF_COMPRESSED)
+            );
+}
+

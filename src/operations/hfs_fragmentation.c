@@ -84,6 +84,9 @@ VolumeFragmentationSummary* createVolumeFragmentationSummary(HIOptions *options)
                     // invisible
                     if (file->userInfo.fdFlags & kIsInvisible) summary->invisibleFileCount++;
 
+                    // compressed
+                    if (HFSPlusCatalogRecordIsCompressed(record)) summary->compressedFileCount++;
+
                     // file sizes
                     if ((file->dataFork.logicalSize == 0) && (file->resourceFork.logicalSize == 0)) { summary->emptyFileCount++; continue; }
 
@@ -275,6 +278,7 @@ void PrintVolumeFragmentationSummary(out_ctx* ctx, const VolumeFragmentationSumm
     PrintUI            (ctx, summary, invisibleFileCount);
     PrintUI            (ctx, summary, emptyFileCount);
     PrintUI            (ctx, summary, emptyDirectoryCount);
+    PrintUI            (ctx, summary, compressedFileCount);
     PrintDataLength    (ctx, summary, dataForksLogicalSize);
     PrintDataLength    (ctx, summary, resourceForksLogicalSize);
     PrintUI            (ctx, summary, fragmentedDataForkCount);

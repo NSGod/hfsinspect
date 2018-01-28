@@ -117,6 +117,7 @@ typedef struct VolumeSummary {
     uint64_t    invisibleFileCount;
     uint64_t    emptyFileCount;
     uint64_t    emptyDirectoryCount;
+    uint64_t    compressedFileCount;
     
     Rank        *topLargestFiles;
     uint64_t    topLargestFileCount;
@@ -144,6 +145,7 @@ typedef struct VolumeFragmentationSummary {
     uint64_t        invisibleFileCount;
     uint64_t        emptyFileCount;
     uint64_t        emptyDirectoryCount;
+    uint64_t        compressedFileCount;
 
     uint64_t        dataForksLogicalSize;
     uint64_t        resourceForksLogicalSize;
