@@ -18,7 +18,8 @@
 
 /*
    http://developer.apple.com/library/mac/#technotes/tn2166/_index.html
-
+   http://developer.apple.com/library/content/technotes/tn2166/_index.html
+ 
    GPTHeader is at LBA 1. GPTPartitionEntry array starts at header->partition_start_lba (usually LBA2).
    Backup header is at the next-to-last LBA of the disk. The partition array usually precedes this.
 

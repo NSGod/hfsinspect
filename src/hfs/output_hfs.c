@@ -35,14 +35,14 @@ void _PrintHFSBlocks(out_ctx* ctx, const char* label, uint64_t blocks)
 {
     char sizeLabel[50] = "";
     (void)format_blocks(ctx, sizeLabel, blocks, volume_->block_size, 50);
-    PrintAttribute(ctx, label, sizeLabel);
+    PrintAttribute(ctx, label, "%s", sizeLabel);
 }
 
 void _PrintHFSTimestamp(out_ctx* ctx, const char* label, uint32_t timestamp)
 {
     char buf[50];
     (void)format_hfs_timestamp(ctx, buf, timestamp, 50);
-    PrintAttribute(ctx, label, buf);
+    PrintAttribute(ctx, label, "%s", buf);
 }
 
 void _PrintHFSChar(out_ctx* ctx, const char* label, const char* i, size_t nbytes)
@@ -268,17 +268,17 @@ void PrintExtentList(out_ctx* ctx, const ExtentList* list, uint32_t totalBlocks)
         catalogBlocks += e->blockCount;
 
         if (totalBlocks) {
-            float pct = (float)e->blockCount/(float)totalBlocks*100.;
+            float pct = (float)e->blockCount/(float)totalBlocks*100.f;
             total += pct;
-            PrintAttribute(ctx, "", "%12u %12u %12.2f", e->startBlock, e->blockCount, pct);
+            PrintAttribute(ctx, "", "%12zu %12zu %12.2f", e->startBlock, e->blockCount, pct);
         } else {
-            PrintAttribute(ctx, "", "%12u %12u %12s", e->startBlock, e->blockCount, "?");
+            PrintAttribute(ctx, "", "%12zu %12zu %12s", e->startBlock, e->blockCount, "?");
         }
     }
 
     char sumLine[50] = {'\0'};
     memset(sumLine, '-', 38);
-    PrintAttribute(ctx, "", sumLine);
+    PrintAttribute(ctx, "", "%s", sumLine);
 
     if (totalBlocks) {
         PrintAttribute(ctx, "", "%4d extents %12d %12.2f", usedExtents, catalogBlocks, total);
@@ -501,7 +501,7 @@ void PrintHFSPlusBSDInfo(out_ctx* ctx, const HFSPlusBSDInfo* record, bool isHard
 
     char     modeString[11];
     _genModeString(modeString, mode);
-    PrintAttribute(ctx, "fileMode", modeString);
+    PrintAttribute(ctx, "fileMode", "%s", modeString);
 
     PrintUIOct(ctx, record, fileMode);
 
@@ -802,7 +802,7 @@ void PrintHFSPlusExtentRecord(out_ctx* ctx, const HFSPlusExtentRecord* record)
     extentlist_free(list);
 }
 
-#pragma mark Structure Visualization Functions
+#pragma mark - Structure Visualization Functions
 
 void VisualizeHFSPlusExtentKey(out_ctx* ctx, const HFSPlusExtentKey* record, const char* label, bool oneLine)
 {
@@ -957,7 +957,7 @@ void PrintNode(out_ctx* ctx, const BTreeNodePtr node)
 {
     debug("PrintNode");
 
-    BeginSection(ctx, "Node %u (offset %llu; length: %zu)", node->nodeNumber, node->nodeOffset, node->nodeSize);
+    BeginSection(ctx, "Node %u (offset %lld; length: %zu)", node->nodeNumber, node->nodeOffset, node->nodeSize);
     PrintBTNodeDescriptor(ctx, node->nodeDescriptor);
 
 //    uint16_t *records = ((uint16_t*)(node->data + node->bTree->headerRecord.nodeSize) - node->nodeDescriptor->numRecords);
@@ -975,7 +975,7 @@ void PrintNode(out_ctx* ctx, const BTreeNodePtr node)
 
 void PrintFolderListing(out_ctx* ctx, uint32_t folderID)
 {
-    debug("Printing listing for folder ID %d", folderID);
+    debug("Printing listing for folder ID %u", folderID);
 
     // CNID kind mode user group data rsrc name
     char         lineStr[110] = {0};
@@ -1180,7 +1180,7 @@ void PrintNodeRecord(out_ctx* ctx, const BTreeNodePtr node, int recordNumber)
 
     }
 
-    BeginSection(ctx, "Record ID %u (%u/%u) (length: %zd) (Node %d)",
+    BeginSection(ctx, "Record ID %u (%u/%u) (length: %u) (Node %u)",
                  recordNumber,
                  recordNumber + 1,
                  node->nodeDescriptor->numRecords,
@@ -1269,7 +1269,7 @@ void PrintNodeRecord(out_ctx* ctx, const BTreeNodePtr node, int recordNumber)
                 case kBTIndexNode:
                 {
                     uint32_t* pointer = (uint32_t*) record->value;
-                    PrintAttribute(ctx, "nextNodeID", "%llu", *pointer);
+                    PrintAttribute(ctx, "nextNodeID", "%u", *pointer);
                     break;
                 }
 

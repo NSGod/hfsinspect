@@ -45,7 +45,7 @@ int BeginSection(out_ctx* ctx, const char* format, ...)
     va_list argp;
     va_start(argp, format);
 
-    Print(ctx, "");
+    Print(ctx, "%s", "");
     char    str[255];
     vsprintf(str, format, argp);
     int     bytes = Print(ctx, "# %s", str);
@@ -130,7 +130,7 @@ void PrintAttributeDump(out_ctx* ctx, const char* label, const void* map, size_t
     assert(nbytes > 0);
     assert(base >= 2 && base <= 36);
 
-    PrintAttribute(ctx, label, "");
+    PrintAttribute(ctx, label, "%s", "");
     VisualizeData(map, nbytes);
 }
 

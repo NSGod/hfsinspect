@@ -38,7 +38,7 @@ void VisualizeData      (const void* data, size_t length);
 
 #define PrintUI(ctx, record, value)                 PrintAttribute(ctx, #value, "%llu", (uint64_t)record->value)
 #define PrintUIOct(ctx, record, value)              PrintAttribute(ctx, #value, "0%06o (%u)", record->value, record->value)
-#define PrintUIHex(ctx, record, value)              PrintAttribute(ctx, #value, "%#x (%u)", record->value, record->value)
+#define PrintUIHex(ctx, record, value)              PrintAttribute(ctx, #value, "%#llx (%llu)", (uint64_t)record->value, (uint64_t)record->value)
 
 #define PrintIntFlag(ctx, label, name, value)       PrintAttribute(ctx, label, "%s (%llu)", name, (uint64_t)value)
 #define PrintOctFlag(ctx, label, name, value)       PrintAttribute(ctx, label, "0%06o (%s)", value, name)
@@ -52,11 +52,11 @@ void VisualizeData      (const void* data, size_t length);
 #define PrintConstOctIfEqual(ctx, source, c)        { if ((source) == c)   PrintOctFlag(ctx, NULL, #c, c); }
 #define PrintConstHexIfEqual(ctx, source, c)        { if ((source) == c)   PrintHexFlag(ctx, NULL, #c, c); }
 
-int  BeginSection   (out_ctx* ctx, const char* format, ...);
+int  BeginSection   (out_ctx* ctx, const char* format, ...) __printflike(2, 3);
 void EndSection     (out_ctx* ctx);
 
-int Print           (out_ctx* ctx, const char* format, ...);
-int PrintAttribute  (out_ctx* ctx, const char* label, const char* format, ...);
+int Print           (out_ctx* ctx, const char* format, ...) __printflike(2, 3);
+int PrintAttribute  (out_ctx* ctx, const char* label, const char* format, ...) __printflike(3, 4);
 int _PrintUIChar    (out_ctx* ctx, const char* label, const char* i, size_t nbytes);
 
 int format_dump     (out_ctx* ctx, char* out, const char* value, unsigned base, size_t nbytes, size_t length);

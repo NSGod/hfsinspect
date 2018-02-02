@@ -242,7 +242,7 @@ void PrintGPTHeader(const GPTHeader* header_p, const Volume* vol)
     if (vol != NULL)
         _PrintDataLength (ctx, "(size)", (header_p->last_lba * vol->sector_size) - (header_p->first_lba * vol->sector_size) );
 
-    PrintAttribute          (ctx, "uuid", uuid_str);
+    PrintAttribute          (ctx, "uuid", "%s", uuid_str);
     PrintUI                 (ctx, header_p, partition_table_start_lba);
     PrintUI                 (ctx, header_p, partitions_entry_count);
     PrintDataLength         (ctx, header_p, partitions_entry_size);

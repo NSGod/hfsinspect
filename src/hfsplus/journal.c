@@ -35,11 +35,11 @@ void PrintJournalInfoBlock(out_ctx* ctx, const JournalInfoBlock* record)
 
     char uuid_str[sizeof(uuid_string_t) + 1];
     (void)strlcpy(uuid_str, &record->ext_jnl_uuid[0], sizeof(uuid_str));
-    PrintAttribute(ctx, "ext_jnl_uuid", uuid_str);
+    PrintAttribute(ctx, "ext_jnl_uuid", "%s", uuid_str);
 
     char serial[49];
     (void)strlcpy(serial, &record->machine_serial_num[0], 49);
-    PrintAttribute(ctx, "machine_serial_num", serial);
+    PrintAttribute(ctx, "machine_serial_num", "%s", serial);
 
     // (uint32_t) reserved[32]
 

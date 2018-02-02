@@ -116,6 +116,8 @@ bool resolveDeviceAndPath(char* path_in, char* device_out, char* path_out)
 #endif
 }
 
+void die(int val, char* format, ...) __printflike(2, 3);
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-security"
 
@@ -158,7 +160,7 @@ void loadBTree(HIOptions* options)
         if ( hfs_get_hotfiles_btree(&options->tree, options->hfs) < 0)
             die(1, "Hotfiles B-Tree not found. Target must be a hard drive with a copy of Mac OS X that has successfully booted to create this file (it will not be present on SSDs).");
     } else {
-        die(1, "Unsupported tree: %s", options->tree_type);
+        die(1, "Unsupported tree: %u", options->tree_type);
     }
 }
 
@@ -914,7 +916,7 @@ NOPE:
             BeginSection(ctx, "Hotfiles B-Tree Node %d", options.node_id);
 
         } else {
-            die(1, "Unknown tree type: %s", options.tree_type);
+            die(1, "Unknown tree type: %u", options.tree_type);
         }
 
         bool showHex = 0;

@@ -49,7 +49,7 @@ VolumeFragmentationSummary* createVolumeFragmentationSummary(HIOptions *options)
         BTreeNodePtr node = NULL;
         if ( BTGetNode(&node, catalog, cnid) < 0) {
             perror("get node");
-            die(1, "There was an error fetching node %d", cnid);
+            die(1, "There was an error fetching node %u", cnid);
         }
 
         // Process node
@@ -165,10 +165,10 @@ VolumeFragmentationSummary* createVolumeFragmentationSummary(HIOptions *options)
                 char   size[128] = {0};
                 (void)format_size(hfs->vol->ctx, size, space, 128);
 
-                fprintf(stdout, "\r%0.2f%% (files: %ju; directories: %ju; size: %s)",
-                        ((float)count / (float)catalog->headerRecord.leafRecords) * 100.,
-                        (intmax_t)summary->fileCount,
-                        (intmax_t)summary->folderCount,
+                fprintf(stdout, "\r%0.2f%% (files: %llu; directories: %llu; size: %s)",
+                        ((float)count / (float)catalog->headerRecord.leafRecords) * 100.f,
+                        summary->fileCount,
+                        summary->folderCount,
                         size
                         );
                 fflush(stdout);
@@ -208,7 +208,7 @@ void PrintFragmentedFork(out_ctx* ctx, const HFSPlusFork* hfsfork)
 
     TAILQ_FOREACH(e, list, extents) {
         char blockCountStr[12] = "";
-        sprintf(blockCountStr, "%u:", (uint32_t)e->blockCount);
+        sprintf(blockCountStr, "%zu:", e->blockCount);
         strlcat(mapStr, blockCountStr, mapStrLen);
     }
 
@@ -293,7 +293,7 @@ void PrintVolumeFragmentationSummary(out_ctx* ctx, const VolumeFragmentationSumm
                     summary->fragmentedFileCount,
                     (double)summary->fragmentedFileCount/(double)summary->fileCount);
 
-    Print(ctx, "");
+    Print(ctx, "%s", "");
     Print(ctx, "# Effective Fragmentation: %llu out of %llu possible files are fragmented (%0.2f%%)",
           summary->fragmentedFileCount,
           summary->filesLargerThanBlockSizeCount,

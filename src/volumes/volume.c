@@ -296,7 +296,7 @@ void vol_dump(Volume* vol)
 {
     BeginSection(vol->ctx, "Volume '%s' (%s)", vol->desc, vol->native_desc);
 
-    Print(vol->ctx, "source", "%s", vol->source);
+    PrintAttribute(vol->ctx, "source", "%s", vol->source);
 
 #define PrintUICharsIfEqual(var, val) if (var == val) { \
         char     type[5]; \

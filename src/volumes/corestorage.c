@@ -149,7 +149,7 @@ void PrintCSVolumeHeader(out_ctx* ctx, CSVolumeHeader* header)
         if (header->md_blocks[i]) {
             char title[50] = "";
             sprintf(title, "md_blocks[%u]", i);
-            PrintAttribute(ctx, title, "%#x", header->md_blocks[i]);
+            PrintAttribute(ctx, title, "%#llx", header->md_blocks[i]);
         }
     }
 
@@ -158,13 +158,13 @@ void PrintCSVolumeHeader(out_ctx* ctx, CSVolumeHeader* header)
 
     char str[2048] = "";
     memstr(str, 16, &header->encryption_key_data[0], header->encryption_key_size, 1024);
-    PrintAttribute(ctx, "encryption_key_data", str);
+    PrintAttribute(ctx, "encryption_key_data", "%s", str);
 
     memstr(str, 16, (char*)&header->physical_volume_uuid, 16, 1024);
-    PrintAttribute(ctx, "physical_volume_uuid", str);
+    PrintAttribute(ctx, "physical_volume_uuid", "%s", str);
 
     memstr(str, 16, (char*)&header->logical_volume_group_uuid, 16, 1024);
-    PrintAttribute(ctx, "logical_volume_group_uuid", str);
+    PrintAttribute(ctx, "logical_volume_group_uuid", "%s", str);
 
     //    memstr(str, 16, (char*)&header->reserved10[0], 176, 1024);
     //    VisualizeData((char*)&header->reserved10, 176);
@@ -191,14 +191,14 @@ void PrintCSMetadataBlockType11(out_ctx* ctx, CSMetadataBlockType11* block)
 
     PrintUIHex      (ctx, block, field_10);
 
-    PrintUIHex      (ctx, block, secondary_vhb_off);
+    PrintUIHex    (ctx, block, secondary_vhb_off);
     PrintUI         (ctx, block, ukwn_record_count);
 
     BeginSection(ctx, "Unknown Records");
     Print(ctx, "%-12s %-12s %-12s", "Generation", "Curly", "Moe");
     for (unsigned i = 0; i < block->ukwn_record_count; i++) {
         uint64_t* record = (void*)&block->ukwn_records[i];
-        Print(ctx, "%-#12x %-#12x %-#12x", record[0], record[1], record[2]);
+        Print(ctx, "%-#12llx %-#12llx %-#12llx", record[0], record[1], record[2]);
     }
     EndSection(ctx); // records
 
