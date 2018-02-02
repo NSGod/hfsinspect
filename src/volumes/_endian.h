@@ -96,10 +96,10 @@ static inline uint64_t bswap64(uint64_t x)
     #define Swap(x) _Generic( (x), uint16_t: Swap16((x)),  uint32_t: Swap32((x)),  uint64_t: Swap64((x))  )
 #else
     #define Swap(x) { switch(sizeof((x))) { \
-                          case 16: Swap16((x)); break; \
-                          case 32: Swap32((x)); break; \
-                          case 64: Swap64((x)); break; \
-                          default: break; \
+                          case 2: Swap16((x)); break; \
+                          case 4: Swap32((x)); break; \
+                          case 8: Swap64((x)); break; \
+                          default: printf("Swap() error!\n"); break; \
                       }}
 #endif // defined(clang)
 
