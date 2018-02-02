@@ -9,6 +9,7 @@
 
 #include "hfs/Apple/hfs_types.h"   // Apple's FastUnicodeCompare and conversion table.
 #include "hfs/catalog.h"
+#include "hfs/Apple/hfs_macos_defs.h"	// UF_* flags (on older versions of OS X)
 #include "hfs/hfs_endian.h"
 #include "hfs/hfs_io.h"
 #include "hfs/output_hfs.h"

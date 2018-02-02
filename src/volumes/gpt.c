@@ -51,17 +51,17 @@ void        PrintGPTPartitions      (const GPTHeader* header_p, const GPTPartiti
 
 #pragma mark - Internal
 
-void _gpt_swap_uuid(uuid_t* uuid_p, const uuid_t* uuid)
-{
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-align"
+void _gpt_swap_uuid(uuid_t* uuid_p, const uuid_t* uuid)
+{
     // Because these UUIDs are fucked up.
     *( (uint32_t*) uuid_p + 0 ) = be32toh(*( (uint32_t*)uuid + 0 ));
     *( (uint16_t*) uuid_p + 2 ) = be16toh(*( (uint16_t*)uuid + 2 ));
     *( (uint16_t*) uuid_p + 3 ) = be16toh(*( (uint16_t*)uuid + 3 ));
     *( (uint64_t*) uuid_p + 1 ) =         *( (uint64_t*)uuid + 1 );
-#pragma GCC diagnostic pop
 }
+#pragma GCC diagnostic pop
 
 const char* _gpt_partition_type_str(uuid_t uuid, VolType* hint)
 {

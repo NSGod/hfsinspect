@@ -70,8 +70,10 @@ int vol_open(Volume* vol, const char* path, int mode, off_t offset, uint64_t len
 
         ioctl(vol->fd, DKIOCGETBLOCKCOUNT, &bc);
         ioctl(vol->fd, DKIOCGETBLOCKSIZE, &bs);
+#if defined DKIOCGETPHYSICALBLOCKSIZE
         ioctl(vol->fd, DKIOCGETPHYSICALBLOCKSIZE, &ps);
-
+#endif
+        
         vol->sector_count    = ( (bc != 0) ? bc : s.st_blocks);
         vol->sector_size     = ( (bs != 0) ? bs : S_BLKSIZE);
         vol->phy_sector_size = ( (ps != 0) ? ps : vol->sector_size);

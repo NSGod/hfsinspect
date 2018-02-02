@@ -81,7 +81,7 @@ typedef struct block_list_header {
 struct journal;
 
 // Only define this if we're not on OS X and before sys/disk.h.
-#if !defined(DKIOCFORMAT)
+#if !defined(DKIOCGETPHYSICALBLOCKSIZE)
 typedef struct
 {
     uint64_t               offset;

@@ -57,6 +57,10 @@ void swap_BTHeaderRec(BTHeaderRec* record)
 
 int swap_BTreeNode(BTreeNodePtr node)
 {
+#if ((defined __ppc__) || (defined __ppc64__))
+    return 1;
+#else
+    
     char*          nodeData = node->data;
     const BTreePtr bTree    = node->bTree;
 
@@ -180,5 +184,6 @@ int swap_BTreeNode(BTreeNodePtr node)
         }
     }
     return 1;
+#endif
 }
 
