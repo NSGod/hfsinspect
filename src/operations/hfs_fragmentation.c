@@ -161,7 +161,7 @@ VolumeFragmentationSummary* createVolumeFragmentationSummary(HIOptions *options)
 
             if ((count % iter_size) == 0) {
                 // Update status
-                size_t space     = summary->dataForksLogicalSize + summary->resourceForksLogicalSize;
+                uint64_t space   = summary->dataForksLogicalSize + summary->resourceForksLogicalSize;
                 char   size[128] = {0};
                 (void)format_size(hfs->vol->ctx, size, space, 128);
 
@@ -193,7 +193,7 @@ void PrintFragmentedFork(out_ctx* ctx, const HFSPlusFork* hfsfork)
 {
     // There's probably a better way to do this, but until then...
 
-    uint32_t totalFragmentCount = 0;
+    size_t totalFragmentCount = 0;
 
     ExtentList* list = hfsfork->extents;
 
@@ -216,7 +216,7 @@ void PrintFragmentedFork(out_ctx* ctx, const HFSPlusFork* hfsfork)
     int result = HFSPlusGetCNIDPath(&forkPath, (FSSpec){ hfsfork->hfs, hfsfork->cnid } );
     if (result < 0) strlcpy((char *)forkPath, "<unknown>", PATH_MAX);
 
-    fprintf(stdout, "cnid=%u fork=%s map=%s bytes=%llu extents=%u path=%s\n",
+    fprintf(stdout, "cnid=%u fork=%s map=%s bytes=%llu extents=%zu path=%s\n",
             hfsfork->cnid,
             hfsfork->forkType == HFSDataForkType ? "data" : "rsrc",
             mapStr,
@@ -303,7 +303,7 @@ void PrintVolumeFragmentationSummary(out_ctx* ctx, const VolumeFragmentationSumm
         BeginSection(ctx, "Most Fragmented Files");
         Print(ctx, "%4s %10s %13s %10s  %s", "#", "CNID", "Size", "Fragments", "Path");
 
-        for (int64_t i = summary->topFragementedFilesCount - 1; i >= 0; i--) {
+        for (ssize_t i = summary->topFragementedFilesCount - 1; i >= 0; i--) {
             if (summary->topFragementedFiles[i].cnid == 0) continue;
 
             PrintFragmentedFile(ctx, summary->topFragementedFilesCount - i, &summary->topFragementedFiles[i]);
@@ -316,7 +316,7 @@ void PrintVolumeFragmentationSummary(out_ctx* ctx, const VolumeFragmentationSumm
     EndSection(ctx); // volume fragmentation summary
 }
 
-void PrintFragmentedFile(out_ctx* ctx, uint64_t index, const FragmentedFile* file)
+void PrintFragmentedFile(out_ctx* ctx, size_t index, const FragmentedFile* file)
 {
     char size[50];
     (void)format_size(ctx, size, file->logicalSize, 50);
@@ -324,5 +324,5 @@ void PrintFragmentedFile(out_ctx* ctx, uint64_t index, const FragmentedFile* fil
     hfs_str     fullPath      = "";
     int result = HFSPlusGetCNIDPath(&fullPath, (FSSpec){ get_hfs_volume(), file->cnid });
     if (result < 0) strlcpy((char *)fullPath, "<unknown>", PATH_MAX);
-    Print(ctx, "%4llu %10u %13s %10u  %s", index, file->cnid, size, file->fragmentCount, fullPath);
+    Print(ctx, "%4zu %10u %13s %10u  %s", index, file->cnid, size, file->fragmentCount, fullPath);
 }

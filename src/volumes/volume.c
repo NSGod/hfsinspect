@@ -24,12 +24,12 @@
 
 #define ASSERT_VOL(vol) { assert(vol != NULL); assert(vol->fp); }
 
-int vol_open(Volume* vol, const char* path, int mode, off_t offset, size_t length, size_t block_size)
+int vol_open(Volume* vol, const char* path, int mode, off_t offset, uint64_t length, uint32_t block_size)
 {
     struct stat s = {0};
     FILE*       f = NULL;
 
-    trace("vol (%p), path '%s', mode %#o, offset %zd, length %zu, block_size %zu", (void *)vol, path, mode, offset, length, block_size);
+    trace("vol (%p), path '%s', mode %#o, offset %lld, length %llu, block_size %u", (void *)vol, path, mode, offset, length, block_size);
 
     assert(vol);
     assert(path);
@@ -51,7 +51,7 @@ int vol_open(Volume* vol, const char* path, int mode, off_t offset, size_t lengt
 
     if (length && block_size) {
         vol->length       = length;
-        vol->sector_size  = (uint32_t)block_size;
+        vol->sector_size  = block_size;
         vol->sector_count = (length / block_size);
     } else {
         vol->length       = s.st_size;
@@ -90,7 +90,7 @@ int vol_open(Volume* vol, const char* path, int mode, off_t offset, size_t lengt
     }
 
     if ((length == 0) && vol->sector_size && vol->sector_count)
-        vol->length = vol->sector_size * vol->sector_count;
+        vol->length = (uint64_t)vol->sector_size * vol->sector_count;
 
     char* name = basename((char*)path);
     strlcpy((char*)&vol->desc, name, 99);
@@ -137,12 +137,12 @@ ssize_t vol_blk_get(const Volume* vol, void* buf, size_t count, off_t start, siz
     ssize_t rval = 0;
     off_t   off  = 0;
 
-    trace("vol (%p), start %zd, count %zu, blksz %zu, buf (%p)", (void *)vol, start, count, blksz, buf);
+    trace("vol (%p), start %lld, count %zu, blksz %zu, buf (%p)", (void *)vol, start, count, blksz, buf);
 
     // Determine offset based on block size.
     off  = (start * blksz) + vol->offset;
 
-    debug2("Seeking to %zd then reading %zu blocks of size %zu.", off, count, blksz);
+    debug2("Seeking to %lld then reading %zu blocks of size %zu.", off, count, blksz);
 
     rval = fpread(vol->fp, buf, blksz * count, off);
 
@@ -170,13 +170,13 @@ ssize_t vol_read(const Volume* vol, void* buf, size_t size, off_t offset)
     debug2("Reading from volume %s+%ju at (%jd, %zu)", basename((char*)&vol->source), (uintmax_t)vol->offset, (intmax_t)offset, size);
 
     // Range checks
-    if (vol->length && (offset > (ssize_t)vol->length)) {
+    if (vol->length && (offset > vol->length)) {
         debug("Read ignored; beyond end of source.");
         return 0;
     }
 
     if ( vol->length && ((offset + size) > vol->length)) {
-        size = vol->length - offset;
+        size = (size_t)(vol->length - offset);
         debug("Adjusted read to (%jd, %zu)", (intmax_t)offset, size);
     }
 
@@ -208,7 +208,7 @@ ssize_t vol_read(const Volume* vol, void* buf, size_t size, off_t offset)
     start_block = (size_t)(offset / blksz);
 
     // Offset of the request within the start block.
-    byte_offset = (offset % blksz);
+    byte_offset = (size_t)(offset % blksz);
 
     // Fetch the data into a read buffer (it may fail).
     read_blocks = vol_blk_get(vol, read_buffer, block_count, start_block, blksz);
@@ -252,7 +252,7 @@ int vol_close(Volume* vol)
     return result;
 }
 
-Volume* vol_make_partition(Volume* vol, uint16_t pos, off_t offset, size_t length)
+Volume* vol_make_partition(Volume* vol, uint16_t pos, off_t offset, uint64_t length)
 {
     { if (vol->fp == NULL) { errno = EINVAL; return NULL; } }
 

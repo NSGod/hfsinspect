@@ -50,7 +50,7 @@ void extentlist_add(ExtentList* list, size_t startBlock, size_t blockCount)
     } else {
         TAILQ_INSERT_TAIL(list, newExtent, extents);
 
-        int     block  = 0;
+        uint32_t     block  = 0;
         Extent* extent = NULL;
 
         // For large files, this takes a LONG time. Optimize to only do this when inserting in the middle.

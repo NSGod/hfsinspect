@@ -56,7 +56,7 @@ typedef char uuid_string_t[37];
 
 #else                           // !GC_ENABLED
 
-#define ALLOC(buf_size)        calloc(1, (buf_size))
+#define ALLOC(buf_size)        calloc(1, (size_t)(buf_size))
 #define REALLOC(buf, buf_size) realloc((buf), (buf_size))
 #define FREE(buf)              free((buf))
 

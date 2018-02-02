@@ -502,8 +502,8 @@ int main (int argc, char* const* argv)
                 char* blockStart    = strsep(&option, ":");
                 char* blockCount      = strsep(&option, ":");
 
-                if (blockStart && strlen(blockStart))   sscanf(blockStart, "%llu", &options.blockRangeStart);
-                if (blockCount && strlen(blockCount))   sscanf(blockCount, "%llu", &options.blockRangeCount);
+                if (blockStart && strlen(blockStart))   sscanf(blockStart, "%zu", &options.blockRangeStart);
+                if (blockCount && strlen(blockCount))   sscanf(blockCount, "%zu", &options.blockRangeCount);
 
                 SFREE(tofree);
 
@@ -923,7 +923,7 @@ NOPE:
 
         if (showHex) {
             size_t length = options.tree->headerRecord.nodeSize;
-            off_t  offset = length * options.node_id;
+            off_t  offset = (off_t)length * options.node_id;
             void*  buf    = NULL;
             SALLOC(buf, length);
             fpread(options.tree->fp, buf, length, offset);
@@ -961,7 +961,7 @@ NOPE:
     }
 
     // Clean up
-    hfs_close(options.hfs); // also perorms vol_close(vol), though perhaps it shouldn't?
+    hfs_close(options.hfs); // also performs vol_close(vol), though perhaps it shouldn't?
 
     debug("Clean exit.");
 

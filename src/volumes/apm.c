@@ -48,7 +48,7 @@ int apm_get_header(Volume* vol, APMHeader* header, unsigned partition_number)
     ssize_t bytes      = 0;
 
     block_size = vol->sector_size;
-    bytes      = vol_read(vol, header, sizeof(APMHeader), (block_size * partition_number));
+    bytes      = vol_read(vol, header, sizeof(APMHeader), ((off_t)block_size * partition_number));
 
     if (bytes < 0) return -1;
 
@@ -206,12 +206,12 @@ int apm_load(Volume* vol)
         if ( apm_get_header(vol, &header, partitionID) < 0 )
             return -1;
 
-        size_t  sector_size = vol->sector_size;
-        off_t   offset      = header.partition_start * sector_size;
-        size_t  length      = header.partition_length * sector_size;
+        uint32_t    sector_size = vol->sector_size;
+        off_t       offset      = (off_t)header.partition_start * sector_size;
+        uint64_t    length      = (uint64_t)header.partition_length * sector_size;
 
         Volume* partition   = vol_make_partition(vol, partitionID - 1, offset, length);
-        partition->sector_size  = (uint32_t)sector_size;
+        partition->sector_size  = sector_size;
         partition->sector_count = header.partition_length;
 
         memcpy(partition->desc, &header.name, 32);

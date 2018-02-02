@@ -83,7 +83,7 @@ bool BTIsNodeUsed(const BTreePtr bTree, bt_nodeid_t nodeNum)
 
             memcpy(bTree->nodeBitmap + old_size, record.record, record.recordLen);
         }
-        debug("Done loading nodes.");
+        debug("Done loading bitmap nodes.");
 
         // Clean up
         BTFreeNode(node);
@@ -275,7 +275,7 @@ int btree_get_node(BTreeNodePtr* outNode, const BTreePtr tree, bt_nodeid_t nodeN
 
     node->nodeSize   = tree->headerRecord.nodeSize;
     node->nodeNumber = nodeNumber;
-    node->nodeOffset = node->nodeNumber * node->nodeSize;
+    node->nodeOffset = (off_t)node->nodeNumber * node->nodeSize;
     node->bTree      = tree;
     node->treeID     = tree->treeID;
 

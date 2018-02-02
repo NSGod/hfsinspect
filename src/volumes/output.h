@@ -60,8 +60,8 @@ int PrintAttribute  (out_ctx* ctx, const char* label, const char* format, ...) _
 int _PrintUIChar    (out_ctx* ctx, const char* label, const char* i, size_t nbytes);
 
 int format_dump     (out_ctx* ctx, char* out, const char* value, unsigned base, size_t nbytes, size_t length);
-int format_size     (out_ctx* ctx, char* out, size_t value, size_t length);
-int format_blocks   (out_ctx* ctx, char* out, size_t blocks, size_t block_size, size_t length);
+int format_size     (out_ctx* ctx, char* out, uint64_t value, size_t length);
+int format_blocks   (out_ctx* ctx, char* out, uint64_t blocks, size_t block_size, size_t length);
 int format_time     (out_ctx* ctx, char* out, time_t gmt_time, size_t length);
 
 int format_uint_oct (char* out, uint64_t value, uint8_t padding, size_t length);

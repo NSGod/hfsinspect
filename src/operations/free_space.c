@@ -109,7 +109,7 @@ void showFreeSpace(HIOptions* options)
             }
         }
         
-        bool used = BTIsBlockUsed((uint32_t)i, data, fork->logicalSize);
+        bool used = BTIsBlockUsed((uint32_t)i, data, (size_t)fork->logicalSize);
         if ((used == currentExtent.used) && (i != (options->hfs->vh.totalBlocks - 1))) {
             currentExtent.length++;
             continue;
@@ -135,8 +135,8 @@ void showFreeSpace(HIOptions* options)
             
             if (options->verbose) {
                 char size[50];
-                (void)format_size(ctx, size, currentExtent.length * fork->hfs->block_size, 50);
-                Print(ctx, "%12lu %26lu %13s", currentExtent.start, currentExtent.length, size);
+                (void)format_size(ctx, size, (uint64_t)currentExtent.length * fork->hfs->block_size, 50);
+                Print(ctx, "%12zu %26zu %13s", currentExtent.start, currentExtent.length, size);
             }
         }
 
@@ -154,9 +154,9 @@ void showFreeSpace(HIOptions* options)
             if (topFreeExtents[i].blockCount == 0) continue;
 
             char size[50];
-            (void)format_size(ctx, size, topFreeExtents[i].blockCount * fork->hfs->block_size, 50);
+            (void)format_size(ctx, size, (uint64_t)topFreeExtents[i].blockCount * fork->hfs->block_size, 50);
 
-            Print(ctx, "%12lu %26lu %13s", topFreeExtents[i].startBlock, topFreeExtents[i].blockCount, size);
+            Print(ctx, "%12zu %26zu %13s", topFreeExtents[i].startBlock, topFreeExtents[i].blockCount, size);
         }
         EndSection(ctx); // Largest Contiguous Freespace Segments
     }

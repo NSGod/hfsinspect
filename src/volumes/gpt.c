@@ -162,8 +162,8 @@ int _gpt_load_header(Volume* vol, GPTHeader* header_out, GPTPartitionRecord* ent
 
     // Search for the GPT header with block sizes of 512, 1024, 2048, and 4096.
     for (unsigned i = 9; i < 13; i++) {
-        size_t block_size = pow(2, i);
-        offset = block_size * first_sector_lba;
+        size_t block_size = (size_t)pow(2, i);
+        offset = (off_t)block_size * first_sector_lba;
         debug("Looking for GPT header at offset %ju", (uintmax_t)offset);
 
         // Read the GPT header.
@@ -316,7 +316,7 @@ int gpt_load(Volume* vol)
     GPTHeader          header  = {0};
     GPTPartitionRecord entries = {{{0}}};
     off_t              offset  = 0;
-    size_t             length  = 0;
+    uint64_t           length  = 0;
 
     vol->type    = kVolTypePartitionMap;
     vol->subtype = kPMTypeGPT;

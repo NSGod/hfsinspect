@@ -149,7 +149,7 @@ void inspectBlockRange(HIOptions* options)
     if ( range_max(blockRange) > hfs->block_count ) {
         blockRange.count = hfs->block_count - blockRange.start;
         blockRange.count = MAX(blockRange.count, 1);
-        debug("Trimmed range to (%zu, %zu) (volume only has %zu blocks)", blockRange.start, blockRange.count, hfs->block_count);
+        debug("Trimmed range to (%zu, %zu) (volume only has %lu blocks)", blockRange.start, blockRange.count, hfs->block_count);
     }
 
     FileExtentList* fileExtents = fileExtentList_create();
@@ -238,7 +238,7 @@ void inspectBlockRange(HIOptions* options)
 
     TAILQ_FOREACH(fileExtent, fileExtents, extents) {
         char size[50];
-        (void)format_size(ctx, size, fileExtent->blockCount * hfs->block_size, 50);
+        (void)format_size(ctx, size, (uint64_t)fileExtent->blockCount * hfs->block_size, 50);
 
         hfs_str path = "";
         int result = HFSPlusGetCNIDPath(&path, (FSSpec){ hfs, fileExtent->cnid });
@@ -267,7 +267,7 @@ void inspectBlockRange(HIOptions* options)
 
         range freespaceRange = make_range(fileExtent->startBlock + fileExtent->blockCount, next->startBlock - (fileExtent->startBlock + fileExtent->blockCount));
 
-        (void)format_size(ctx, size, freespaceRange.count * hfs->block_size, 50);
+        (void)format_size(ctx, size, (uint64_t)freespaceRange.count * hfs->block_size, 50);
 
         Print(ctx, "%10s   ┃%12zu %12zu  ┃ %10s %4s %13s  %s",
               "",

@@ -50,11 +50,11 @@ enum HIModes {
 
 // Configuration context
 typedef struct HIOptions {
-    HFSPlus*            hfs;                            // 8
-    BTreePtr            tree;                           // 8
-    FILE*               extract_fp;                     // 8
-    HFSPlusFork*        extract_HFSPlusFork;            // 8
-    HFSPlusCatalogFile* extract_HFSPlusCatalogFile;     // 8
+    HFSPlus*            hfs;                            // 4/8
+    BTreePtr            tree;                           // 4/8
+    FILE*               extract_fp;                     // 4/8
+    HFSPlusFork*        extract_HFSPlusFork;            // 4/8
+    HFSPlusCatalogFile* extract_HFSPlusCatalogFile;     // 4/8
 
     uint32_t            mode;                           // 4
     bt_nodeid_t         record_parent;                  // 4
@@ -68,8 +68,8 @@ typedef struct HIOptions {
     char                extract_path[PATH_MAX];         // 1024
 
     uint32_t            topCount;                       // 4
-    uint64_t            blockRangeStart;                // 8
-    uint64_t            blockRangeCount;                // 8
+    size_t              blockRangeStart;                // 4/8
+    size_t              blockRangeCount;                // 4/8
     
     bool                verbose;                        // 1
 } HIOptions;
@@ -83,7 +83,7 @@ void die(int val, char* format, ...) __attribute__(( noreturn ));
 void    showFreeSpace(HIOptions* options);
 void    showPathInfo(HIOptions* options);
 void    showCatalogRecord(HIOptions* options, FSSpec spec, bool followThreads);
-ssize_t extractFork(const HFSPlusFork* fork, const char* extractPath);
+off_t   extractFork(const HFSPlusFork* fork, const char* extractPath);
 void    extractHFSPlusCatalogFile(const HFSPlus* hfs, const HFSPlusCatalogFile* file, const char* extractPath);
 void    inspectBlockRange(HIOptions* options);
 
@@ -119,8 +119,8 @@ typedef struct VolumeSummary {
     uint64_t    emptyDirectoryCount;
     uint64_t    compressedFileCount;
     
+    size_t      topLargestFileCount;
     Rank        *topLargestFiles;
-    uint64_t    topLargestFileCount;
     
     ForkSummary dataFork;
     ForkSummary resourceFork;
@@ -155,9 +155,8 @@ typedef struct VolumeFragmentationSummary {
     uint64_t        filesLargerThanBlockSizeCount;
     uint64_t        fragmentedFileCount;
 
+    size_t          topFragementedFilesCount;
     FragmentedFile  *topFragementedFiles;
-    uint64_t        topFragementedFilesCount;
-    
 } VolumeFragmentationSummary;
 
 VolumeSummary* createVolumeSummary(HIOptions* options);
@@ -171,6 +170,6 @@ void                            freeVolumeFragmentationSummary(VolumeFragmentati
 void                            generateFragmentedFile(HIOptions* options, FragmentedFile* fragmentedFile, const HFSPlusCatalogFile* file);
 void          PrintFragmentedFork(out_ctx* ctx, const HFSPlusFork* hfsfork) _NONNULL;
 void          PrintVolumeFragmentationSummary(out_ctx* ctx, const VolumeFragmentationSummary* summary) _NONNULL;
-void          PrintFragmentedFile(out_ctx* ctx, uint64_t index, const FragmentedFile* file) _NONNULL;
+void          PrintFragmentedFile(out_ctx* ctx, size_t index, const FragmentedFile* file) _NONNULL;
 
 #endif

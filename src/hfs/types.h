@@ -29,7 +29,7 @@ struct HFSPlus {
     Volume*             vol;                // Volume containing the filesystem
     HFSPlusVolumeHeader vh;                 // Volume header
     off_t               offset;             // Partition offset, if known/needed (bytes)
-    size_t              length;             // Partition length, if known/needed (bytes)
+    uint64_t            length;             // Partition length, if known/needed (bytes)
     size_t              block_size;         // Allocation block size. (bytes)
     size_t              block_count;        // Number of blocks. (blocks of block_size size)
 };

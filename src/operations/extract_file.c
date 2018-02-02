@@ -8,7 +8,7 @@
 
 #include "operations.h"
 
-ssize_t extractFork(const HFSPlusFork* fork, const char* extractPath)
+off_t extractFork(const HFSPlusFork* fork, const char* extractPath)
 {
     FILE*    f_out         = NULL;
     FILE*    f_in          = NULL;
@@ -16,8 +16,8 @@ ssize_t extractFork(const HFSPlusFork* fork, const char* extractPath)
     size_t   chunkSize     = 0;
     void*    chunk         = NULL;
     ssize_t  nbytes        = 0;
-    size_t   totalBytes    = 0;
-    size_t   bytes         = 0;
+    uint64_t totalBytes    = 0;
+    uint64_t bytes         = 0;
     char     totalStr[100] = {0};
     char     bytesStr[100] = {0};
 
@@ -75,7 +75,7 @@ void extractHFSPlusCatalogFile(const HFSPlus* hfs, const HFSPlusCatalogFile* fil
         if ( hfsfork_make(&fork, hfs, file->dataFork, HFSDataForkType, file->fileID) < 0 ) {
             die(1, "Could not create fork for fileID %u", file->fileID);
         }
-        ssize_t      size = extractFork(fork, extractPath);
+        off_t      size = extractFork(fork, extractPath);
         if (size < 0) {
             perror("extract");
             die(1, "Extract data fork failed.");
@@ -85,7 +85,7 @@ void extractHFSPlusCatalogFile(const HFSPlus* hfs, const HFSPlusCatalogFile* fil
     if (file->resourceFork.logicalSize > 0) {
         char*   outputPath = NULL;
         SALLOC(outputPath, FILENAME_MAX);
-        ssize_t size;
+        off_t size;
         size = strlcpy(outputPath, extractPath, FILENAME_MAX);
         if (size < 1) die(1, "Could not create destination filename.");
         size = strlcat(outputPath, ".rsrc", FILENAME_MAX);

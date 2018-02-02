@@ -76,15 +76,15 @@ struct Volume {
     uint32_t phy_sector_size;               // physical logical block size, if available
 
     off_t    offset;                        // offset in bytes on source
-    size_t   length;                        // length in bytes
+    uint64_t length;                        // length in bytes
 
     VolType  type;                          // Major type of volume (partition map or filesystem)
     VolType  subtype;                       // Minor type of volume (style of pmap or fs (eg. GPT or HFSPlus)
     char     desc[128];                     // Human-readable description of the volume format.
     char     native_desc[128];              // Native description of the volume format, if any.
 
-    unsigned depth;                         // How many containers deep this volume is found (0 = root)
-    unsigned partition_count;               // total count of sub-partitions; 0 if this is a data partition
+    uint32_t depth;                         // How many containers deep this volume is found (0 = root)
+    uint32_t partition_count;               // total count of sub-partitions; 0 if this is a data partition
     Volume*  parent_partition;              // the enclosing partition; NULL if the root partition map
     Volume*  partitions[128];               // partition records
 };
@@ -112,7 +112,7 @@ struct PartitionOps {
    @return Zero on success, -1 on failure (check errno and reference open(2) for details).
    @see {@link vol_qopen}
  */
-int vol_open(Volume* vol, const char* path, int mode, off_t offset, size_t length, size_t block_size) __attribute__((nonnull));
+int vol_open(Volume* vol, const char* path, int mode, off_t offset, uint64_t length, uint32_t block_size) __attribute__((nonnull));
 
 /**
    Quickly open a whole source. Offset, length, and block_size are set to zero and auto-detected as needed.
@@ -151,7 +151,7 @@ int vol_close(Volume* vol) __attribute__((nonnull));
 
 /**
  */
-Volume* vol_make_partition(Volume* vol, uint16_t pos, off_t offset, size_t length) __attribute__((nonnull(1)));
+Volume* vol_make_partition(Volume* vol, uint16_t pos, off_t offset, uint64_t length) __attribute__((nonnull(1)));
 void    vol_dump(Volume* vol) __attribute__((nonnull));
 
 #endif

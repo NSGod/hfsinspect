@@ -117,7 +117,7 @@ void _PrintDataLength(out_ctx* ctx, const char* label, uint64_t size)
     (void)format_size(ctx, decimalLabel, size, 50);
 
     if (size > 1024) {
-        PrintAttribute(ctx, label, "%s (%lu bytes)", decimalLabel, size);
+        PrintAttribute(ctx, label, "%s (%llu bytes)", decimalLabel, size);
     } else {
         PrintAttribute(ctx, label, "%s", decimalLabel);
     }
@@ -200,11 +200,11 @@ int format_dump(out_ctx* ctx, char* out, const char* value, unsigned base, size_
     return (int)memstr(out, base, value, nbytes, length);
 }
 
-int format_size(out_ctx* ctx, char* out, size_t value, size_t length)
+int format_size(out_ctx* ctx, char* out, uint64_t value, size_t length)
 {
     char*       binaryNames[]  = { "bytes", "KiB", "MiB", "GiB", "TiB", "EiB", "PiB", "ZiB", "YiB" };
     char*       decimalNames[] = { "bytes", "KB", "MB", "GB", "TB", "EB", "PB", "ZB", "YB" };
-    float       divisor        = 1024.0;
+    float       divisor        = 1024.0f;
     bool        decimal        = ctx->decimal_sizes;
     long double displaySize    = value;
     int         count          = 0;
@@ -214,7 +214,7 @@ int format_size(out_ctx* ctx, char* out, size_t value, size_t length)
     assert(out != NULL);
     assert(length > 0);
 
-    if (decimal) divisor = 1000.0;
+    if (decimal) divisor = 1000.0f;
 
     while (count < 9) {
         if (displaySize < divisor) break;
@@ -229,12 +229,12 @@ int format_size(out_ctx* ctx, char* out, size_t value, size_t length)
     return (int)strlen(out);
 }
 
-int format_blocks(out_ctx* ctx, char* out, size_t blocks, size_t block_size, size_t length)
+int format_blocks(out_ctx* ctx, char* out, uint64_t blocks, size_t block_size, size_t length)
 {
-    size_t displaySize = (blocks * block_size);
+    uint64_t displaySize = (blocks * block_size);
     char   sizeLabel[50];
     (void)format_size(ctx, sizeLabel, displaySize, 50);
-    return snprintf(out, length, "%s (%zu blocks)", sizeLabel, blocks);
+    return snprintf(out, length, "%s (%llu blocks)", sizeLabel, blocks);
 }
 
 int format_time(out_ctx* ctx, char* out, time_t gmt_time, size_t length)

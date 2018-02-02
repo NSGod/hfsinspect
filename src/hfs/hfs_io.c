@@ -21,9 +21,9 @@ hfs_forktype_t HFSResourceForkType = 0xFF;
 
 #pragma mark HFS Volume
 
-ssize_t hfs_read(void* buffer, const HFSPlus* hfs, size_t size, size_t offset)
+ssize_t hfs_read(void* buffer, const HFSPlus* hfs, size_t size, off_t offset)
 {
-    trace("buffer (%p), hfs (%p), size %zu, offset %zu", (void *)buffer, (void *)hfs, size, offset);
+    trace("buffer (%p), hfs (%p), size %zu, offset %lld", (void *)buffer, (void *)hfs, size, offset);
 
     ASSERT_PTR(buffer);
     ASSERT_PTR(hfs);
@@ -36,8 +36,8 @@ ssize_t hfs_read_blocks(void* buffer, const HFSPlus* hfs, size_t block_count, si
 {
     ASSERT_PTR(buffer);
     ASSERT_PTR(hfs);
-
-    return vol_read(hfs->vol, buffer, block_count * hfs->block_size, start_block * hfs->block_size);
+    trace("buffer (%p), hfs (%p), block_count %zu, start_block %zu", (void *)buffer, (void *)hfs, block_count, start_block);
+    return vol_read(hfs->vol, buffer, block_count * hfs->block_size, (off_t)start_block * hfs->block_size);
 }
 
 /*
@@ -250,7 +250,7 @@ ssize_t hfs_read_fork(void* buffer, const HFSPlusFork* fork, size_t block_count,
     // Keep the original request around
     range request     = make_range(start_block, block_count);
 
-    debug2("Reading from CNID %u (%zd, %zd)", fork->cnid, request.start, request.count);
+    debug2("Reading from CNID %u (logicalStartBlock: %zu, numBlocks: %zu)", fork->cnid, request.start, request.count);
 
     // Sanity checks
     if (request.count < 1) {
@@ -266,7 +266,7 @@ ssize_t hfs_read_fork(void* buffer, const HFSPlusFork* fork, size_t block_count,
     if ( range_max(request) >= fork->totalBlocks ) {
         request.count = fork->totalBlocks - request.start;
         request.count = MAX(request.count, 1);
-        debug("Trimmed request to (%zu, %zu) (file only has %d blocks)", request.start, request.count, fork->totalBlocks);
+        debug("Trimmed request to (%zu, %zu) (file only has %u blocks)", request.start, request.count, fork->totalBlocks);
     }
 
     char*       read_buffer = NULL;
@@ -277,7 +277,7 @@ ssize_t hfs_read_fork(void* buffer, const HFSPlusFork* fork, size_t block_count,
     range       remaining   = request;
 
     while (remaining.count != 0) {
-        range   read_range;
+        range   read_range = {0};
         bool    found  = false;
         ssize_t blocks = 0;
 
@@ -287,19 +287,19 @@ ssize_t hfs_read_fork(void* buffer, const HFSPlusFork* fork, size_t block_count,
                 print("%10zd: %10zd %10zd", extent->logicalStart, extent->startBlock, extent->blockCount);
             }
             PrintExtentList(fork->hfs->vol->ctx, extentList, fork->totalBlocks);
-            critical("We're stuck in a read loop: request (%zd, %zd); remaining (%zd, %zd)", request.start, request.count, remaining.start, remaining.count);
+            critical("We're stuck in a read loop: request (%zu, %zu); remaining (%zu, %zu)", request.start, request.count, remaining.start, remaining.count);
         }
 
-        debug2("Remaining: (%zd, %zd)", remaining.start, remaining.count);
+        debug2("Remaining: (%zu, %zu)", remaining.start, remaining.count);
 
-        found = extentlist_find(extentList, remaining.start, &read_range.start, &read_range.count);
+        found = extentlist_find(extentList, (size_t)remaining.start, &read_range.start, &read_range.count);
         if (!found) {
             PrintExtentList(fork->hfs->vol->ctx, extentList, fork->totalBlocks);
-            critical("Logical block %zd not found in the extents for CNID %d!", remaining.start, fork->cnid);
+            critical("Logical block %zu not found in the extents for CNID %u!", remaining.start, fork->cnid);
         }
 
         if (read_range.count == 0) {
-            warning("About to read a null range! Looking for (%zd, %zd), received (%zd, %zd).", remaining.start, remaining.count, read_range.start, read_range.count);
+            warning("About to read a null range! Looking for (%zu, %zu), received (%zu, %zu).", remaining.start, remaining.count, read_range.start, read_range.count);
             continue;
         }
 
@@ -326,7 +326,7 @@ ssize_t hfs_read_fork(void* buffer, const HFSPlusFork* fork, size_t block_count,
 }
 
 // Grab a specific byte range of a fork.
-ssize_t hfs_read_fork_range(void* buffer, const HFSPlusFork* fork, size_t size, size_t offset)
+ssize_t hfs_read_fork_range(void* buffer, const HFSPlusFork* fork, size_t size, off_t offset)
 {
     ASSERT_PTR(buffer);
     ASSERT_PTR(fork);
@@ -343,8 +343,8 @@ ssize_t hfs_read_fork_range(void* buffer, const HFSPlusFork* fork, size_t size, 
     }
 
     if ( (offset + size) > fork->logicalSize ) {
-        size = fork->logicalSize - offset;
-        debug("Adjusted read to (%zu, %zu)", offset, size);
+        size = (size_t)(fork->logicalSize - offset);
+        debug("Adjusted read to (%lld, %zu)", offset, size);
     }
 
     if (size < 1) {
@@ -355,7 +355,7 @@ ssize_t hfs_read_fork_range(void* buffer, const HFSPlusFork* fork, size_t size, 
     start_block = (size_t)(offset / fork->hfs->block_size);
 
     // Offset of the request within the start block.
-    byte_offset = (offset % fork->hfs->block_size);
+    byte_offset = (size_t)(offset % fork->hfs->block_size);
 
     // Add a block to the read if the offset is not block-aligned.
     block_count = (size / fork->hfs->block_size) + ( ((offset + size) % fork->hfs->block_size) ? 1 : 0);
@@ -397,12 +397,12 @@ ssize_t fork_readfn(void* c, char* buf, size_t nbytes)
 {
     HFSPlusForkCookie* cookie = (HFSPlusForkCookie*)c;
     off_t              offset = cookie->cursor;
-    size_t             bytes  = 0;
+    ssize_t            bytes  = 0;
 
     bytes = hfs_read_fork_range(buf, cookie->fork, nbytes, offset);
     if (bytes > 0) cookie->cursor += bytes;
 
-    return bytes;
+    return (int)bytes;
 }
 
 #if defined (BSD)

@@ -91,7 +91,7 @@ VolumeSummary* createVolumeSummary(HIOptions* options)
                     if (file->resourceFork.logicalSize)
                         generateForkSummary(options, &summary->resourceFork, file, &file->resourceFork, HFSResourceForkType);
 
-                    size_t fileSize = file->dataFork.logicalSize + file->resourceFork.logicalSize;
+                    uint64_t fileSize = file->dataFork.logicalSize + file->resourceFork.logicalSize;
 
                     if (summary->topLargestFileCount) {
                         if (summary->topLargestFiles[0].measure < fileSize) {
@@ -139,7 +139,7 @@ VolumeSummary* createVolumeSummary(HIOptions* options)
 
         if ((count % iter_size) == 0) {
             // Update status
-            size_t space     = summary->dataFork.logicalSpace + summary->resourceFork.logicalSpace;
+            uint64_t space     = summary->dataFork.logicalSpace + summary->resourceFork.logicalSpace;
             char   size[128] = {0};
             (void)format_size(options->hfs->vol->ctx, size, space, 128);
 
@@ -233,7 +233,7 @@ void PrintVolumeSummary(out_ctx* ctx, const VolumeSummary* summary)
         _print_color(stdout, 0, 0, 0, true);
         Print(ctx,"%4s %10s %13s  %s", "#", "CNID", "Size", "Path");
         _print_reset(stdout);
-        for (int64_t i = summary->topLargestFileCount - 1; i >= 0; i--) {
+        for (ssize_t i = summary->topLargestFileCount - 1; i >= 0; i--) {
             if (summary->topLargestFiles[i].cnid == 0) continue;
 
             char    size[50];
@@ -244,7 +244,7 @@ void PrintVolumeSummary(out_ctx* ctx, const VolumeSummary* summary)
             _print_reset(stdout);
             _print_gray(stdout, 23, false);
             _print_color(stdout, 0, 0, 0, true);
-            Print(ctx, "%4lld %10u %13s  %s", summary->topLargestFileCount - i, summary->topLargestFiles[i].cnid, size, fullPath);
+            Print(ctx, "%4zu %10u %13s  %s", summary->topLargestFileCount - i, summary->topLargestFiles[i].cnid, size, fullPath);
             _print_reset(stdout);
         }
         EndSection(ctx); // largest files

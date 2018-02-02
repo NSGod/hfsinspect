@@ -77,7 +77,7 @@ int hfs_open(HFSPlus* hfs, Volume* vol)
         if ( hfs_load_mbd(vol, &mdb) < 0)
             return -1;
 
-        hfs->offset = (mdb.drAlBlSt * 512) + (mdb.drEmbedExtent.startBlock * mdb.drAlBlkSiz);
+        hfs->offset = ((off_t)mdb.drAlBlSt * 512) + ((off_t)mdb.drEmbedExtent.startBlock * mdb.drAlBlkSiz);
     }
 
     // Load the volume header.
@@ -90,7 +90,7 @@ int hfs_open(HFSPlus* hfs, Volume* vol)
     hfs->block_count = hfs->vh.totalBlocks;
 
     hfs->offset     += vol->offset;
-    hfs->length      = (vol->length ? vol->length : hfs->block_size * hfs->block_count);
+    hfs->length      = (vol->length ? vol->length : (uint64_t)hfs->block_size * hfs->block_count);
 
     return 0;
 }

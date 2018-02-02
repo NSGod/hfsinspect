@@ -68,6 +68,8 @@ int hfsplus_get_catalog_btree(BTreePtr* tree, const HFSPlus* hfs)
         }
         cachedTree->treeID  = kHFSCatalogFileID;
         cachedTree->getNode = hfsplus_catalog_get_node;
+        
+        debug("Finished creating catalog B-Tree");
     }
 
     // Copy the cached tree out.
