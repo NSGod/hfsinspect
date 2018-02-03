@@ -22,13 +22,29 @@ HFSPlus* get_hfs_volume(void) { return volume_; }
 
 #pragma mark Value Print Functions
 
+void _PrintCatalogPath(out_ctx* ctx, char* label, bt_nodeid_t cnid)
+{
+    hfs_str name = "";
+    if (cnid != 0) {
+        if ( (HFSPlusGetCNIDPath(&name, (FSSpec){volume_, cnid})) < 0) {
+            // if the file/folder isn't found, print '<missing>' like `bless` does
+            strlcpy((char *)name, "<missing>", PATH_MAX);
+        }
+    }
+    if (cnid != 0) {
+        PrintAttribute(ctx, label, "%u => %s", cnid, name);
+    } else {
+        PrintAttribute(ctx, label, "%u %s", cnid, name);
+    }
+}
+
 void _PrintCatalogName(out_ctx* ctx, char* label, bt_nodeid_t cnid)
 {
     hfs_str name = "";
     if (cnid != 0)
         HFSPlusGetCNIDName(&name, (FSSpec){volume_, cnid});
 
-    PrintAttribute(ctx, label, "%d (%s)", cnid, name);
+    PrintAttribute(ctx, label, "%u (%s)", cnid, name);
 }
 
 void _PrintHFSBlocks(out_ctx* ctx, const char* label, uint64_t blocks)
@@ -223,12 +239,12 @@ void PrintVolumeHeader(out_ctx* ctx, const HFSPlusVolumeHeader* vh)
 
     HFSPlusVolumeFinderInfo* finderInfo = (void*)&vh->finderInfo;
 
-    PrintCatalogName    (ctx, finderInfo, bootDirID);
-    PrintCatalogName    (ctx, finderInfo, bootParentID);
-    PrintCatalogName    (ctx, finderInfo, openWindowDirID);
-    PrintCatalogName    (ctx, finderInfo, os9DirID);
-    PrintRawAttribute   (ctx, finderInfo, reserved, 2);
-    PrintCatalogName    (ctx, finderInfo, osXDirID);
+    PrintCatalogPath    (ctx, finderInfo, bootDirID);
+    PrintCatalogPath    (ctx, finderInfo, bootParentID);
+    PrintCatalogPath    (ctx, finderInfo, openWindowDirID);
+    PrintCatalogPath    (ctx, finderInfo, os9DirID);
+    PrintUI             (ctx, finderInfo, reserved);
+    PrintCatalogPath    (ctx, finderInfo, osXDirID);
     PrintRawAttribute   (ctx, finderInfo, volID, 16);
 
     EndSection(ctx);

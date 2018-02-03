@@ -21,11 +21,13 @@
 void     set_hfs_volume(HFSPlus* v) _NONNULL;
 HFSPlus* get_hfs_volume(void);
 
+#define PrintCatalogPath(ctx, record, value)  _PrintCatalogPath(ctx, #value, record->value)
 #define PrintCatalogName(ctx, record, value)  _PrintCatalogName(ctx, #value, record->value)
 #define PrintHFSBlocks(ctx, record, value)    _PrintHFSBlocks(ctx, #value, record->value)
 #define PrintHFSChar(ctx, record, value)      _PrintHFSChar(ctx, #value, (char*)&(record->value), sizeof(record->value))
 #define PrintHFSTimestamp(ctx, record, value) _PrintHFSTimestamp(ctx, #value, record->value)
 
+void _PrintCatalogPath              (out_ctx* ctx, char* label, bt_nodeid_t cnid) _NONNULL;
 void _PrintCatalogName              (out_ctx* ctx, char* label, bt_nodeid_t cnid) _NONNULL;
 void _PrintHFSBlocks                (out_ctx* ctx, const char* label, uint64_t blocks) _NONNULL;
 void _PrintHFSChar                  (out_ctx* ctx, const char* label, const char* i, size_t nbytes) _NONNULL;
