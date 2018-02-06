@@ -151,18 +151,18 @@ int apm_dump(Volume* vol)
         PrintDataLength     (ctx, header, data_length*vol->sector_size);
 
         PrintRawAttribute   (ctx, header, status, 2);
-        PrintUIFlagIfSet    (ctx, header->status, kAPMStatusValid);
-        PrintUIFlagIfSet    (ctx, header->status, kAPMStatusAllocated);
-        PrintUIFlagIfSet    (ctx, header->status, kAPMStatusInUse);
-        PrintUIFlagIfSet    (ctx, header->status, kAPMStatusBootInfo);
-        PrintUIFlagIfSet    (ctx, header->status, kAPMStatusReadable);
-        PrintUIFlagIfSet    (ctx, header->status, kAPMStatusWritable);
-        PrintUIFlagIfSet    (ctx, header->status, kAPMStatusPositionIndependent);
-        PrintUIFlagIfSet    (ctx, header->status, kAPMStatusChainCompatible);
-        PrintUIFlagIfSet    (ctx, header->status, kAPMStatusRealDriver);
-        PrintUIFlagIfSet    (ctx, header->status, kAPMStatusChainDriver);
-        PrintUIFlagIfSet    (ctx, header->status, kAPMStatusAutoMount);
-        PrintUIFlagIfSet    (ctx, header->status, kAPMStatusIsStartup);
+        PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusValid);
+        PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusAllocated);
+        PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusInUse);
+        PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusBootInfo);
+        PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusReadable);
+        PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusWritable);
+        PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusPositionIndependent);
+        PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusChainCompatible);
+        PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusRealDriver);
+        PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusChainDriver);
+        PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusAutoMount);
+        PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusIsStartup);
 
         PrintUI             (ctx, header, boot_code_start);
         PrintDataLength     (ctx, header, boot_code_length*vol->sector_size);
