@@ -157,9 +157,9 @@ void _PrintRawAttribute(out_ctx* ctx, const char* label, const void* map, size_t
     }
 
     for (unsigned i = 0; i < len; i += segmentLength) {
-        char segment[segmentLength]; memset(segment, '\0', segmentLength);
+        char segment[segmentLength+1]; memset(segment, '\0', segmentLength+1);
 
-        (void)strlcpy(segment, &str[i], MIN(segmentLength, len - i));
+        (void)strlcpy(segment, &str[i], MIN(segmentLength+1, (len - i)+1));
 
         PrintAttribute(ctx, label, "%s%s", (base==16 ? "0x" : ""), segment);
 
