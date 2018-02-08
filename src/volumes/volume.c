@@ -303,7 +303,7 @@ void vol_dump(Volume* vol)
 #define PrintUICharsIfEqual(var, val) if (var == val) { \
         char     type[5]; \
         uint64_t i = val; \
-        format_uint_chars(type, (const char*)&i, 4, 5); \
+        format_uint_chars(type, i, 4, 5); \
         PrintAttribute(vol->ctx, #var, "'%s' (%s)", type, #val); \
 }
 

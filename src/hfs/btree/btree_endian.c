@@ -49,8 +49,8 @@ void swap_BTHeaderRec(BTHeaderRec* record)
     Swap32(record->freeNodes);
     // noswap: record->reserved1
     Swap32(record->clumpSize);
-    // noswap: record->btreeType is a short
-    // noswap: record->keyCompareType is a short
+    // noswap: record->btreeType is a byte
+    // noswap: record->keyCompareType is a byte
     Swap32(record->attributes);
     // noswap: header->reserved3
 }

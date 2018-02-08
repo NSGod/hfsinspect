@@ -169,15 +169,15 @@ void _PrintRawAttribute(out_ctx* ctx, const char* label, const void* map, size_t
     SFREE(str);
 }
 
-int _PrintUIChar(out_ctx* ctx, const char* label, const char* i, size_t nbytes)
+int _PrintUIChar(out_ctx* ctx, const char* label, uint64_t value, size_t nbytes)
 {
+    assert(nbytes >= 2 && nbytes <= 8);
+
     char str[50] = {0};
-    char hex[50] = {0};
 
-    (void)format_uint_chars(str, i, nbytes, 50);
-    (void)format_dump(ctx, hex, i, 16, nbytes, 50);
+    (void)format_uint_chars(str, value, nbytes, 50);
 
-    return PrintAttribute(ctx, label, "0x%s (%s)", hex, str);
+    return PrintAttribute(ctx, label, "%#llx (%s)", value, str);
 }
 
 void VisualizeData(const void* data, size_t length)
@@ -274,14 +274,17 @@ int format_uuid(char* out, const unsigned char value[16])
     return (int)strlen(out);
 }
 
-int format_uint_chars(char* out, const char* value, size_t nbytes, size_t length)
+int format_uint_chars(char* out, uint64_t value, size_t nbytes, size_t length)
 {
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    while (nbytes--) *out++ = value[nbytes];
+    const char* chars = (const char*)&value;
+#if defined(__LITTLE_ENDIAN__)
+    while (nbytes--) *out++ = chars[nbytes];
     *out++      = '\0';
-#else
-    memcpy(out, value, nbytes);
+#elif defined(__BIG_ENDIAN__)
+    memcpy(out, chars + (8 - nbytes), nbytes);
     out[nbytes] = '\0';
+#else
+#error unknown byte order!
 #endif
     return (int)strlen(out);
 }

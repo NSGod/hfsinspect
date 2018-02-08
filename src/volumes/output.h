@@ -34,7 +34,7 @@ void VisualizeData      (const void* data, size_t length);
 
 #define PrintRawAttribute(ctx, record, value, base) _PrintRawAttribute(ctx, #value, &(record->value), sizeof(record->value), base)
 #define PrintDataLength(ctx, record, value)         _PrintDataLength(ctx, #value, (uint64_t)record->value)
-#define PrintUIChar(ctx, record, value)             _PrintUIChar(ctx, #value, (char*)&(record->value), sizeof(record->value))
+#define PrintUIChar(ctx, record, value)             _PrintUIChar(ctx, #value, (uint64_t)record->value, sizeof(record->value))
 
 #define PrintUI(ctx, record, value)                 PrintAttribute(ctx, #value, "%llu", (uint64_t)record->value)
 #define PrintUIOct(ctx, record, value)              PrintAttribute(ctx, #value, "0%06o (%u)", record->value, record->value)
@@ -57,7 +57,7 @@ void EndSection     (out_ctx* ctx);
 
 int Print           (out_ctx* ctx, const char* format, ...) __printflike(2, 3);
 int PrintAttribute  (out_ctx* ctx, const char* label, const char* format, ...) __printflike(3, 4);
-int _PrintUIChar    (out_ctx* ctx, const char* label, const char* i, size_t nbytes);
+int _PrintUIChar    (out_ctx* ctx, const char* label, uint64_t value, size_t nbytes);
 
 int format_dump     (out_ctx* ctx, char* out, const char* value, unsigned base, size_t nbytes, size_t length);
 int format_size     (out_ctx* ctx, char* out, uint64_t value, size_t length);
@@ -68,6 +68,6 @@ int format_uint_oct (char* out, uint64_t value, uint8_t padding, size_t length);
 int format_uint_dec (char* out, uint64_t value, uint8_t padding, size_t length);
 int format_uint_hex (char* out, uint64_t value, uint8_t padding, size_t length);
 int format_uuid     (char* out, const unsigned char value[16]);
-int format_uint_chars(char* out, const char* value, size_t nbytes, size_t length);
+int format_uint_chars(char* out, uint64_t value, size_t nbytes, size_t length);
 
 #endif
