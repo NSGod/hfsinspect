@@ -24,13 +24,11 @@ HFSPlus* get_hfs_volume(void);
 #define PrintCatalogPath(ctx, record, value)  _PrintCatalogPath(ctx, #value, record->value)
 #define PrintCatalogName(ctx, record, value)  _PrintCatalogName(ctx, #value, record->value)
 #define PrintHFSBlocks(ctx, record, value)    _PrintHFSBlocks(ctx, #value, record->value)
-#define PrintHFSChar(ctx, record, value)      _PrintHFSChar(ctx, #value, (char*)&(record->value), sizeof(record->value))
 #define PrintHFSTimestamp(ctx, record, value) _PrintHFSTimestamp(ctx, #value, record->value)
 
 void _PrintCatalogPath              (out_ctx* ctx, char* label, bt_nodeid_t cnid) _NONNULL;
 void _PrintCatalogName              (out_ctx* ctx, char* label, bt_nodeid_t cnid) _NONNULL;
 void _PrintHFSBlocks                (out_ctx* ctx, const char* label, uint64_t blocks) _NONNULL;
-void _PrintHFSChar                  (out_ctx* ctx, const char* label, const char* i, size_t nbytes) _NONNULL;
 void _PrintHFSTimestamp             (out_ctx* ctx, const char* label, uint32_t timestamp) _NONNULL;
 
 void PrintVolumeInfo                (out_ctx* ctx, const HFSPlus* hfs) _NONNULL;
@@ -67,6 +65,5 @@ void PrintHFSPlusFileAttributes     (out_ctx* ctx, uint32_t fileID, HFSPlus* hfs
 void PrintHFSUniStr255              (out_ctx* ctx, const char* label, const HFSUniStr255* record) _NONNULL;
 
 int format_hfs_timestamp            (out_ctx* ctx, char* out, uint32_t timestamp, size_t length) _NONNULL;
-int format_hfs_chars                (out_ctx* ctx, char* out, const char* value, size_t nbytes, size_t length) _NONNULL;
 
 #endif

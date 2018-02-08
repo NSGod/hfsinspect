@@ -61,17 +61,6 @@ void _PrintHFSTimestamp(out_ctx* ctx, const char* label, uint32_t timestamp)
     PrintAttribute(ctx, label, "%s", buf);
 }
 
-void _PrintHFSChar(out_ctx* ctx, const char* label, const char* i, size_t nbytes)
-{
-    char str[50] = {0};
-    char hex[50] = {0};
-
-    (void)format_hfs_chars(ctx, str, i, nbytes, 50);
-    (void)format_dump(ctx, hex, i, 16, nbytes, 50);
-
-    PrintAttribute(ctx, label, "0x%s (%s)", hex, str);
-}
-
 void PrintHFSUniStr255(out_ctx* ctx, const char* label, const HFSUniStr255* record)
 {
     hfs_str name = "";
@@ -117,7 +106,7 @@ void PrintHFSMasterDirectoryBlock(out_ctx* ctx, const HFSMasterDirectoryBlock* v
 {
     BeginSection(ctx, "HFS Master Directory Block");
 
-    PrintHFSChar(ctx, vcb, drSigWord);
+    PrintUIChar(ctx, vcb, drSigWord);
     PrintHFSTimestamp(ctx, vcb, drCrDate);
     PrintHFSTimestamp(ctx, vcb, drLsMod);
     PrintRawAttribute(ctx, vcb, drAtrb, 2);
@@ -151,7 +140,7 @@ void PrintHFSMasterDirectoryBlock(out_ctx* ctx, const HFSMasterDirectoryBlock* v
     PrintUI(ctx, vcb, drFndrInfo[5]);
     PrintUI(ctx, vcb, drFndrInfo[6]);
     PrintUI(ctx, vcb, drFndrInfo[7]);
-    PrintHFSChar(ctx, vcb, drEmbedSigWord);
+    PrintUIChar(ctx, vcb, drEmbedSigWord);
     PrintUI(ctx, vcb, drEmbedExtent.startBlock);
     PrintUI(ctx, vcb, drEmbedExtent.blockCount);
     EndSection(ctx);
@@ -160,7 +149,7 @@ void PrintHFSMasterDirectoryBlock(out_ctx* ctx, const HFSMasterDirectoryBlock* v
 void PrintVolumeHeader(out_ctx* ctx, const HFSPlusVolumeHeader* vh)
 {
     BeginSection(ctx, "HFS Plus Volume Header");
-    PrintHFSChar        (ctx, vh, signature);
+    PrintUIChar         (ctx, vh, signature);
     PrintUI             (ctx, vh, version);
 
     PrintRawAttribute   (ctx, vh, attributes, 2);
@@ -177,7 +166,7 @@ void PrintVolumeHeader(out_ctx* ctx, const HFSPlusVolumeHeader* vh)
     PrintUIFlagIfMatch  (ctx, vh->attributes, kHFSContentProtectionMask);
     PrintUIFlagIfMatch  (ctx, vh->attributes, kHFSMDBAttributesMask);
 
-    PrintHFSChar        (ctx, vh, lastMountedVersion);
+    PrintUIChar         (ctx, vh, lastMountedVersion);
     PrintUI             (ctx, vh, journalInfoBlock);
     PrintHFSTimestamp   (ctx, vh, createDate);
     PrintHFSTimestamp   (ctx, vh, modifyDate);
@@ -552,8 +541,8 @@ void PrintHFSPlusBSDInfo(out_ctx* ctx, const HFSPlusBSDInfo* record, bool isHard
 
 void PrintFndrFileInfo(out_ctx* ctx, const FndrFileInfo* record)
 {
-    PrintHFSChar(ctx, record, fdType);
-    PrintHFSChar(ctx, record, fdCreator);
+    PrintUIChar(ctx, record, fdType);
+    PrintUIChar(ctx, record, fdCreator);
     PrintRawAttribute(ctx, record, fdFlags, 2);
     PrintFinderFlags(ctx, record->fdFlags);
     PrintAttribute(ctx, "fdLocation", "(%u, %u)", record->fdLocation.v, record->fdLocation.h);
@@ -1378,17 +1367,5 @@ int format_hfs_timestamp(out_ctx* ctx, char* out, uint32_t timestamp, size_t len
     }
 
     return format_time(ctx, out, timestamp, length);
-}
-
-int format_hfs_chars(out_ctx* ctx, char* out, const char* value, size_t nbytes, size_t length)
-{
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    while (nbytes--) *out++ = value[nbytes];
-    *out++      = '\0';
-#else
-    memcpy(out, value, nbytes);
-    out[nbytes] = '\0';
-#endif
-    return (int)strlen(out);
 }
 
