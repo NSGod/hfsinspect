@@ -1114,7 +1114,7 @@ void PrintFolderListing(out_ctx* ctx, uint32_t folderID)
     char rsrcTotal[50];
 
     format_size(ctx, dataTotal, folderStats.dataForkSize, 50);
-    format_size(ctx, rsrcTotal, folderStats.rsrcForkCount, 50);
+    format_size(ctx, rsrcTotal, folderStats.rsrcForkSize, 50);
 
     Print(ctx, "%s", lineStr);
     Print(ctx, headerFormat, "", "", "", "", "", dataTotal, rsrcTotal, "");
