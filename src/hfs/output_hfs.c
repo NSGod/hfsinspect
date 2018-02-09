@@ -20,7 +20,7 @@ static HFSPlus* volume_ = NULL;
 void set_hfs_volume(HFSPlus* v) { volume_ = v; }
 HFSPlus* get_hfs_volume(void) { return volume_; }
 
-#pragma mark Value Print Functions
+#pragma mark - Value Print Functions
 
 void _PrintCatalogPath(out_ctx* ctx, char* label, bt_nodeid_t cnid)
 {
@@ -56,6 +56,10 @@ void _PrintHFSBlocks(out_ctx* ctx, const char* label, uint64_t blocks)
 
 void _PrintHFSTimestamp(out_ctx* ctx, const char* label, uint32_t timestamp)
 {
+    if (timestamp == 0) {
+        PrintAttribute(ctx, label, "0");
+        return;
+    }
     char buf[50];
     (void)format_hfs_timestamp(ctx, buf, timestamp, 50);
     PrintAttribute(ctx, label, "%s", buf);
@@ -68,7 +72,7 @@ void PrintHFSUniStr255(out_ctx* ctx, const char* label, const HFSUniStr255* reco
     PrintAttribute(ctx, label, "\"%s\" (%u)", name, record->length);
 }
 
-#pragma mark Structure Print Functions
+#pragma mark - Structure Print Functions
 
 void PrintVolumeInfo(out_ctx* ctx, const HFSPlus* hfs)
 {
@@ -332,13 +336,13 @@ void PrintHFSPlusForkData(out_ctx* ctx, const HFSPlusForkData* fork, uint32_t cn
 
 void PrintBTNodeDescriptor(out_ctx* ctx, const BTNodeDescriptor* node)
 {
-    BeginSection(ctx, "Node Descriptor");
+    BeginSection(ctx, "B-Tree Node Descriptor");
     PrintUI(ctx, node, fLink);
     PrintUI(ctx, node, bLink);
-    PrintConstIfEqual(ctx, node->kind, kBTLeafNode);
-    PrintConstIfEqual(ctx, node->kind, kBTIndexNode);
-    PrintConstIfEqual(ctx, node->kind, kBTHeaderNode);
-    PrintConstIfEqual(ctx, node->kind, kBTMapNode);
+    PrintLabeledConstIfEqual(ctx, node, kind, kBTLeafNode);
+    PrintLabeledConstIfEqual(ctx, node, kind, kBTIndexNode);
+    PrintLabeledConstIfEqual(ctx, node, kind, kBTHeaderNode);
+    PrintLabeledConstIfEqual(ctx, node, kind, kBTMapNode);
     PrintUI(ctx, node, height);
     PrintUI(ctx, node, numRecords);
     PrintUI(ctx, node, reserved);
@@ -347,7 +351,7 @@ void PrintBTNodeDescriptor(out_ctx* ctx, const BTNodeDescriptor* node)
 
 void PrintBTHeaderRecord(out_ctx* ctx, const BTHeaderRec* hr)
 {
-    BeginSection(ctx, "Header Record");
+    BeginSection(ctx, "B-Tree Header Record");
     PrintUI         (ctx, hr, treeDepth);
     PrintUI         (ctx, hr, rootNode);
     PrintUI         (ctx, hr, leafRecords);
@@ -360,12 +364,12 @@ void PrintBTHeaderRecord(out_ctx* ctx, const BTHeaderRec* hr)
     PrintUI         (ctx, hr, reserved1);
     PrintDataLength (ctx, hr, clumpSize);
 
-    PrintConstIfEqual(ctx, hr->btreeType, kBTHFSTreeType);
-    PrintConstIfEqual(ctx, hr->btreeType, kBTUserTreeType);
-    PrintConstIfEqual(ctx, hr->btreeType, kBTReservedTreeType);
+    PrintLabeledConstIfEqual(ctx, hr, btreeType, kBTHFSTreeType);
+    PrintLabeledConstIfEqual(ctx, hr, btreeType, kBTUserTreeType);
+    PrintLabeledConstIfEqual(ctx, hr, btreeType, kBTReservedTreeType);
 
-    PrintConstHexIfEqual(ctx, hr->keyCompareType, kHFSCaseFolding);
-    PrintConstHexIfEqual(ctx, hr->keyCompareType, kHFSBinaryCompare);
+    PrintLabeledConstHexIfEqual(ctx, hr, keyCompareType, kHFSCaseFolding);
+    PrintLabeledConstHexIfEqual(ctx, hr, keyCompareType, kHFSBinaryCompare);
 
     PrintRawAttribute(ctx, hr, attributes, 2);
     PrintUIFlagIfMatch(ctx, hr->attributes, kBTBadCloseMask);
@@ -939,7 +943,7 @@ void VisualizeHFSBTreeNodeRecord(out_ctx* ctx, const char* label, BTHeaderRec he
     VisualizeData((char*)record.value, MIN(record.recordLen, record.valueLen));
 }
 
-#pragma mark Node Print Functions
+#pragma mark - Node Print Functions
 
 void PrintTreeNode(out_ctx* ctx, const BTreePtr tree, uint32_t nodeID)
 {

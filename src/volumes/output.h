@@ -40,15 +40,18 @@ void VisualizeData      (const void* data, size_t length);
 #define PrintUIOct(ctx, record, value)              PrintAttribute(ctx, #value, "0%06o (%u)", record->value, record->value)
 #define PrintUIHex(ctx, record, value)              PrintAttribute(ctx, #value, "%#llx (%llu)", (uint64_t)record->value, (uint64_t)record->value)
 
-#define PrintIntFlag(ctx, label, name, value)       PrintAttribute(ctx, label, "%s (%llu)", name, (uint64_t)value)
+#define PrintUIntFlag(ctx, label, name, value)      PrintAttribute(ctx, label, "%s (%llu)", name, (uint64_t)value)
+#define PrintIntFlag(ctx, label, name, value)       PrintAttribute(ctx, label, "%s (%lld)", name, (int64_t)value)
 #define PrintOctFlag(ctx, label, name, value)       PrintAttribute(ctx, label, "0%06o (%s)", value, name)
 #define PrintHexFlag(ctx, label, name, value)       PrintAttribute(ctx, label, "%s (%#x)", name, value)
 
-#define PrintUIFlagIfSet(ctx, source, flag)         { if (((uint64_t)(source)) & (((uint64_t)1) << ((uint64_t)(flag)))) PrintIntFlag(ctx, #source, #flag, flag); }
-#define PrintUIFlagIfMatch(ctx, source, mask)       { if ((source) & mask) PrintIntFlag(ctx, NULL, #mask, mask); }
+#define PrintUIFlagIfSet(ctx, source, flag)         { if (((uint64_t)(source)) & (((uint64_t)1) << ((uint64_t)(flag)))) PrintUIntFlag(ctx, NULL, #flag, flag); }
+#define PrintUIFlagIfMatch(ctx, source, mask)       { if ((source) & mask) PrintUIntFlag(ctx, NULL, #mask, mask); }
 #define PrintUIOctFlagIfMatch(ctx, source, mask)    { if ((source) & mask) PrintOctFlag(ctx, NULL, #mask, mask); }
 
-#define PrintConstIfEqual(ctx, source, c)           { if ((source) == c)   PrintIntFlag(ctx, NULL, #c, c); }
+#define PrintConstIfEqual(ctx, source, c)           { if ((source) == c)   PrintUIntFlag(ctx, NULL, #c, c); }
+#define PrintLabeledConstIfEqual(ctx, record, value, c)    { if ((record->value) == c)   PrintIntFlag(ctx, #value, #c, c); }
+#define PrintLabeledConstHexIfEqual(ctx, record, value, c)    { if ((record->value) == c)   PrintHexFlag(ctx, #value, #c, c); }
 #define PrintConstOctIfEqual(ctx, source, c)        { if ((source) == c)   PrintOctFlag(ctx, NULL, #c, c); }
 #define PrintConstHexIfEqual(ctx, source, c)        { if ((source) == c)   PrintHexFlag(ctx, NULL, #c, c); }
 
