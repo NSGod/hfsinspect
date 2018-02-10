@@ -55,15 +55,15 @@ void PrintJournalHeader(out_ctx* ctx, const journal_header* record)
        volatile off_t end;           // zero-based byte offset of where free space begins
        off_t          size;          // size in bytes of the entire journal
        int32_t        blhdr_size;    // size in bytes of each block_list_header in the journal
-       int32_t        checksum;
+       uint32_t       checksum;
        int32_t        jhdr_size;     // block size (in bytes) of the journal header
        uint32_t       sequence_num;  // NEW FIELD: a monotonically increasing value assigned to all txn's
      */
     BeginSection(ctx, "Journal Header");
     PrintUIChar(ctx, record, magic);
     PrintUIHex(ctx, record, endian);
-    PrintUI(ctx, record, start);
-    PrintUI(ctx, record, end);
+    PrintInt(ctx, record, start);
+    PrintInt(ctx, record, end);
     PrintDataLength(ctx, record, size);
     PrintDataLength(ctx, record, blhdr_size);
     PrintUIHex(ctx, record, checksum);

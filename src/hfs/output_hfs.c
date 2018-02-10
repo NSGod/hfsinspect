@@ -549,17 +549,17 @@ void PrintFndrFileInfo(out_ctx* ctx, const FndrFileInfo* record)
     PrintUIChar(ctx, record, fdCreator);
     PrintRawAttribute(ctx, record, fdFlags, 2);
     PrintFinderFlags(ctx, record->fdFlags);
-    PrintAttribute(ctx, "fdLocation", "(%u, %u)", record->fdLocation.v, record->fdLocation.h);
-    PrintUI(ctx, record, opaque);
+    PrintAttribute(ctx, "fdLocation", "(%d, %d)", record->fdLocation.v, record->fdLocation.h);
+    PrintInt(ctx, record, opaque);
 }
 
 void PrintFndrDirInfo(out_ctx* ctx, const FndrDirInfo* record)
 {
-    PrintAttribute(ctx, "frRect", "(%u, %u, %u, %u)", record->frRect.top, record->frRect.left, record->frRect.bottom, record->frRect.right);
+    PrintAttribute(ctx, "frRect", "(%d, %d, %d, %d)", record->frRect.top, record->frRect.left, record->frRect.bottom, record->frRect.right);
     PrintRawAttribute(ctx, record, frFlags, 2);
     PrintFinderFlags    (ctx, record->frFlags);
     PrintAttribute(ctx, "frLocation", "(%u, %u)", record->frLocation.v, record->frLocation.h);
-    PrintUI             (ctx, record, opaque);
+    PrintInt            (ctx, record, opaque);
 }
 
 void PrintFinderFlags(out_ctx* ctx, uint16_t record)
@@ -688,7 +688,7 @@ void PrintHFSPlusFileThreadRecord(out_ctx* ctx, const HFSPlusCatalogThread* reco
 
 void PrintHFSPlusCatalogThread(out_ctx* ctx, const HFSPlusCatalogThread* record)
 {
-    PrintUI             (ctx, record, reserved);
+    PrintInt            (ctx, record, reserved);
     PrintUI             (ctx, record, parentID);
     PrintHFSUniStr255   (ctx, "nodeName", &record->nodeName);
 }

@@ -36,6 +36,7 @@ void VisualizeData      (const void* data, size_t length);
 #define PrintDataLength(ctx, record, value)         _PrintDataLength(ctx, #value, (uint64_t)record->value)
 #define PrintUIChar(ctx, record, value)             _PrintUIChar(ctx, #value, (uint64_t)record->value, sizeof(record->value))
 
+#define PrintInt(ctx, record, value)                PrintAttribute(ctx, #value, "%lld", (int64_t)record->value)
 #define PrintUI(ctx, record, value)                 PrintAttribute(ctx, #value, "%llu", (uint64_t)record->value)
 #define PrintUIOct(ctx, record, value)              PrintAttribute(ctx, #value, "0%06o (%u)", record->value, record->value)
 #define PrintUIHex(ctx, record, value)              PrintAttribute(ctx, #value, "%#llx (%llu)", (uint64_t)record->value, (uint64_t)record->value)

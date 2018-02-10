@@ -245,6 +245,7 @@ bool hfsplus_get_journalheader(journal_header* header, JournalInfoBlock* info, c
             perror("hfs_read");
             return false;
         }
+        swap_journal_header(header);
         return true;
     }
 

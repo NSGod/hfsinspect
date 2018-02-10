@@ -133,6 +133,21 @@ void swap_JournalInfoBlock(JournalInfoBlock* record)
     // noswap: reserved is reserved
 }
 
+void swap_journal_header(journal_header* record)
+{
+    if (record->endian != ENDIAN_MAGIC) {
+        Swap32(record->magic);
+        Swap32(record->endian);
+        Swap64(record->start);
+        Swap64(record->end);
+        Swap64(record->size);
+        Swap32(record->blhdr_size);
+        Swap32(record->checksum);
+        Swap32(record->jhdr_size);
+        Swap32(record->sequence_num);
+    }
+}
+
 void swap_HFSPlusForkData(HFSPlusForkData* record)
 {
     // trace("record (%p)", record);

@@ -127,7 +127,7 @@ typedef struct journal_header {
     volatile off_t end;           // zero-based byte offset of where free space begins
     off_t          size;          // size in bytes of the entire journal
     int32_t        blhdr_size;    // size in bytes of each block_list_header in the journal
-    int32_t        checksum;
+    uint32_t       checksum;
     int32_t        jhdr_size;     // block size (in bytes) of the journal header
     uint32_t       sequence_num;  // NEW FIELD: a monotonically increasing value assigned to all txn's
 } journal_header;
