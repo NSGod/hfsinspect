@@ -25,11 +25,11 @@ void PrintJournalInfoBlock(out_ctx* ctx, const JournalInfoBlock* record)
      */
 
     BeginSection(ctx, "Journal Info Block");
-    PrintRawAttribute(ctx, record, flags, 2);
+    PrintUIBinary    (ctx, record, flags);
     PrintUIFlagIfMatch(ctx, record->flags, kJIJournalInFSMask);
     PrintUIFlagIfMatch(ctx, record->flags, kJIJournalOnOtherDeviceMask);
     PrintUIFlagIfMatch(ctx, record->flags, kJIJournalNeedInitMask);
-    _PrintRawAttribute(ctx, "device_signature", &record->device_signature[0], 32, 16);
+    _PrintHexData(ctx, "device_signature", &record->device_signature[0], 32);
     PrintDataLength(ctx, record, offset);
     PrintDataLength(ctx, record, size);
 

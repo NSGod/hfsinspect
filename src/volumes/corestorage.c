@@ -137,7 +137,7 @@ void PrintCSVolumeHeader(out_ctx* ctx, CSVolumeHeader* header)
     PrintCSBlockHeader(ctx, &header->block_header);
 
     PrintDataLength (ctx, header, physical_size);
-    PrintRawAttribute(ctx, header, field_14, 16);
+    PrintHexData    (ctx, header, field_14);
 
     PrintUIChar     (ctx, header, signature);
     PrintUI         (ctx, header, checksum_algo);

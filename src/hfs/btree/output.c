@@ -15,7 +15,7 @@ void PrintBTNodeRecord(out_ctx* ctx, BTNodeRecordPtr record)
     PrintUI(ctx, record, offset);
     PrintUI(ctx, record, recordLen);
     PrintUI(ctx, record, keyLen);
-    PrintRawAttribute(ctx, record, key, 16);
+    PrintHexData(ctx, record, key);
     PrintUI(ctx, record, valueLen);
     EndSection(ctx);
 }

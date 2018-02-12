@@ -123,51 +123,6 @@ void _PrintDataLength(out_ctx* ctx, const char* label, uint64_t size)
     }
 }
 
-void PrintAttributeDump(out_ctx* ctx, const char* label, const void* map, size_t nbytes, char base)
-{
-    assert(label != NULL);
-    assert(map != NULL);
-    assert(nbytes > 0);
-    assert(base >= 2 && base <= 36);
-
-    PrintAttribute(ctx, label, "%s", "");
-    VisualizeData(map, nbytes);
-}
-
-void _PrintRawAttribute(out_ctx* ctx, const char* label, const void* map, size_t nbytes, char base)
-{
-    assert(label != NULL);
-    assert(map != NULL);
-    assert(nbytes > 0);
-    assert(base >= 2 && base <= 36);
-
-#define segmentLength 32
-    char*   str   = NULL;
-    ssize_t len   = 0;
-    ssize_t msize = 0;
-
-    msize = format_dump(ctx, NULL, map, base, nbytes, 0);
-    if (msize < 0) { perror("format_dump"); return; }
-    msize++; // NULL terminator
-    SALLOC(str, msize);
-
-    if ( (len = format_dump(ctx, str, map, base, nbytes, msize)) < 0 ) {
-        warning("format_dump failed!");
-        return;
-    }
-
-    for (unsigned i = 0; i < len; i += segmentLength) {
-        char segment[segmentLength+1]; memset(segment, '\0', segmentLength+1);
-
-        (void)strlcpy(segment, &str[i], MIN(segmentLength+1, (len - i)+1));
-
-        PrintAttribute(ctx, label, "%s%s", (base==16 ? "0x" : ""), segment);
-
-        if (i == 0) label = "";
-    }
-
-    SFREE(str);
-}
 
 int _PrintUIChar(out_ctx* ctx, const char* label, uint64_t value, size_t nbytes)
 {
@@ -180,6 +135,59 @@ int _PrintUIChar(out_ctx* ctx, const char* label, uint64_t value, size_t nbytes)
     return PrintAttribute(ctx, label, "%#llx (%s)", value, str);
 }
 
+void _PrintUIBinary(out_ctx* ctx, const char* label, uint64_t value, size_t nbytes)
+{
+    assert(nbytes >= 2 && nbytes <= 8);
+
+    char str[65] = {0};
+
+    int len = format_uint_binary(str, value, nbytes, 65);
+
+#define segmentLength 32
+
+    for (size_t i = 0; i < len; i += segmentLength) {
+        char segment[segmentLength+1]; memset(segment, '\0', segmentLength+1);
+
+        (void)strlcpy(segment, &str[i], MIN(segmentLength+1, (len - i)+1));
+
+        PrintAttribute(ctx, label, "%s", segment);
+
+        if (i == 0) label = " ";
+    }
+}
+
+void _PrintHexData(out_ctx* ctx, const char* label, const void* map, size_t nbytes)
+{
+    assert(label != NULL);
+    assert(map != NULL);
+    assert(nbytes > 0);
+
+#define segmentLength 32
+    char* str       = NULL;
+    ssize_t len     = 0;
+    ssize_t msize   = 0;
+
+    msize = format_hex_data(NULL, map, nbytes, 0);
+    if (msize < 0) { perror("format_hex_data"); return; }
+    msize++; // NULL terminator
+    SALLOC(str, msize);
+
+    if ( (len = format_hex_data(str, map, nbytes, msize)) < 0) {
+        SFREE(str);
+        warning("format_hex_data failed!");
+        return;
+    }
+
+    for (size_t i = 0; i < len; i += segmentLength) {
+        char segment[segmentLength+1]; memset(segment, '\0', segmentLength+1);
+
+        (void)strlcpy(segment, &str[i], MIN(segmentLength+1, (len - i)+1));
+
+        PrintAttribute(ctx, label, "0x%s", segment);
+        if (i == 0) label = " ";
+    }
+}
+
 void VisualizeData(const void* data, size_t length)
 {
     // Init the last line to something unlikely so a zero line is shown.
@@ -190,15 +198,6 @@ void VisualizeData(const void* data, size_t length)
 
 #pragma mark - Formatters
 
-int format_dump(out_ctx* ctx, char* out, const char* value, unsigned base, size_t nbytes, size_t length)
-{
-    assert(value != NULL);
-    assert(base >= 2 && base <= 36);
-    assert(nbytes > 0);
-    if (out != NULL) assert(length > 0);
-
-    return (int)memstr(out, base, value, nbytes, length);
-}
 
 int format_size(out_ctx* ctx, char* out, uint64_t value, size_t length)
 {
@@ -289,3 +288,81 @@ int format_uint_chars(char* out, uint64_t value, size_t nbytes, size_t length)
     return (int)strlen(out);
 }
 
+int format_uint_binary(char* out, uint64_t value, size_t nbytes, size_t length)
+{
+    // Determine the size of the result string.
+    size_t rlength = (nbytes * 8);
+
+    // Return the size if the output buffer is empty.
+    if (out == NULL) return (int)rlength;
+
+    // Zero length buffer == zero length result.
+    if (nbytes == 0) return 0;
+
+    // Ensure we have been granted enough space to do this.
+    if (rlength > length) { errno = ENOMEM; return -1; }
+
+    /* Process the string */
+
+    // Init the string's bytes to the character zero so that positions we don't write to have something printable.
+    // THIS IS INTENTIONALLY NOT '\0'!!
+    memset(out, '0', rlength);
+
+    const uint8_t* data = (const uint8_t*)&value;
+
+    // We build the result string from the tail, so here's the index in that string, starting at the end.
+    ssize_t ridx = rlength - 1;
+    ssize_t byteIndex = 0;
+#if defined(__LITTLE_ENDIAN__)
+    for (byteIndex = 0; byteIndex < nbytes; byteIndex++) {
+#elif defined(__BIG_ENDIAN__)
+    for (byteIndex = 7; byteIndex > (7 - (ssize_t)nbytes); byteIndex--) {
+#else
+#error unknown byte order!
+#endif
+        uint8_t chr = data[byteIndex];
+        int8_t bitIndex = 7;
+        while (bitIndex >= 0 && ridx >= 0) {
+            uint8_t idx = chr % 2;
+            out[ridx] = (idx ? '1' : '0');
+            chr /= 2;
+            ridx--;
+            bitIndex--;
+        }
+    }
+
+    // Cap the string.
+    out[rlength] = '\0';
+
+    return (int)rlength;
+}
+
+ssize_t format_hex_data(char* restrict out, const void* data, size_t nbytes, size_t length)
+{
+    // Determine the size of the result string.
+    size_t rlength = (nbytes * 2);
+
+    // Return the size if the output buffer is empty.
+    if (out == NULL) return rlength;
+
+    // Zero length buffer == zero length result.
+    if (nbytes == 0) return 0;
+
+    // No source buffer?
+    if (data == NULL) { errno = EINVAL; return -1; }
+
+    // Ensure we have been granted enough space to do this.
+    if (rlength > length) { errno = ENOMEM; return -1; }
+
+    /* Process the string */
+
+    for (size_t i = 0; i < nbytes; i++) {
+        uint8_t chr = ((uint8_t *)data)[i];
+        sprintf(&out[i * 2], "%02x", chr);
+    }
+
+    // Cap the string.
+    out[rlength] = '\0';
+
+    return rlength;
+}

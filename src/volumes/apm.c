@@ -150,7 +150,7 @@ int apm_dump(Volume* vol)
         PrintUI             (ctx, header, data_start);
         PrintDataLength     (ctx, header, data_length*vol->sector_size);
 
-        PrintRawAttribute   (ctx, header, status, 2);
+        PrintUIBinary       (ctx, header, status);
         PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusValid);
         PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusAllocated);
         PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusInUse);

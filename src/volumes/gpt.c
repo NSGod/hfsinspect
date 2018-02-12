@@ -276,7 +276,7 @@ void PrintGPTPartitions(const GPTHeader* header_p, const GPTPartitionRecord* ent
         PrintAttribute(ctx, "first_lba", "%llu", partition.first_lba);
         PrintAttribute(ctx, "last_lba", "%llu", partition.last_lba);
         _PrintDataLength(ctx, "(size)", (partition.last_lba * vol->sector_size) - (partition.first_lba * vol->sector_size) );
-        _PrintRawAttribute(ctx, "attributes", &partition.attributes, sizeof(partition.attributes), 2);
+        _PrintUIBinary(ctx, "attributes", partition.attributes, sizeof(partition.attributes));
         for(unsigned c = 0; c < 37; c++) name[c] = partition.name[c];
         name[36] = '\0';
         PrintAttribute(ctx, "name", "%ls", name);

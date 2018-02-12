@@ -27,14 +27,13 @@ typedef struct out_ctx out_ctx;
 out_ctx OCMake          (bool decimal_sizes, unsigned indent_step, char* prefix);
 void    OCSetIndentLevel(out_ctx* ctx, unsigned new_level);
 
-void PrintAttributeDump (out_ctx* ctx, const char* label, const void* map, size_t nbytes, char base);
-void _PrintRawAttribute (out_ctx* ctx, const char* label, const void* map, size_t size, char base);
 void _PrintDataLength   (out_ctx* ctx, const char* label, uint64_t size);
 void VisualizeData      (const void* data, size_t length);
 
-#define PrintRawAttribute(ctx, record, value, base) _PrintRawAttribute(ctx, #value, &(record->value), sizeof(record->value), base)
 #define PrintDataLength(ctx, record, value)         _PrintDataLength(ctx, #value, (uint64_t)record->value)
 #define PrintUIChar(ctx, record, value)             _PrintUIChar(ctx, #value, (uint64_t)record->value, sizeof(record->value))
+#define PrintUIBinary(ctx, record, value)           _PrintUIBinary(ctx, #value, (uint64_t)record->value, sizeof(record->value))
+#define PrintHexData(ctx, record, value)            _PrintHexData(ctx, #value, &(record->value), sizeof(record->value))
 
 #define PrintInt(ctx, record, value)                PrintAttribute(ctx, #value, "%lld", (int64_t)record->value)
 #define PrintUI(ctx, record, value)                 PrintAttribute(ctx, #value, "%llu", (uint64_t)record->value)
@@ -62,8 +61,9 @@ void EndSection     (out_ctx* ctx);
 int Print           (out_ctx* ctx, const char* format, ...) __printflike(2, 3);
 int PrintAttribute  (out_ctx* ctx, const char* label, const char* format, ...) __printflike(3, 4);
 int _PrintUIChar    (out_ctx* ctx, const char* label, uint64_t value, size_t nbytes);
+void _PrintUIBinary (out_ctx* ctx, const char* label, uint64_t value, size_t nbytes);
+void _PrintHexData  (out_ctx* ctx, const char* label, const void* map, size_t nbytes);
 
-int format_dump     (out_ctx* ctx, char* out, const char* value, unsigned base, size_t nbytes, size_t length);
 int format_size     (out_ctx* ctx, char* out, uint64_t value, size_t length);
 int format_blocks   (out_ctx* ctx, char* out, uint64_t blocks, size_t block_size, size_t length);
 int format_time     (out_ctx* ctx, char* out, time_t gmt_time, size_t length);
@@ -73,5 +73,7 @@ int format_uint_dec (char* out, uint64_t value, uint8_t padding, size_t length);
 int format_uint_hex (char* out, uint64_t value, uint8_t padding, size_t length);
 int format_uuid     (char* out, const unsigned char value[16]);
 int format_uint_chars(char* out, uint64_t value, size_t nbytes, size_t length);
+int format_uint_binary(char* out, uint64_t value, size_t nbytes, size_t length);
+ssize_t format_hex_data(char* restrict out, const void* data, size_t nbytes, size_t length);
 
 #endif

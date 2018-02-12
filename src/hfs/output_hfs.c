@@ -113,7 +113,7 @@ void PrintHFSMasterDirectoryBlock(out_ctx* ctx, const HFSMasterDirectoryBlock* v
     PrintUIChar(ctx, vcb, drSigWord);
     PrintHFSTimestamp(ctx, vcb, drCrDate);
     PrintHFSTimestamp(ctx, vcb, drLsMod);
-    PrintRawAttribute(ctx, vcb, drAtrb, 2);
+    PrintUIBinary(ctx, vcb, drAtrb);
     PrintUI(ctx, vcb, drNmFls);
     PrintUI(ctx, vcb, drVBMSt);
     PrintUI(ctx, vcb, drAllocPtr);
@@ -156,7 +156,7 @@ void PrintVolumeHeader(out_ctx* ctx, const HFSPlusVolumeHeader* vh)
     PrintUIChar         (ctx, vh, signature);
     PrintUI             (ctx, vh, version);
 
-    PrintRawAttribute   (ctx, vh, attributes, 2);
+    PrintUIBinary       (ctx, vh, attributes);
     PrintUIFlagIfMatch  (ctx, vh->attributes, kHFSVolumeHardwareLockMask);
     PrintUIFlagIfMatch  (ctx, vh->attributes, kHFSVolumeUnmountedMask);
     PrintUIFlagIfMatch  (ctx, vh->attributes, kHFSVolumeSparedBlocksMask);
@@ -187,7 +187,7 @@ void PrintVolumeHeader(out_ctx* ctx, const HFSPlusVolumeHeader* vh)
     PrintUI             (ctx, vh, nextCatalogID);
     PrintUI             (ctx, vh, writeCount);
 
-    PrintRawAttribute   (ctx, vh, encodingsBitmap, 2);
+    PrintUIBinary       (ctx, vh, encodingsBitmap);
     PrintUIFlagIfSet    (ctx, vh->encodingsBitmap, kTextEncodingMacRoman);
     PrintUIFlagIfSet    (ctx, vh->encodingsBitmap, kTextEncodingMacJapanese);
     PrintUIFlagIfSet    (ctx, vh->encodingsBitmap, kTextEncodingMacChineseTrad);
@@ -238,7 +238,7 @@ void PrintVolumeHeader(out_ctx* ctx, const HFSPlusVolumeHeader* vh)
     PrintCatalogPath    (ctx, finderInfo, os9DirID);
     PrintUI             (ctx, finderInfo, reserved);
     PrintCatalogPath    (ctx, finderInfo, osXDirID);
-    PrintRawAttribute   (ctx, finderInfo, volID, 16);
+    PrintAttribute      (ctx, "volID", "%#llx", finderInfo->volID);
 
     EndSection(ctx);
 
@@ -371,7 +371,7 @@ void PrintBTHeaderRecord(out_ctx* ctx, const BTHeaderRec* hr)
     PrintLabeledConstHexIfEqual(ctx, hr, keyCompareType, kHFSCaseFolding);
     PrintLabeledConstHexIfEqual(ctx, hr, keyCompareType, kHFSBinaryCompare);
 
-    PrintRawAttribute(ctx, hr, attributes, 2);
+    PrintUIBinary(ctx, hr, attributes);
     PrintUIFlagIfMatch(ctx, hr->attributes, kBTBadCloseMask);
     PrintUIFlagIfMatch(ctx, hr->attributes, kBTBigKeysMask);
     PrintUIFlagIfMatch(ctx, hr->attributes, kBTVariableIndexKeysMask);
@@ -547,7 +547,7 @@ void PrintFndrFileInfo(out_ctx* ctx, const FndrFileInfo* record)
 {
     PrintUIChar(ctx, record, fdType);
     PrintUIChar(ctx, record, fdCreator);
-    PrintRawAttribute(ctx, record, fdFlags, 2);
+    PrintUIBinary(ctx, record, fdFlags);
     PrintFinderFlags(ctx, record->fdFlags);
     PrintAttribute(ctx, "fdLocation", "(%d, %d)", record->fdLocation.v, record->fdLocation.h);
     PrintInt(ctx, record, opaque);
@@ -556,7 +556,7 @@ void PrintFndrFileInfo(out_ctx* ctx, const FndrFileInfo* record)
 void PrintFndrDirInfo(out_ctx* ctx, const FndrDirInfo* record)
 {
     PrintAttribute(ctx, "frRect", "(%d, %d, %d, %d)", record->frRect.top, record->frRect.left, record->frRect.bottom, record->frRect.right);
-    PrintRawAttribute(ctx, record, frFlags, 2);
+    PrintUIBinary(ctx, record, frFlags);
     PrintFinderFlags    (ctx, record->frFlags);
     PrintAttribute(ctx, "frLocation", "(%u, %u)", record->frLocation.v, record->frLocation.h);
     PrintInt            (ctx, record, opaque);
@@ -600,7 +600,7 @@ void PrintHFSPlusCatalogFolder(out_ctx* ctx, const HFSPlusCatalogFolder* record)
 {
     PrintAttribute(ctx, "recordType", "kHFSPlusFolderRecord");
 
-    PrintRawAttribute(ctx, record, flags, 2);
+    PrintUIBinary(ctx, record, flags);
     PrintConstIfEqual(ctx, record->flags, kHFSFileLockedMask);
     PrintConstIfEqual(ctx, record->flags, kHFSThreadExistsMask);
     PrintConstIfEqual(ctx, record->flags, kHFSHasAttributesMask);
@@ -632,7 +632,7 @@ void PrintHFSPlusCatalogFolder(out_ctx* ctx, const HFSPlusCatalogFolder* record)
 void PrintHFSPlusCatalogFile(out_ctx* ctx, const HFSPlusCatalogFile* record)
 {
     PrintAttribute(ctx, "recordType", "kHFSPlusFileRecord");
-    PrintRawAttribute(ctx, record, flags, 2);
+    PrintUIBinary(ctx, record, flags);
     PrintUIFlagIfMatch(ctx, record->flags, kHFSFileLockedMask);
     PrintUIFlagIfMatch(ctx, record->flags, kHFSThreadExistsMask);
     PrintUIFlagIfMatch(ctx, record->flags, kHFSHasAttributesMask);
