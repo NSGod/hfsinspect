@@ -12,6 +12,7 @@
 #include "hfs/types.h"
 #include "hfs/btree/btree_endian.h"
 #include "hfs/catalog.h"
+#include "hfsplus/hotfiles.h"
 #include "logging/logging.h"    // console printing routines
 
 void swap_HFSExtentDescriptor(HFSExtentDescriptor* record)
@@ -395,5 +396,27 @@ void swap_HFSPlusAttrRecord(HFSPlusAttrRecord* record)
             break;
         }
     }
+}
+
+void swap_HotFilesInfo(HotFilesInfo* record)
+{
+    Swap32(record->magic);
+    Swap32(record->version);
+    Swap32(record->duration);
+    Swap32(record->timebase);
+    Swap32(record->timeleft);
+    Swap32(record->threshold);
+    Swap32(record->maxfileblks);
+    Swap32(record->maxfilecnt);
+    // noswap: uint8_t tag[32]; 
+}
+
+void swap_HotFileKey(HotFileKey* record)
+{
+    // noswap: keyLength; swapped in swap_BTNode
+    // noswap: forkType is a byte
+    // noswap: pad is a byte
+    Swap32(record->temperature);
+    Swap32(record->fileID);
 }
 

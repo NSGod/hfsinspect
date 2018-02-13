@@ -13,7 +13,9 @@
 #include "hfs/hfs_extentlist.h"
 
 #include "volumes/output.h"
+#include "hfsplus/hotfiles.h"
 
+// Number of seconds between Jan 1, 1904 00:00:00 GMT and Jan 1, 1970 00:00:00 UTC
 #define MAC_GMT_FACTOR 2082844800UL
 
 #define _NONNULL       __attribute__((nonnull))
@@ -64,6 +66,7 @@ void PrintHFSPlusExtentRecord       (out_ctx* ctx, const HFSPlusExtentRecord* re
 void PrintHFSPlusFileAttributes     (out_ctx* ctx, uint32_t fileID, HFSPlus* hfs) _NONNULL;
 void PrintHFSUniStr255              (out_ctx* ctx, const char* label, const HFSUniStr255* record) _NONNULL;
 
+void PrintHotFilesInfo              (out_ctx* ctx, const HotFilesInfo* record) _NONNULL;
 int format_hfs_timestamp            (out_ctx* ctx, char* out, uint32_t timestamp, size_t length) _NONNULL;
 
 #endif

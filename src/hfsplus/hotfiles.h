@@ -12,6 +12,8 @@
 #include "hfs/btree/btree.h"
 #include "hfs/types.h"
 
+#define HFC_FILENAME            ".hotfiles.btree"
+
 #define HFC_MAGIC               0xFF28FF26
 #define HFC_VERSION             1
 #define HFC_DEFAULT_DURATION    (3600 * 60)
@@ -19,7 +21,13 @@
 #define HFC_MAXIMUM_FILESIZE    (10 * 1024 * 1024)
 #define HFS_TAG                 "CLUSTERED HOT FILES B-TREE     ";
 #define HFC_LOOKUPTAG           0xFFFFFFFF
-#define HFC_KEYLENGTH           (sizeof(HotFileKey) - sizeof(uint32_t))
+#define HFC_KEYLENGTH           (sizeof(HotFileKey) - sizeof(uint16_t))
+
+/*
+ * Minimum post Tiger base time.
+ * Thu Mar 31 17:00:00 2005
+ */
+#define HFC_MIN_BASE_TIME   0x424c8f00L
 
 struct HotFilesInfo {
     uint32_t magic;             /* must be HFC_MAGIC */
@@ -49,12 +57,19 @@ typedef struct HotFileKey HotFileKey;
    --TN1150
  */
 struct HotFileThreadRecord {
-    union {
-        uint32_t temperature;
-        char     text[4];
-    };
+    HotFileKey      key;
+    uint32_t        temperature;
 };
 typedef struct HotFileThreadRecord HotFileThreadRecord;
+
+struct HotFileRecord {
+    HotFileKey      key;
+    union {
+        uint32_t    data;
+        char        text[4];
+    };
+};
+typedef struct HotFileRecord HotFileRecord;
 
 #define HFCMakeKey(forkType, temperature, fileID) \
     (HotFileKey){ .keyLength = HFC_KEYLENGTH, .forkType = forkType, .pad = 0, .temperature = temperature, .fileID = fileID }
@@ -65,7 +80,16 @@ typedef struct HotFileThreadRecord HotFileThreadRecord;
 
 int hfs_get_hotfiles_btree(BTreePtr* tree, const HFSPlus* hfs) __attribute__((nonnull));
 int hfs_hotfiles_get_node(BTreeNodePtr* node, const BTreePtr bTree, bt_nodeid_t nodeNum) __attribute__((nonnull));
+int hfs_hotfiles_compare_keys(const HotFileKey* key1, const HotFileKey* key2) __attribute__((nonnull));
 
-uint32_t HFCGetFileTemperature(HFSPlus* hfs, bt_nodeid_t fileID, hfs_forktype_t forkType) __attribute__((nonnull));
+// returns the hotfiles b-tree tree id, or 0 if the hotfiles b-tree isn't yet loaded.
+bt_nodeid_t hfs_hotfiles_get_tree_id(void);
+
+int hfs_hotfiles_get_info(HotFilesInfo* info, const BTreePtr tree) __attribute__((nonnull));
+
+//uint32_t HFCGetFileTemperature(HFSPlus* hfs, bt_nodeid_t fileID, hfs_forktype_t forkType) __attribute__((nonnull));
+
+void swap_HotFilesInfo          (HotFilesInfo* record) __attribute__((nonnull));
+void swap_HotFileKey            (HotFileKey* record) __attribute__((nonnull));
 
 #endif

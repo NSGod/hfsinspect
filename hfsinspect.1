@@ -86,6 +86,12 @@ option is added, will list the most fragmented files. When the
 /
 .Fl -verbose
 option is added, will list all fragmented files.
+.It Fl H , Cm --hotfiles
+Show the hottest files on a volume (you must specify the number to list with the
+.Fl t
+/
+.Fl -top
+option).
 .It Fl t , Cm --top Ar TOP
 Specify the number of largest contiguous freespace segments to display (when used with the
 .Fl 0
@@ -95,10 +101,14 @@ option), the number of largest files to display (when used with the
 .Fl s
 /
 .Fl -summary 
-option), or the number of most fragmented files to display (when used with the
+option), the number of most fragmented files to display (when used with the
 .Fl f
 /
 .Fl -fragmentation
+option), or the number of hottest files to display (when used with the
+.Fl H
+/
+.Fl -hotfiles
 option).
 .It Fl i , Cm --inspect Ar STARTBLOCK:BLOCKCOUNT
 Inspect a block range on a volume and list the files or freespace found within. The

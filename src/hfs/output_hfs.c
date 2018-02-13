@@ -596,6 +596,27 @@ void PrintFndrOpaqueInfo(out_ctx* ctx, const FndrOpaqueInfo* record)
     // It's opaque. Provided for completeness, and just incase some properties are discovered.
 }
 
+
+void PrintHotFilesInfo(out_ctx* ctx, const HotFilesInfo* record)
+{
+    BeginSection(ctx, "Hotfiles Info");
+    PrintUIHex(ctx, record, magic);
+    PrintUI(ctx, record, version);
+    PrintAttribute(ctx, "duration", "%u seconds", record->duration);
+    PrintUI(ctx, record, timebase);
+    // Not really sure yet how this value is supposed to be interpreted (in other words, this is probably wrong):
+    uint32_t adjTimebase = MAC_GMT_FACTOR + HFC_MIN_BASE_TIME + record->timebase;
+    _PrintHFSTimestamp(ctx, "timebase", adjTimebase);
+    PrintAttribute(ctx, "timeleft", "%u seconds", record->timeleft);
+    PrintUI(ctx, record, threshold);
+    PrintAttribute(ctx, "maxfileblcks", "%u blocks", record->maxfileblks);
+    PrintUI(ctx, record, maxfilecnt);
+    PrintAttribute(ctx, "tag", "%s", (const char *)record->tag);
+    EndSection(ctx);
+}
+
+#pragma mark - Catalog Records
+
 void PrintHFSPlusCatalogFolder(out_ctx* ctx, const HFSPlusCatalogFolder* record)
 {
     PrintAttribute(ctx, "recordType", "kHFSPlusFolderRecord");

@@ -46,6 +46,7 @@ enum HIModes {
     HIModeFreeSpace,
     HIModeShowFragmentation,
     HIModeInspectBlockRange,
+    HIModeShowHotFiles,
 };
 
 // Configuration context
@@ -86,6 +87,7 @@ void    showCatalogRecord(HIOptions* options, FSSpec spec, bool followThreads);
 off_t   extractFork(const HFSPlusFork* fork, const char* extractPath);
 void    extractHFSPlusCatalogFile(const HFSPlus* hfs, const HFSPlusCatalogFile* file, const char* extractPath);
 void    inspectBlockRange(HIOptions* options);
+void    showHotFiles(HIOptions* options);
 
 // For volume statistics
 typedef struct Rank {

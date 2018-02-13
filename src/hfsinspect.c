@@ -173,8 +173,6 @@ void show_version()
 
 /* hfsdebug-lite args remaining...
    -e,        --examples      display some usage examples
-   -H,        --hotfiles      display the hottest files on the volume; requires
-                                the -t (--top=TOP) option for the number to list
    -l TYPE,   --list=TYPE     specify an HFS+ B-Tree's leaf nodes' type, where
                                  TYPE is one of "file", "folder", "filethread", or
                                  "folderthread" for the Catalog B-Tree; one of
@@ -197,7 +195,8 @@ void show_version()
 
 void print_usage()
 {
-    char* help = "[-hv] [-d path | -p path | -V fspath] [-DjlrSB] [-0sf [-v] [-t top]] [-b btree [-n nid]] [-P path] [-c cnid] [-i startBlock:blockCount] [-F parent:name] [-o file] path";
+    char* help = "[-hv] [-d path | -p path | -V fspath] [-DjlrSB] [-0sf [-v] [-t top]] [-b btree [-n nid]] [-P path] [-c cnid]\n"
+                 "                    [-i startBlock:blockCount] [-F parent:name] [-o file] path";
     fprintf(stderr, "usage: %s %s\n", PROGRAM_NAME, help);
 }
 
@@ -205,7 +204,7 @@ void print_help()
 {
     char* help = "\n"
                  "    -h,         --help          Show help and quit. \n"
-                 "    -v,         --version       Show version information and quit. \n"
+                 "    -v,         --version       Show version information and quit.\n"
                  "    -v,         --verbose       When combined with other options, -v is interpreted to mean --verbose, which\n"
                  "                                    increases the verbosity of output of those options (see below).\n"
                  "    -S          --si            Use base 1000 SI data size measurements instead of the traditional base 1024.\n"
@@ -215,14 +214,14 @@ void print_help()
                  "hfsinspect will use the root filesystem by default, or the filesystem containing a target file in some cases. If you wish to\n"
                  "specify a specific device or volume, you can with the following options:\n"
                  "\n"
-                 "    -d DEV,     --device DEV    Path to device or file containing a bare HFS+ filesystem (no partition map or HFS wrapper) \n"
-                 "    -V VOLUME   --volume VOLUME Use the path to a mounted disk or any file on the disk to use a mounted volume. \n"
+                 "    -d DEV,     --device DEV    Path to device or file containing a bare HFS+ filesystem (no partition map or HFS wrapper)\n"
+                 "    -V VOLUME   --volume VOLUME Use the path to a mounted disk or any file on the disk to use a mounted volume.\n"
                  "    -p          --path          Locate the record for the given path on a mounted filesystem.\n"
                  "\n"
                  "INFO: \n"
                  "    By default, hfsinspect will just show you the volume header and quit. Use the following options to get more specific data.\n"
                  "\n"
-                 "    -l,         --list          If the specified FSOB is a folder, list the contents. \n"
+                 "    -l,         --list          If the specified FSOB is a folder, list the contents.\n"
                  "    -D,         --disk-info     Show any available information about the disk, including partitions and volume headers.\n"
                  "    -0,         --freespace     Show a summary of the used/free space and extent count based on the allocation file.\n"
                  "                                   When the -t/--top option is added, will list the largest contiguous freespace segments.\n"
@@ -232,23 +231,26 @@ void print_help()
                  "    -f,         --fragmentation Show a summary of the fragmented files on the disk.\n"
                  "                                   When the -t/--top option is added, will list the most fragmented files.\n"
                  "                                   When the -v/--verbose option is added, will list all fragmented files.\n"
+                 "    -H,         --hotfiles      Show the hottest files on a volume (you must specify the number to\n"
+                 "                                   list with the -t/--top option).\n"
                  "    -t TOP,     --top TOP       Specify the number of largest contiguous freespace segments to display (when used with the -0/--freespace option),\n"
-                 "                                   the number of largest files to display (when used with the -s/--summary option), or\n"
+                 "                                   the number of largest files to display (when used with the -s/--summary option),\n"
                  "                                   the number of most fragmented files to display (when used with the -f/--fragmentation option).\n"
-                 "    -i RANGE,   --inspect RANGE Inspect a block range on a volume and lists the files or freespace found within. \n"
+                 "                                   the number of hottest files to display (when used with the -H/--hotfiles option).\n"
+                 "    -i RANGE,   --inspect RANGE Inspect a block range on a volume and lists the files or freespace found within.\n"
                  "                                   RANGE should be of the form startBlock:blockCount (eg. 10000000:800000).\n"
                  "                                   The blockCount operand is optional, and can be omitted to search to the end\n"
                  "                                   of the volume (eg. 10000000:).\n"
-                 "    -r,         --volumeheader  Dump the volume header. \n"
-                 "    -j,         --journal       Dump the volume's journal info block structure. \n"
-                 "    -b NAME,    --btree NAME    Specify which HFS+ B-Tree to work with. Supported options: attributes, catalog, extents, or hotfiles. \n"
-                 "    -n ID,      --node ID       Dump an HFS+ B-Tree node by ID (must specify tree with -b). \n"
-                 "    -c CNID,    --cnid CNID     Lookup and display a record by its catalog node ID. \n"
+                 "    -r,         --volumeheader  Dump the volume header.\n"
+                 "    -j,         --journal       Dump the volume's journal info block structure.\n"
+                 "    -b NAME,    --btree NAME    Specify which HFS+ B-Tree to work with. Supported options: attributes, catalog, extents, or hotfiles.\n"
+                 "    -n ID,      --node ID       Dump an HFS+ B-Tree node by ID (must specify tree with -b).\n"
+                 "    -c CNID,    --cnid CNID     Lookup and display a record by its catalog node ID.\n"
                  "    -F FSSpec   --fsspec FSSpec Locate a record by Carbon-style FSSpec (parent:name).\n"
                  "    -P path     --vol-path path Locate a record by its path on the given device's filesystem.\n"
                  "    -y DIR      --yank DIR      Yank all the filesystem files and put then in the specified directory.\n"
                  "\n"
-                 "OUTPUT: \n"
+                 "OUTPUT:\n"
                  "    You can optionally have hfsinspect dump any fork it finds as the result of an operation. This includes B-Trees or file forks.\n"
                  "    Use a command like \"-b catalog -o catalog.dump\" to extract the catalog file from the boot drive, for instance.\n"
                  "\n"
@@ -298,7 +300,8 @@ int main (int argc, char* const* argv)
         { "fragmentation",  no_argument,            NULL,                   'f' },
         { "inspect",        required_argument,      NULL,                   'i' },
         { "top",            required_argument,      NULL,                   't' },
-        
+        { "hotfiles",       no_argument,            NULL,                   'H' },
+
         { "btree",          required_argument,      NULL,                   'b' },
         { "node",           required_argument,      NULL,                   'n' },
         { "cnid",           required_argument,      NULL,                   'c' },
@@ -311,7 +314,7 @@ int main (int argc, char* const* argv)
     };
 
     /* short options */
-    char*         shortopts = "0ShvjlrsDd:n:b:p:P:F:V:c:o:y:LBft:i:";
+    char*         shortopts = "0ShvjlrsDd:n:b:p:P:F:V:c:o:y:LBft:i:H";
 
     int           opt;
     while ((opt = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1) {
@@ -507,7 +510,12 @@ int main (int argc, char* const* argv)
 
                 SFREE(tofree);
 
+                break;
+            }
 
+            case 'H':
+            {
+                set_mode(&options, HIModeShowHotFiles);
                 break;
             }
 
@@ -772,6 +780,12 @@ NOPE:
 
     set_hfs_volume(options.hfs); // Set the context for certain output_hfs.h calls.
 
+#pragma mark Validate Options
+    
+    if (check_mode(&options, HIModeShowHotFiles)) {
+        if (!options.topCount) fatal("option -H/--hotfiles requires the -t/--top option to be specified");
+    }
+
 #pragma mark Volume Requests
 
     // Always detail what volume we're working on at the very least
@@ -828,6 +842,13 @@ NOPE:
     if (check_mode(&options, HIModeInspectBlockRange)) {
         debug("Inspecting block range.");
         inspectBlockRange(&options);
+    }
+
+    // Show Hotfiles
+    if (check_mode(&options, HIModeShowHotFiles)) {
+        debug("Show hotfiles");
+        if (!options.topCount) fatal("option -H/--hotfiles requires the -t/--top option to be specified");
+        showHotFiles(&options);
     }
 
 #pragma mark Allocation Requests
