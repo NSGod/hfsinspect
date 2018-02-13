@@ -119,6 +119,9 @@ int apm_dump(Volume* vol)
 
     SALLOC(header, sizeof(APMHeader));
 
+    bool prevWideAtts = ctx->wideAttributes;
+    ctx->wideAttributes = true;
+
     BeginSection(ctx, "Apple Partition Map");
 
     while (1) {
@@ -134,7 +137,8 @@ int apm_dump(Volume* vol)
         PrintUIChar         (ctx, header, signature);
         PrintUI             (ctx, header, partition_count);
         PrintUI             (ctx, header, partition_start);
-        PrintDataLength     (ctx, header, partition_length*vol->sector_size);
+        PrintUI             (ctx, header, partition_length);
+        _PrintDataLength    (ctx, "partition_length (bytes)", (uint64_t)header->partition_length * vol->sector_size);
 
         memcpy(str, &header->name, 32); str[32] = '\0';
         PrintAttribute(ctx, "name", "%s", str);
@@ -148,7 +152,8 @@ int apm_dump(Volume* vol)
         }
 
         PrintUI             (ctx, header, data_start);
-        PrintDataLength     (ctx, header, data_length*vol->sector_size);
+        PrintUI             (ctx, header, data_length);
+        _PrintDataLength    (ctx, "data_length (bytes)", (uint64_t)header->data_length * vol->sector_size);
 
         PrintUIBinary       (ctx, header, status);
         PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusValid);
@@ -165,7 +170,8 @@ int apm_dump(Volume* vol)
         PrintUIFlagIfMatch  (ctx, header->status, kAPMStatusIsStartup);
 
         PrintUI             (ctx, header, boot_code_start);
-        PrintDataLength     (ctx, header, boot_code_length*vol->sector_size);
+        PrintUI             (ctx, header, boot_code_length);
+        _PrintDataLength(ctx, "boot_code_length (bytes)", (uint64_t)header->boot_code_length * vol->sector_size);
         PrintUI             (ctx, header, bootloader_address);
         PrintUI             (ctx, header, boot_code_entry);
         PrintUI             (ctx, header, boot_code_checksum);
@@ -180,7 +186,8 @@ int apm_dump(Volume* vol)
             partitionID++;
     }
 
-    EndSection(ctx);
+    EndSection(ctx); // Apple Partition Map
+    ctx->wideAttributes = prevWideAtts;
 
     if (header != NULL)
         SFREE(header);

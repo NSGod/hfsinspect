@@ -123,7 +123,6 @@ void _PrintDataLength(out_ctx* ctx, const char* label, uint64_t size)
     }
 }
 
-
 int _PrintUIChar(out_ctx* ctx, const char* label, uint64_t value, size_t nbytes)
 {
     assert(nbytes >= 2 && nbytes <= 8);
@@ -198,7 +197,6 @@ void VisualizeData(const void* data, size_t length)
 
 #pragma mark - Formatters
 
-
 int format_size(out_ctx* ctx, char* out, uint64_t value, size_t length)
 {
     char*       binaryNames[]  = { "bytes", "KiB", "MiB", "GiB", "TiB", "EiB", "PiB", "ZiB", "YiB" };
@@ -223,7 +221,11 @@ int format_size(out_ctx* ctx, char* out, uint64_t value, size_t length)
 
     if (decimal) sizeLabel = decimalNames[count]; else sizeLabel = binaryNames[count];
 
-    snprintf(out, length, "%0.2Lf %s", displaySize, sizeLabel);
+    if (count > 0) {
+        snprintf(out, length, "%0.2Lf %s", displaySize, sizeLabel);
+    } else {
+        snprintf(out, length, "%0.Lf %s", displaySize, sizeLabel);
+    }
 
     return (int)strlen(out);
 }

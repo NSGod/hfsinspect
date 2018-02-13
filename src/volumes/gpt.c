@@ -279,7 +279,7 @@ void PrintGPTPartitions(const GPTHeader* header_p, const GPTPartitionRecord* ent
         _PrintUIBinary(ctx, "attributes", partition.attributes, sizeof(partition.attributes));
         for(unsigned c = 0; c < 37; c++) name[c] = partition.name[c];
         name[36] = '\0';
-        PrintAttribute(ctx, "name", "%ls", name);
+        PrintAttribute(ctx, "name", "%ls", (int *)name);
 
         EndSection(ctx);
     }
