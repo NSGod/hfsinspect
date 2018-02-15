@@ -622,14 +622,14 @@ void PrintHFSPlusCatalogFolder(out_ctx* ctx, const HFSPlusCatalogFolder* record)
     PrintAttribute(ctx, "recordType", "kHFSPlusFolderRecord");
 
     PrintUIBinary(ctx, record, flags);
-    PrintConstIfEqual(ctx, record->flags, kHFSFileLockedMask);
-    PrintConstIfEqual(ctx, record->flags, kHFSThreadExistsMask);
-    PrintConstIfEqual(ctx, record->flags, kHFSHasAttributesMask);
-    PrintConstIfEqual(ctx, record->flags, kHFSHasSecurityMask);
-    PrintConstIfEqual(ctx, record->flags, kHFSHasFolderCountMask);
-    PrintConstIfEqual(ctx, record->flags, kHFSHasLinkChainMask);
-    PrintConstIfEqual(ctx, record->flags, kHFSHasChildLinkMask);
-    PrintConstIfEqual(ctx, record->flags, kHFSHasDateAddedMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSFileLockedMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSThreadExistsMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSHasAttributesMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSHasSecurityMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSHasFolderCountMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSHasLinkChainMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSHasChildLinkMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSHasDateAddedMask);
 
     PrintUI(ctx, record, valence);
     PrintUI(ctx, record, folderID);
