@@ -175,7 +175,7 @@ void swap_HFSPlusExtentDescriptor(HFSPlusExtentDescriptor* record)
 void swap_HFSPlusExtentKey(HFSPlusExtentKey* record)
 {
     // trace("record (%p)", record);
-//    noswap: keyLength; swapped in swap_BTNode
+//    noswap: keyLength; swapped in swap_BTreeNode
     Swap32(record->fileID);
     Swap32(record->startBlock);
 }
@@ -211,7 +211,7 @@ void swap_FndrDirInfo(FndrDirInfo* record)
     Swap16(record->frRect.left);
     Swap16(record->frRect.bottom);
     Swap16(record->frRect.right);
-    // noswap: frFlags is an undocumented short
+    Swap16(record->frFlags);    // frFlags is documented, it's just like fdFlags
     Swap16(record->frLocation.v);
     Swap16(record->frLocation.h);
     Swap16(record->opaque);
@@ -240,7 +240,7 @@ void swap_HFSPlusCatalogKey(HFSPlusCatalogKey* record)
 {
     // trace("record (%p)", record);
 
-//    noswap: keyLength; swapped in swap_BTNode
+//    noswap: keyLength; swapped in swap_BTreeNode
     Swap32(record->parentID);
     swap_HFSUniStr255(&record->nodeName);
 }
@@ -333,7 +333,7 @@ void swap_HFSPlusCatalogThread(HFSPlusCatalogThread* record)
 void swap_HFSPlusAttrKey(HFSPlusAttrKey* record)
 {
     // trace("record (%p)", record);
-//    noswap: keyLength; swapped in swap_BTNode
+//    noswap: keyLength; swapped in swap_BTreeNode
     Swap16(record->pad);
     Swap32(record->fileID);
     Swap32(record->startBlock);
@@ -413,7 +413,7 @@ void swap_HotFilesInfo(HotFilesInfo* record)
 
 void swap_HotFileKey(HotFileKey* record)
 {
-    // noswap: keyLength; swapped in swap_BTNode
+    // noswap: keyLength; swapped in swap_BTreeNode
     // noswap: forkType is a byte
     // noswap: pad is a byte
     Swap32(record->temperature);
