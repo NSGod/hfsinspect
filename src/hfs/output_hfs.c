@@ -562,40 +562,123 @@ void PrintFndrDirInfo(out_ctx* ctx, const FndrDirInfo* record)
     PrintInt            (ctx, record, opaque);
 }
 
+enum {
+    kLabelColorNone         = 0,
+    kLabelColorGray         = 1,
+    kLabelColorGreen        = 2,
+    kLabelColorPurple       = 3,
+    kLabelColorBlue         = 4,
+    kLabelColorYellow       = 5,
+    kLabelColorRed          = 6,
+    kLabelColorOrange       = 7,
+};
+
 void PrintFinderFlags(out_ctx* ctx, uint16_t record)
 {
     uint16_t kIsOnDesk            = 0x0001;      /* Files and folders (System 6) */
-    uint16_t kRequireSwitchLaunch = 0x0020;      /* Old */
+    //  NOTE: kColor is the Finder label color, which is 3 bits in size, for a total of 8 different values
     uint16_t kColor               = 0x000E;      /* Files and folders */
-    uint16_t kIsShared            = 0x0040;      /* Files only (Applications only) If */
-    uint16_t kHasNoINITs          = 0x0080;      /* Files only (Extensions/Control */
+    uint16_t kRequireSwitchLaunch = 0x0020;      /* bit 0x0020 was kRequireSwitchLaunch, but is now reserved for future use */
+    uint16_t kIsShared            = 0x0040;      /* Files only (Applications only) If clear, the application needs to write to
+                                                    its resource fork, and therefore cannot be shared on a server */
+    uint16_t kHasNoINITs          = 0x0080;      /* Files only (Extensions/Control Panels only) This file contains no INIT resource */
     uint16_t kHasBeenInited       = 0x0100;      /* Files only.  Clear if the file */
+                                                 /* bit 0x0200 was the letter bit for AOCE, but is now reserved for future use */
     uint16_t kHasCustomIcon       = 0x0400;      /* Files and folders */
     uint16_t kIsStationery        = 0x0800;      /* Files only */
     uint16_t kNameLocked          = 0x1000;      /* Files and folders */
-    uint16_t kHasBundle           = 0x2000;      /* Files only */
+    uint16_t kHasBundle           = 0x2000;      /* Files and folders */
+                                            /* Indicates that a file has a BNDL resource */
+                                            /* Indicates that a folder is displayed as a package */
     uint16_t kIsInvisible         = 0x4000;      /* Files and folders */
     uint16_t kIsAlias             = 0x8000;      /* Files only */
 
+    uint16_t labelColor = record & kColor;
+    labelColor = (labelColor >> 1L);
+
+#define PrintFinderLabelColorIfEqual(var, val) if (var == val) { \
+    PrintAttribute(ctx, NULL, "kColor == %s (%u)", #val, val); \
+}
+
     PrintUIFlagIfMatch(ctx, record, kIsOnDesk);
-    PrintUIFlagIfMatch(ctx, record, kRequireSwitchLaunch);
-    PrintUIFlagIfMatch(ctx, record, kColor);
-    PrintUIFlagIfMatch(ctx, record, kIsShared);
-    PrintUIFlagIfMatch(ctx, record, kHasNoINITs);
-    PrintUIFlagIfMatch(ctx, record, kHasBeenInited);
-    PrintUIFlagIfMatch(ctx, record, kHasCustomIcon);
-    PrintUIFlagIfMatch(ctx, record, kIsStationery);
-    PrintUIFlagIfMatch(ctx, record, kNameLocked);
-    PrintUIFlagIfMatch(ctx, record, kHasBundle);
-    PrintUIFlagIfMatch(ctx, record, kIsInvisible);
-    PrintUIFlagIfMatch(ctx, record, kIsAlias);
+
+    PrintFinderLabelColorIfEqual(labelColor, kLabelColorGray);
+    PrintFinderLabelColorIfEqual(labelColor, kLabelColorGreen);
+    PrintFinderLabelColorIfEqual(labelColor, kLabelColorPurple);
+    PrintFinderLabelColorIfEqual(labelColor, kLabelColorBlue);
+    PrintFinderLabelColorIfEqual(labelColor, kLabelColorYellow);
+    PrintFinderLabelColorIfEqual(labelColor, kLabelColorRed);
+    PrintFinderLabelColorIfEqual(labelColor, kLabelColorOrange);
+
+    PrintHexFlagIfMatch(ctx, record, kRequireSwitchLaunch);
+    PrintHexFlagIfMatch(ctx, record, kIsShared);
+    PrintHexFlagIfMatch(ctx, record, kHasNoINITs);
+    PrintHexFlagIfMatch(ctx, record, kHasBeenInited);
+    PrintHexFlagIfMatch(ctx, record, kHasCustomIcon);
+    PrintHexFlagIfMatch(ctx, record, kIsStationery);
+    PrintHexFlagIfMatch(ctx, record, kNameLocked);
+    PrintHexFlagIfMatch(ctx, record, kHasBundle);
+    PrintHexFlagIfMatch(ctx, record, kIsInvisible);
+    PrintHexFlagIfMatch(ctx, record, kIsAlias);
 }
 
-void PrintFndrOpaqueInfo(out_ctx* ctx, const FndrOpaqueInfo* record)
+void PrintExtendedFinderFlags(out_ctx* ctx, uint16_t record)
 {
-    // It's opaque. Provided for completeness, and just incase some properties are discovered.
+    // From Finder.h:
+    uint16_t kExtendedFlagsAreInvalid      = 0x8000; /* If set the other extended flags are ignored */
+    uint16_t kExtendedFlagHasCustomBadge   = 0x0100; /* Set if the file or folder has a badge resource */
+    uint16_t kExtendedFlagObjectIsBusy     = 0x0080; /* Set if the object is marked as busy/incomplete */
+    uint16_t kExtendedFlagHasRoutingInfo   = 0x0004; /* Set if the file contains routing info resource */
+
+    PrintHexFlagIfMatch(ctx, record, kExtendedFlagsAreInvalid);
+    PrintHexFlagIfMatch(ctx, record, kExtendedFlagHasCustomBadge);
+    PrintHexFlagIfMatch(ctx, record, kExtendedFlagObjectIsBusy);
+    PrintHexFlagIfMatch(ctx, record, kExtendedFlagHasRoutingInfo);
 }
 
+void PrintFndrExtendedDirInfo(out_ctx* ctx, const struct FndrExtendedDirInfo* record)
+{
+    PrintUI(ctx, record, document_id);
+    PrintUI(ctx, record, date_added);
+    PrintHFSTimestamp(ctx, record, date_added);
+    PrintUIBinary(ctx, record, extended_flags);
+    PrintExtendedFinderFlags(ctx, record->extended_flags);
+    PrintUI(ctx, record, reserved3);
+    PrintUI(ctx, record, write_gen_counter);
+}
+
+void PrintFndrExtendedFileInfo(out_ctx* ctx, const struct FndrExtendedFileInfo* record)
+{
+    PrintUI(ctx, record, document_id);
+    PrintUI(ctx, record, date_added);
+    PrintHFSTimestamp(ctx, record, date_added);
+    PrintUIBinary(ctx, record, extended_flags);
+    PrintExtendedFinderFlags(ctx, record->extended_flags);
+    PrintUI(ctx, record, reserved2);
+    PrintUI(ctx, record, write_gen_counter);
+}
+
+void PrintFndrOldExtendedDirInfo(out_ctx* ctx, const FndrOldExtendedDirInfo* record)
+{
+    PrintAttribute(ctx, "scrollPosition", "(%d, %d)", record->scrollPosition.v, record->scrollPosition.h);
+    PrintUI(ctx, record, reserved1);
+    PrintUIBinary(ctx, record, extended_flags);
+    PrintExtendedFinderFlags(ctx, record->extended_flags);
+    PrintUI(ctx, record, reserved2);
+    PrintUI(ctx, record, putAwayFolderID);
+}
+
+void PrintFndrOldExtendedFileInfo(out_ctx* ctx, const FndrOldExtendedFileInfo* record)
+{
+    PrintInt(ctx, record, reserved1[0]);
+    PrintInt(ctx, record, reserved1[1]);
+    PrintInt(ctx, record, reserved1[2]);
+    PrintInt(ctx, record, reserved1[3]);
+    PrintUIBinary(ctx, record, extended_flags);
+    PrintExtendedFinderFlags(ctx, record->extended_flags);
+    PrintUI(ctx, record, reserved2);
+    PrintUI(ctx, record, putAwayFolderID);
+}
 
 void PrintHotFilesInfo(out_ctx* ctx, const HotFilesInfo* record)
 {
@@ -621,6 +704,7 @@ void PrintHFSPlusCatalogFolder(out_ctx* ctx, const HFSPlusCatalogFolder* record)
 {
     PrintAttribute(ctx, "recordType", "kHFSPlusFolderRecord");
 
+    PrintUI(ctx, record, folderID);
     PrintUIBinary(ctx, record, flags);
     PrintUIFlagIfMatch(ctx, record->flags, kHFSFileLockedMask);
     PrintUIFlagIfMatch(ctx, record->flags, kHFSThreadExistsMask);
@@ -630,9 +714,12 @@ void PrintHFSPlusCatalogFolder(out_ctx* ctx, const HFSPlusCatalogFolder* record)
     PrintUIFlagIfMatch(ctx, record->flags, kHFSHasLinkChainMask);
     PrintUIFlagIfMatch(ctx, record->flags, kHFSHasChildLinkMask);
     PrintUIFlagIfMatch(ctx, record->flags, kHFSHasDateAddedMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSFastDevPinnedMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSDoNotFastDevPinMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSFastDevCandidateMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSAutoCandidateMask);
 
     PrintUI(ctx, record, valence);
-    PrintUI(ctx, record, folderID);
     PrintHFSTimestamp(ctx, record, createDate);
     PrintHFSTimestamp(ctx, record, contentModDate);
     PrintHFSTimestamp(ctx, record, attributeModDate);
@@ -643,16 +730,35 @@ void PrintHFSPlusCatalogFolder(out_ctx* ctx, const HFSPlusCatalogFolder* record)
 
     BeginSection(ctx, "Finder Info");
     PrintFndrDirInfo(ctx, &record->userInfo);
-    PrintFndrOpaqueInfo(ctx, &record->finderInfo);
     EndSection(ctx);
 
+    BeginSection(ctx, "Extended Finder Info");
+    if (record->flags & kHFSHasDateAddedMask) {
+        PrintFndrExtendedDirInfo(ctx, (const struct FndrExtendedDirInfo*)&record->finderInfo);
+    } else {
+        PrintFndrOldExtendedDirInfo(ctx, (const FndrOldExtendedDirInfo*)&record->finderInfo);
+    }
+    EndSection(ctx);
+    Print(ctx, "%s", "");
+
     PrintUI(ctx, record, textEncoding);
-    PrintUI(ctx, record, folderCount);
+    if ((record->flags & kHFSHasFolderCountBit))
+        PrintUI(ctx, record, folderCount);
+    
+    Print(ctx, "%s", "");
+
+    hfs_str path = "";
+    int result = HFSPlusGetCNIDPath(&path, (FSSpec){ get_hfs_volume(), record->folderID });
+    if (result < 0) strlcpy((char *)path, "<unknown>", PATH_MAX);
+    PrintAttribute(ctx, "path", "%s", path);
+
 }
 
 void PrintHFSPlusCatalogFile(out_ctx* ctx, const HFSPlusCatalogFile* record)
 {
     PrintAttribute(ctx, "recordType", "kHFSPlusFileRecord");
+
+    PrintUI                 (ctx, record, fileID);
     PrintUIBinary(ctx, record, flags);
     PrintUIFlagIfMatch(ctx, record->flags, kHFSFileLockedMask);
     PrintUIFlagIfMatch(ctx, record->flags, kHFSThreadExistsMask);
@@ -662,9 +768,12 @@ void PrintHFSPlusCatalogFile(out_ctx* ctx, const HFSPlusCatalogFile* record)
     PrintUIFlagIfMatch(ctx, record->flags, kHFSHasLinkChainMask);
     PrintUIFlagIfMatch(ctx, record->flags, kHFSHasChildLinkMask);
     PrintUIFlagIfMatch(ctx, record->flags, kHFSHasDateAddedMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSFastDevPinnedMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSDoNotFastDevPinMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSFastDevCandidateMask);
+    PrintUIFlagIfMatch(ctx, record->flags, kHFSAutoCandidateMask);
 
     PrintUI                 (ctx, record, reserved1);
-    PrintUI                 (ctx, record, fileID);
     PrintHFSTimestamp       (ctx, record, createDate);
     PrintHFSTimestamp       (ctx, record, contentModDate);
     PrintHFSTimestamp       (ctx, record, attributeModDate);
@@ -675,8 +784,16 @@ void PrintHFSPlusCatalogFile(out_ctx* ctx, const HFSPlusCatalogFile* record)
 
     BeginSection(ctx, "Finder Info");
     PrintFndrFileInfo       (ctx, &record->userInfo);
-    PrintFndrOpaqueInfo     (ctx, &record->finderInfo);
     EndSection(ctx);
+
+    BeginSection(ctx, "Extended Finder Info");
+    if (record->flags & kHFSHasDateAddedMask) {
+        PrintFndrExtendedFileInfo(ctx, (const struct FndrExtendedFileInfo*)&record->finderInfo);
+    } else {
+        PrintFndrOldExtendedFileInfo(ctx, (const FndrOldExtendedFileInfo*)&record->finderInfo);
+    }
+    EndSection(ctx);
+    Print(ctx, "%s", "");
 
     PrintUI                 (ctx, record, textEncoding);
     PrintUI                 (ctx, record, reserved2);
@@ -690,6 +807,13 @@ void PrintHFSPlusCatalogFile(out_ctx* ctx, const HFSPlusCatalogFile* record)
         PrintHFSPlusForkData(ctx, &record->resourceFork, record->fileID, HFSResourceForkType);
         EndSection(ctx);
     }
+    
+    Print(ctx, "%s", "");
+
+    hfs_str path = "";
+    int result = HFSPlusGetCNIDPath(&path, (FSSpec){ get_hfs_volume(), record->fileID });
+    if (result < 0) strlcpy((char *)path, "<unknown>", PATH_MAX);
+    PrintAttribute(ctx, "path", "%s", path);
 
     if ((record->flags & kHFSHasAttributesMask))
         PrintHFSPlusFileAttributes(ctx, record->fileID, volume_);

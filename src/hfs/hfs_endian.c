@@ -98,6 +98,7 @@ void swap_HFSPlusVolumeHeader(HFSPlusVolumeHeader* record)
     Swap32(finderInfo->openWindowDirID);
     Swap32(finderInfo->os9DirID);
     // noswap: reserved is reserved (uint32)
+    Swap32(finderInfo->reserved);
     Swap32(finderInfo->osXDirID);
     Swap64(finderInfo->volID);
 
@@ -229,11 +230,44 @@ void swap_FndrFileInfo(FndrFileInfo* record)
     Swap16(record->opaque);
 }
 
-void swap_FndrOpaqueInfo(FndrOpaqueInfo* record)
+void swap_FndrExtendedDirInfo(struct FndrExtendedDirInfo* record)
 {
-    // trace("record (%p)", record);
+    Swap32(record->document_id);
+    Swap32(record->date_added);
+    Swap16(record->extended_flags);
+    Swap16(record->reserved3);
+    Swap32(record->write_gen_counter);
+}
 
-    // A bunch of undocumented bytes.  Included for completeness.
+void swap_FndrExtendedFileInfo(struct FndrExtendedFileInfo* record)
+{
+    Swap32(record->document_id);
+    Swap32(record->date_added);
+    Swap16(record->extended_flags);
+    Swap16(record->reserved2);
+    Swap32(record->write_gen_counter);
+}
+
+void swap_FndrOldExtendedDirInfo(FndrOldExtendedDirInfo* record)
+{
+    Swap16(record->scrollPosition.v);
+    Swap16(record->scrollPosition.h);
+    Swap32(record->reserved1);
+    Swap16(record->extended_flags);
+    Swap16(record->reserved2);
+    Swap32(record->putAwayFolderID);
+}
+
+void swap_FndrOldExtendedFileInfo(FndrOldExtendedFileInfo* record)
+{
+    // not sure what to do here
+    Swap16(record->reserved1[0]);
+    Swap16(record->reserved1[1]);
+    Swap16(record->reserved1[2]);
+    Swap16(record->reserved1[3]);
+    Swap16(record->extended_flags);
+    Swap16(record->reserved2);
+    Swap32(record->putAwayFolderID);
 }
 
 void swap_HFSPlusCatalogKey(HFSPlusCatalogKey* record)
@@ -292,7 +326,11 @@ void swap_HFSPlusCatalogFile(HFSPlusCatalogFile* record)
     Swap32(record->backupDate);
     swap_HFSPlusBSDInfo(&record->bsdInfo);
     swap_FndrFileInfo(&record->userInfo);
-    swap_FndrOpaqueInfo(&record->finderInfo);
+    if (record->flags & kHFSHasDateAddedMask) {
+        swap_FndrExtendedFileInfo((struct FndrExtendedFileInfo*)&record->finderInfo);
+    } else {
+        swap_FndrOldExtendedFileInfo((FndrOldExtendedFileInfo*)&record->finderInfo);
+    }
     Swap32(record->textEncoding);
     Swap32(record->reserved2);
 
@@ -315,7 +353,11 @@ void swap_HFSPlusCatalogFolder(HFSPlusCatalogFolder* record)
     Swap32(record->backupDate);
     swap_HFSPlusBSDInfo(&record->bsdInfo);
     swap_FndrDirInfo(&record->userInfo);
-    swap_FndrOpaqueInfo(&record->finderInfo);
+    if (record->flags & kHFSHasDateAddedMask) {
+        swap_FndrExtendedDirInfo((struct FndrExtendedDirInfo*)&record->finderInfo);
+    } else {
+        swap_FndrOldExtendedDirInfo((FndrOldExtendedDirInfo*)&record->finderInfo);
+    }
     Swap32(record->textEncoding);
     Swap32(record->folderCount);
 }

@@ -81,7 +81,7 @@ int PrintAttribute(out_ctx* ctx, const char* label, const char* format, ...)
     va_start(argp, format);
 
     int     bytes  = 0;
-    char    str[255];
+    char    str[PATH_MAX+1];
     char    spc[2] = {' ', '\0'};
 
     vsprintf(str, format, argp);
@@ -131,7 +131,7 @@ int _PrintUIChar(out_ctx* ctx, const char* label, uint64_t value, size_t nbytes)
 
     (void)format_uint_chars(str, value, nbytes, 50);
 
-    return PrintAttribute(ctx, label, "%#llx (%s)", value, str);
+    return PrintAttribute(ctx, label, "%#llx ('%s')", value, str);
 }
 
 void _PrintUIBinary(out_ctx* ctx, const char* label, uint64_t value, size_t nbytes)

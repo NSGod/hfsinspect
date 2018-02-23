@@ -48,6 +48,7 @@ void VisualizeData      (const void* data, size_t length);
 #define PrintUIFlagIfSet(ctx, source, flag)         { if (((uint64_t)(source)) & (((uint64_t)1) << ((uint64_t)(flag)))) PrintUIntFlag(ctx, NULL, #flag, flag); }
 #define PrintUIFlagIfMatch(ctx, source, mask)       { if ((source) & mask) PrintUIntFlag(ctx, NULL, #mask, mask); }
 #define PrintUIOctFlagIfMatch(ctx, source, mask)    { if ((source) & mask) PrintOctFlag(ctx, NULL, #mask, mask); }
+#define PrintHexFlagIfMatch(ctx, source, mask)      { if ((source) & mask) PrintHexFlag(ctx, NULL, #mask, mask); }
 
 #define PrintConstIfEqual(ctx, source, c)           { if ((source) == c)   PrintUIntFlag(ctx, NULL, #c, c); }
 #define PrintLabeledConstIfEqual(ctx, record, value, c)    { if ((record->value) == c)   PrintIntFlag(ctx, #value, #c, c); }

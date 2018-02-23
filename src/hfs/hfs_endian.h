@@ -31,7 +31,10 @@ void swap_HFSPlusExtentDescriptor   (HFSPlusExtentDescriptor* extent) __attribut
 void swap_HFSPlusBSDInfo            (HFSPlusBSDInfo* record) __attribute__((nonnull));
 void swap_FndrDirInfo               (FndrDirInfo* record) __attribute__((nonnull));
 void swap_FndrFileInfo              (FndrFileInfo* record) __attribute__((nonnull));
-void swap_FndrOpaqueInfo            (FndrOpaqueInfo* record) __attribute__((nonnull));
+void swap_FndrExtendedDirInfo       (struct FndrExtendedDirInfo* record) __attribute__((nonnull));
+void swap_FndrExtendedFileInfo      (struct FndrExtendedFileInfo* record) __attribute__((nonnull));
+void swap_FndrOldExtendedDirInfo    (FndrOldExtendedDirInfo* record) __attribute__((nonnull));
+void swap_FndrOldExtendedFileInfo   (FndrOldExtendedFileInfo* record) __attribute__((nonnull));
 void swap_HFSPlusCatalogKey         (HFSPlusCatalogKey* key) __attribute__((nonnull));
 void swap_HFSPlusCatalogRecord      (HFSPlusCatalogRecord* record) __attribute__((nonnull));
 void swap_HFSPlusCatalogFile        (HFSPlusCatalogFile* record) __attribute__((nonnull));

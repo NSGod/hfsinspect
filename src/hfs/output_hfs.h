@@ -45,7 +45,10 @@ void PrintHFSPlusBSDInfo            (out_ctx* ctx, const HFSPlusBSDInfo* record,
 void PrintFndrFileInfo              (out_ctx* ctx, const FndrFileInfo* record) _NONNULL;
 void PrintFndrDirInfo               (out_ctx* ctx, const FndrDirInfo* record) _NONNULL;
 void PrintFinderFlags               (out_ctx* ctx, uint16_t record) _NONNULL;
-void PrintFndrOpaqueInfo            (out_ctx* ctx, const FndrOpaqueInfo* record) _NONNULL;
+void PrintFndrExtendedDirInfo       (out_ctx* ctx, const struct FndrExtendedDirInfo* record) _NONNULL;
+void PrintFndrExtendedFileInfo      (out_ctx* ctx, const struct FndrExtendedFileInfo* record) _NONNULL;
+void PrintFndrOldExtendedDirInfo    (out_ctx* ctx, const FndrOldExtendedDirInfo* record) _NONNULL;
+void PrintFndrOldExtendedFileInfo   (out_ctx* ctx, const FndrOldExtendedFileInfo* record) _NONNULL;
 void PrintHFSPlusCatalogFolder      (out_ctx* ctx, const HFSPlusCatalogFolder* record) _NONNULL;
 void PrintHFSPlusCatalogFile        (out_ctx* ctx, const HFSPlusCatalogFile* record) _NONNULL;
 void PrintHFSPlusFolderThreadRecord (out_ctx* ctx, const HFSPlusCatalogThread* record) _NONNULL;

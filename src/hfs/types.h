@@ -70,4 +70,51 @@ union HFSPlusCatalogRecord {
 };
 typedef union HFSPlusCatalogRecord HFSPlusCatalogRecord;
 
+
+// From Finder.h prior to OS X 10.7 when hfs_format.h was first introduced:
+// Providing an older rep of FndrExtendedDirInfo
+struct FndrOldExtendedDirInfo {
+    struct {
+        int16_t v;
+        int16_t h;
+    } scrollPosition;
+    uint32_t       reserved1;
+    uint16_t       extended_flags;
+    uint16_t       reserved2;
+    uint32_t       putAwayFolderID;
+} __attribute__((aligned(2), packed));
+typedef struct FndrOldExtendedDirInfo FndrOldExtendedDirInfo;
+
+// Providing an older rep of FndrExtendedFileInfo
+struct FndrOldExtendedFileInfo {
+    int16_t        reserved1[4];
+    uint16_t       extended_flags;
+    uint16_t       reserved2;
+    uint32_t       putAwayFolderID;
+} __attribute__((aligned(2), packed));
+typedef struct FndrOldExtendedFileInfo FndrOldExtendedFileInfo;
+
+/*
+ hfs_format.h:
+ Lion OS X 10.7:
+ Mountain Lion OS X 10.8:
+ 
+struct FndrExtendedFileInfo {
+	u_int32_t reserved1;
+	u_int32_t date_added;
+	u_int16_t extended_flags;
+	u_int16_t reserved2;
+	u_int32_t reserved3;	
+} __attribute__((aligned(2), packed));
+
+ struct FndrExtendedDirInfo {
+	u_int32_t point;
+	u_int32_t date_added;
+	u_int16_t extended_flags;
+	u_int16_t reserved3;
+	u_int32_t reserved4;
+} __attribute__((aligned(2), packed));
+
+ */
+
 #endif
