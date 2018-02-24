@@ -38,6 +38,14 @@ void _PrintCatalogPath(out_ctx* ctx, char* label, bt_nodeid_t cnid)
     }
 }
 
+void PrintPath(out_ctx* ctx, char* label, bt_nodeid_t cnid)
+{
+    hfs_str path = "";
+    int result = HFSPlusGetCNIDPath(&path, (FSSpec){ volume_, cnid });
+    if (result < 0) strlcpy((char *)path, "<unknown>", PATH_MAX);
+    PrintAttribute(ctx, label, "%s", path);
+}
+
 void _PrintCatalogName(out_ctx* ctx, char* label, bt_nodeid_t cnid)
 {
     hfs_str name = "";
@@ -746,12 +754,7 @@ void PrintHFSPlusCatalogFolder(out_ctx* ctx, const HFSPlusCatalogFolder* record)
         PrintUI(ctx, record, folderCount);
     
     Print(ctx, "%s", "");
-
-    hfs_str path = "";
-    int result = HFSPlusGetCNIDPath(&path, (FSSpec){ get_hfs_volume(), record->folderID });
-    if (result < 0) strlcpy((char *)path, "<unknown>", PATH_MAX);
-    PrintAttribute(ctx, "path", "%s", path);
-
+    PrintPath(ctx, "path", record->folderID);
 }
 
 void PrintHFSPlusCatalogFile(out_ctx* ctx, const HFSPlusCatalogFile* record)
@@ -809,11 +812,7 @@ void PrintHFSPlusCatalogFile(out_ctx* ctx, const HFSPlusCatalogFile* record)
     }
     
     Print(ctx, "%s", "");
-
-    hfs_str path = "";
-    int result = HFSPlusGetCNIDPath(&path, (FSSpec){ get_hfs_volume(), record->fileID });
-    if (result < 0) strlcpy((char *)path, "<unknown>", PATH_MAX);
-    PrintAttribute(ctx, "path", "%s", path);
+    PrintPath(ctx, "path", record->fileID);
 
     if ((record->flags & kHFSHasAttributesMask))
         PrintHFSPlusFileAttributes(ctx, record->fileID, volume_);
@@ -947,6 +946,7 @@ void PrintHFSPlusFileAttributes(out_ctx* ctx, uint32_t fileID, HFSPlus* hfs)
     EndSection(ctx);
 }
 
+#pragma mark - Extent Records
 
 void PrintHFSPlusExtentRecord(out_ctx* ctx, const HFSPlusExtentRecord* record)
 {

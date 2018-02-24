@@ -29,6 +29,7 @@ HFSPlus* get_hfs_volume(void);
 #define PrintHFSTimestamp(ctx, record, value) _PrintHFSTimestamp(ctx, #value, record->value)
 
 void _PrintCatalogPath              (out_ctx* ctx, char* label, bt_nodeid_t cnid) _NONNULL;
+void PrintPath                      (out_ctx* ctx, char* label, bt_nodeid_t cnid) _NONNULL;
 void _PrintCatalogName              (out_ctx* ctx, char* label, bt_nodeid_t cnid) _NONNULL;
 void _PrintHFSBlocks                (out_ctx* ctx, const char* label, uint64_t blocks) _NONNULL;
 void _PrintHFSTimestamp             (out_ctx* ctx, const char* label, uint32_t timestamp) _NONNULL;
