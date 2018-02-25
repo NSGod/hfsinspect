@@ -30,6 +30,7 @@ typedef TAILQ_HEAD(_FileExtentList, _FileExtent) FileExtentList;
 void fileExtentList_sorted_insert(FileExtentList* list, size_t startBlock, size_t blockCount, hfs_cnid_t cnid, uint32_t extentIndex, uint32_t extentCount, hfs_forktype_t forkType) __attribute__((nonnull));
 void fileExtentList_free(FileExtentList* list) __attribute__((nonnull));
 
+void inspectHFSPlusFork(const HFSPlusFork* fork, range blockRange, FileExtentList* fileExtents) __attribute__((nonnull));
 
 FileExtentList* fileExtentList_create(void)
 {
@@ -66,8 +67,9 @@ void fileExtentList_sorted_insert(FileExtentList* list, size_t startBlock, size_
             if (startBlock < e->startBlock) {
                 TAILQ_INSERT_BEFORE(e, newExtent, extents);
                 break;
-                
-            } else if (startBlock > e->startBlock) {
+
+//            } else if (startBlock > e->startBlock) {
+            } else {
                 if (next) {
                     if (startBlock < next->startBlock) {
                         TAILQ_INSERT_BEFORE(next, newExtent, extents);
@@ -82,7 +84,6 @@ void fileExtentList_sorted_insert(FileExtentList* list, size_t startBlock, size_
             }
         }
     }
-    
 }
 
 void fileExtentList_free(FileExtentList* list)
@@ -98,31 +99,33 @@ void fileExtentList_free(FileExtentList* list)
     SFREE(list);
 }
 
+void inspectHFSPlusFork(const HFSPlusFork* fork, range blockRange, FileExtentList* fileExtents)
+{
+    ExtentList* list = fork->extents;
+
+    uint32_t    extentCount = 0;
+    uint32_t    extentIndex = 0;
+    Extent*     e   = NULL;
+    // get total extent count first
+    TAILQ_FOREACH(e, list, extents) extentCount++;
+
+    TAILQ_FOREACH(e, list, extents) {
+        // see if any of the extents fall within our given block range
+        if (range_contains(e->startBlock, blockRange) || range_contains(e->startBlock + e->blockCount, blockRange)) {
+            fileExtentList_sorted_insert(fileExtents, e->startBlock, e->blockCount, fork->cnid, extentIndex, extentCount, fork->forkType);
+            extentIndex++;
+        }
+    }
+}
+
 void inspectHFSCatalogFile(const HFSPlusCatalogFile* file, const HFSPlus* hfs, range blockRange, FileExtentList* fileExtents, hfs_forktype_t forkType) {
     assert(forkType == HFSDataForkType || forkType == HFSResourceForkType);
     
     HFSPlusFork* hfsfork = NULL;
     if ( hfsfork_make(&hfsfork, hfs, (forkType == HFSDataForkType ? file->dataFork : file->resourceFork), forkType, file->fileID) ) {
-        die(1, "Could not create fork reference for fileID %u", file->fileID);
+        die(EXIT_FAILURE, "Could not create fork reference for fileID %u", file->fileID);
     }
-
-    ExtentList* list = hfsfork->extents;
-
-    uint32_t    extentCount = 0;
-    uint32_t    extentIndex = 0;
-    Extent*     e    = NULL;
-    // get total extent count first
-    TAILQ_FOREACH(e, list, extents) extentCount++;
-
-    TAILQ_FOREACH(e, list, extents) {
-
-        // first see if any of the extents fall within our given block range
-        if (range_contains(e->startBlock, blockRange) || range_contains(e->startBlock + e->blockCount, blockRange)) {
-            fileExtentList_sorted_insert(fileExtents, e->startBlock, e->blockCount, file->fileID, extentIndex, extentCount, forkType);
-            extentIndex++;
-        }
-    }
-
+    inspectHFSPlusFork(hfsfork, blockRange, fileExtents);
     hfsfork_free(hfsfork);
 }
 
@@ -153,7 +156,7 @@ void inspectBlockRange(HIOptions* options)
     }
 
     FileExtentList* fileExtents = fileExtentList_create();
-    
+
     size_t finalBlock = range_max(blockRange);
 
     /*
@@ -168,7 +171,7 @@ void inspectBlockRange(HIOptions* options)
         BTreeNodePtr node = NULL;
         if ( BTGetNode(&node, catalog, cnid) < 0) {
             perror("get node");
-            die(1, "There was an error fetching node %d", cnid);
+            die(EXIT_FAILURE, "There was an error fetching node %d", cnid);
         }
 
         for (unsigned recNum = 0; recNum < node->nodeDescriptor->numRecords; recNum++) {
@@ -204,8 +207,10 @@ void inspectBlockRange(HIOptions* options)
 
         // Follow link
         cnid = node->nodeDescriptor->fLink;
-        if (cnid == 0) break;       // End Of Line
-
+        if (cnid == 0) {
+            btree_free_node(node);
+            break;       // End Of Line
+        }
         // Console Status
         static int      count     = 0; // count of records so far
         static unsigned iter_size = 0; // update the status after this many records
@@ -230,9 +235,38 @@ void inspectBlockRange(HIOptions* options)
         btree_free_node(node);
     }
 
-    BeginSection(ctx, "Block Inspection Details");
+    /*
+        To be absolutely thorough, we also need to search the extents of the B-Tree files and
+        the Allocation file themselves, since they don't have entries in the catalog file.
+     */
 
-    Print(ctx, "%10s    %12s %12s    %8s %4s %13s  %s", "CNID", "Start Block", "Block Count", "Extent #", "Fork", "Size", "Path");
+    HFSPlusFork* bitmapFork = NULL;
+    HFSPlusFork* catalogFork = NULL;
+    HFSPlusFork* extentsFork = NULL;
+    HFSPlusFork* attributesFork = NULL;
+
+    if (hfsplus_get_special_fork(&bitmapFork, hfs, kHFSAllocationFileID) < 0) {
+        die(EXIT_FAILURE, "failed to create fork for Allocation File");
+    }
+    inspectHFSPlusFork(bitmapFork, blockRange, fileExtents);
+
+    if (hfsplus_get_special_fork(&catalogFork, hfs, kHFSCatalogFileID) < 0) {
+        die(EXIT_FAILURE, "failed to create fork for Catalog File");
+    }
+    inspectHFSPlusFork(catalogFork, blockRange, fileExtents);
+
+    if (hfsplus_get_special_fork(&extentsFork, hfs, kHFSExtentsFileID) < 0) {
+        die(EXIT_FAILURE, "failed to create fork for Extents Overflow File");
+    }
+    inspectHFSPlusFork(extentsFork, blockRange, fileExtents);
+
+    if (hfs->vh.attributesFile.totalBlocks && hfsplus_get_special_fork(&attributesFork, hfs, kHFSAttributesFileID) < 0) {
+        die(EXIT_FAILURE, "failed to create fork for Attributes File");
+    }
+    if (attributesFork) inspectHFSPlusFork(attributesFork, blockRange, fileExtents);
+
+    BeginSection(ctx, "Block Inspection Details");
+    Print(ctx, "%10s    %12s %12s    %4s %10s %13s  %s", "CNID", "Start Block", "Block Count", "Fork", "Extent #", "Size", "Path");
 
     FileExtent* fileExtent      = NULL;
 
@@ -247,12 +281,12 @@ void inspectBlockRange(HIOptions* options)
         char extentNumber[25] = "";
         sprintf(extentNumber, "%u/%u", fileExtent->extentIndex+1, fileExtent->extentCount);
 
-        Print(ctx, "%10u   ┃%12zu %12zu  ┃ %10s %4s %13s  %s",
+        Print(ctx, "%10u   ┃%12zu %12zu  ┃ %4s %10s %13s  %s",
               fileExtent->cnid,
               fileExtent->startBlock,
               fileExtent->blockCount,
-              extentNumber,
               fileExtent->forkType == HFSDataForkType ? "data" : "rsrc",
+              extentNumber,
               size,
               path);
 
@@ -269,7 +303,7 @@ void inspectBlockRange(HIOptions* options)
 
         (void)format_size(ctx, size, (uint64_t)freespaceRange.count * hfs->block_size, 50);
 
-        Print(ctx, "%10s   ┃%12zu %12zu  ┃ %10s %4s %13s  %s",
+        Print(ctx, "%10s   ┃%12zu %12zu  ┃ %4s %10s %13s  %s",
               "",
               freespaceRange.start,
               freespaceRange.count,
@@ -277,11 +311,13 @@ void inspectBlockRange(HIOptions* options)
               "",
               size,
               "");
-
     }
-
-    EndSection(ctx);
+    EndSection(ctx); // Block Inspection Details
 
     fileExtentList_free(fileExtents);
+    hfsfork_free(bitmapFork);
+    hfsfork_free(catalogFork);
+    hfsfork_free(extentsFork);
+    if (attributesFork) hfsfork_free(attributesFork);
 }
 

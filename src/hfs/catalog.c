@@ -343,6 +343,27 @@ int HFSPlusGetCNIDPath(hfs_str* path, FSSpec spec)
     HFSPlusCatalogRecord    catalogRecord   = {0};
     int                     found           = 0;
 
+    if (originalCNID == kHFSExtentsFileID
+        || originalCNID == kHFSCatalogFileID
+        || originalCNID == kHFSAllocationFileID
+        || originalCNID == kHFSAttributesFileID
+        || originalCNID == kHFSRootParentID
+        ) {
+
+        if (originalCNID == kHFSExtentsFileID) {
+            strlcpy((char *)path, "<** HFS+ Special File: Extents Overflow File **>", PATH_MAX);
+        } else if (originalCNID == kHFSCatalogFileID) {
+            strlcpy((char *)path, "<** HFS+ Special File: Catalog File **>", PATH_MAX);
+        } else if (originalCNID == kHFSAllocationFileID) {
+            strlcpy((char *)path, "<** HFS+ Special File: Allocation Bitmap File **>", PATH_MAX);
+        } else if (originalCNID == kHFSAttributesFileID) {
+            strlcpy((char *)path, "<** HFS+ Special File: Attributes File **>", PATH_MAX);
+        } else if (originalCNID == kHFSRootParentID) {
+            strlcpy((char *)path, pathPrefix, PATH_MAX);
+        }
+        return 1;
+    }
+
     while (parentID != kHFSRootFolderID) {
         found = !(HFSPlusGetCatalogRecordByFSSpec(&catalogRecord, spec) < 0);
         if ( !found ) {
