@@ -153,8 +153,8 @@ void loadBTree(HIOptions* options)
             die(1, "Could not get Extents B-Tree!");
 
     } else if (options->tree_type == BTreeTypeAttributes) {
-        if ( hfsplus_get_attribute_btree(&options->tree, options->hfs) < 0)
-            die(1, "Could not get Attribute B-Tree!");
+        if ( hfsplus_get_attributes_btree(&options->tree, options->hfs) < 0)
+            die(1, "Could not get Attributes B-Tree!");
 
     } else if (options->tree_type == BTreeTypeHotfiles) {
         if ( hfs_get_hotfiles_btree(&options->tree, options->hfs) < 0)

@@ -13,5 +13,6 @@
 #include "hfsplus/attributes.h"
 #include "hfsplus/hotfiles.h"
 #include "hfsplus/journal.h"
+#include "hfsplus/hfsplus_xattrlist.h"
 
 #endif

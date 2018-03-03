@@ -10,17 +10,20 @@
 #define hfsinspect_hfs_attribute_ops_h
 
 #include "hfs/types.h"
+#include "hfsplus/hfsplus_xattrlist.h"
 
 #define _NONNULL __attribute__((nonnull))
 
-typedef struct _HFSPlusAttributeName {
-    u_int16_t attrNameLen;                  /* number of unicode characters */
-    u_int16_t attrName[kHFSMaxAttrNameLen]; /* attribute name (Unicode) */
-} HFSPlusAttributeName;
+struct HFSPlusAttrStr127 {
+    uint16_t    attrNameLen;                    /* number of unicode characters */
+    uint16_t    attrName[kHFSMaxAttrNameLen];   /* attribute name (Unicode) */
+} __attribute__((aligned(2), packed));
+typedef struct HFSPlusAttrStr127 HFSPlusAttrStr127;
 
-int hfsplus_get_attribute_btree     (BTreePtr* tree, const HFSPlus* hfs) _NONNULL;
+int hfsplus_get_attributes_btree     (BTreePtr* tree, const HFSPlus* hfs) _NONNULL;
 int hfsplus_attributes_compare_keys (const HFSPlusAttrKey* key1, const HFSPlusAttrKey* key2) _NONNULL;
 int hfsplus_attributes_get_node     (BTreeNodePtr* node, const BTreePtr bTree, bt_nodeid_t nodeNum) _NONNULL;
+int hfsplus_attributes_get_xattrlist_for_cnid(XAttrList* list, hfs_cnid_t cnid, const HFSPlus* hfs) _NONNULL;
 
 void swap_HFSPlusAttrKey        (HFSPlusAttrKey* record) _NONNULL;
 void swap_HFSPlusAttrData       (HFSPlusAttrData* record) _NONNULL;
@@ -28,14 +31,8 @@ void swap_HFSPlusAttrForkData   (HFSPlusAttrForkData* record) _NONNULL;
 void swap_HFSPlusAttrExtents    (HFSPlusAttrExtents* record) _NONNULL;
 void swap_HFSPlusAttrRecord     (HFSPlusAttrRecord* record) _NONNULL;
 
-__attribute__((nonnull(4)))
-int HFSPlusGetAttributeList(void* attrList, uint32_t* attrCount, uint32_t fileID, const HFSPlus* hfs);
-int HFSPlusGetAttribute(
-    void* data,
-    size_t* length,
-    uint32_t fileID,
-    const HFSPlusAttributeName* name,
-    const HFSPlus* hfs
-) _NONNULL;
+int hfsplus_attributes_make_key(HFSPlusAttrKey* key, hfs_cnid_t cnid, const char *attrName) __attribute__((nonnull(1)));
+
+HFSPlusAttrStr127 HFSPlusAttrKeyGetStr(const HFSPlusAttrKey* key);
 
 #endif

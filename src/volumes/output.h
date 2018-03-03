@@ -52,7 +52,7 @@ void VisualizeData      (const void* data, size_t length);
 
 #define PrintConstIfEqual(ctx, source, c)           { if ((source) == c)   PrintUIntFlag(ctx, NULL, #c, c); }
 #define PrintLabeledConstIfEqual(ctx, record, value, c)    { if ((record->value) == c)   PrintIntFlag(ctx, #value, #c, c); }
-#define PrintLabeledConstHexIfEqual(ctx, record, value, c)    { if ((record->value) == c)   PrintHexFlag(ctx, #value, #c, c); }
+#define PrintLabeledConstHexIfEqual(ctx, record, value, c) { if ((record->value) == c)   PrintHexFlag(ctx, #value, #c, c); }
 #define PrintConstOctIfEqual(ctx, source, c)        { if ((source) == c)   PrintOctFlag(ctx, NULL, #c, c); }
 #define PrintConstHexIfEqual(ctx, source, c)        { if ((source) == c)   PrintHexFlag(ctx, NULL, #c, c); }
 

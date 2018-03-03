@@ -11,6 +11,7 @@
 
 #include "hfs/types.h"
 #include "hfs/hfs_extentlist.h"
+#include "hfsplus/attributes.h"
 
 #include "volumes/output.h"
 #include "hfsplus/hotfiles.h"
@@ -55,6 +56,9 @@ void PrintHFSPlusCatalogFile        (out_ctx* ctx, const HFSPlusCatalogFile* rec
 void PrintHFSPlusFolderThreadRecord (out_ctx* ctx, const HFSPlusCatalogThread* record) _NONNULL;
 void PrintHFSPlusFileThreadRecord   (out_ctx* ctx, const HFSPlusCatalogThread* record) _NONNULL;
 void PrintHFSPlusCatalogThread      (out_ctx* ctx, const HFSPlusCatalogThread* record) _NONNULL;
+void PrintHFSPlusAttrKey            (out_ctx* ctx, const HFSPlusAttrKey* record) _NONNULL;
+void PrintHFSPlusAttrRecord         (out_ctx* ctx, const HFSPlusAttrRecord* record) _NONNULL;
+void PrintXAttrList                 (out_ctx* ctx, const XAttrList* list) _NONNULL;
 
 void VisualizeHFSPlusExtentKey      (out_ctx* ctx, const HFSPlusExtentKey* record, const char* label, bool oneLine) _NONNULL;
 void VisualizeHFSPlusCatalogKey     (out_ctx* ctx, const HFSPlusCatalogKey* record, const char* label, bool oneLine) _NONNULL;
@@ -67,8 +71,9 @@ void PrintFolderListing             (out_ctx* ctx, uint32_t folderID) _NONNULL;
 void PrintNodeRecord                (out_ctx* ctx, const BTreeNodePtr node, int recordNumber) _NONNULL;
 
 void PrintHFSPlusExtentRecord       (out_ctx* ctx, const HFSPlusExtentRecord* record) _NONNULL;
-void PrintHFSPlusFileAttributes     (out_ctx* ctx, uint32_t fileID, HFSPlus* hfs) _NONNULL;
+void PrintHFSPlusAttributes         (out_ctx* ctx, uint32_t cnid, HFSPlus* hfs) _NONNULL;
 void PrintHFSUniStr255              (out_ctx* ctx, const char* label, const HFSUniStr255* record) _NONNULL;
+void PrintHFSPlusAttrStr127         (out_ctx* ctx, const char* label, const HFSPlusAttrStr127* record) _NONNULL;
 
 void PrintHotFilesInfo              (out_ctx* ctx, const HotFilesInfo* record) _NONNULL;
 int format_hfs_timestamp            (out_ctx* ctx, char* out, uint32_t timestamp, size_t length) _NONNULL;

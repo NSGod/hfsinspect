@@ -19,6 +19,7 @@ typedef uint32_t hfs_block_t;
 typedef uint32_t hfs_cnid_t;
 typedef uint64_t hfs_size_t;
 typedef uint8_t  hfs_str[1024];
+typedef uint8_t  hfs_attr_str[255];
 
 typedef int (* hfs_compare_keys)(const void*, const void*);
 

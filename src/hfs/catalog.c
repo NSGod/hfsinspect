@@ -348,6 +348,7 @@ int HFSPlusGetCNIDPath(hfs_str* path, FSSpec spec)
         || originalCNID == kHFSAllocationFileID
         || originalCNID == kHFSAttributesFileID
         || originalCNID == kHFSRootParentID
+        || originalCNID == kHFSRootFolderID
         ) {
 
         if (originalCNID == kHFSExtentsFileID) {
@@ -359,6 +360,8 @@ int HFSPlusGetCNIDPath(hfs_str* path, FSSpec spec)
         } else if (originalCNID == kHFSAttributesFileID) {
             strlcpy((char *)path, "<** HFS+ Special File: Attributes File **>", PATH_MAX);
         } else if (originalCNID == kHFSRootParentID) {
+            strlcpy((char *)path, pathPrefix, PATH_MAX);
+        } else if (originalCNID == kHFSRootFolderID) {
             strlcpy((char *)path, pathPrefix, PATH_MAX);
         }
         return 1;

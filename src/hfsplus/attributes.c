@@ -18,17 +18,17 @@
 #include "hfs/output_hfs.h"
 
 
-int hfsplus_get_attribute_btree(BTreePtr* tree, const HFSPlus* hfs)
+int hfsplus_get_attributes_btree(BTreePtr* tree, const HFSPlus* hfs)
 {
     static BTreePtr cachedTree = NULL;
 
-    debug("Getting attribute B-Tree");
+    debug("Getting Attributes B-Tree");
 
     if (cachedTree == NULL) {
         HFSPlusFork* fork = NULL;
         FILE*        fp   = NULL;
 
-        debug("Creating attribute B-Tree");
+        debug("Creating Attributes B-Tree");
 
         SALLOC(cachedTree, sizeof(struct _BTree));
 
@@ -53,21 +53,18 @@ int hfsplus_attributes_compare_keys (const HFSPlusAttrKey* key1, const HFSPlusAt
 {
     int          result     = 0;
 
-    HFSUniStr255 key1UniStr = {key1->attrNameLen, {0}};
-    HFSUniStr255 key2UniStr = {key2->attrNameLen, {0}};
+    HFSPlusAttrStr127 key1UniStr = HFSPlusAttrKeyGetStr(key1);
+    HFSPlusAttrStr127 key2UniStr = HFSPlusAttrKeyGetStr(key2);
 
-    memcpy(&key1UniStr.unicode, key1->attrName, kHFSMaxAttrNameLen);
-    memcpy(&key2UniStr.unicode, key2->attrName, kHFSMaxAttrNameLen);
+    hfs_attr_str key1Name = {0};
+    hfs_attr_str key2Name = {0};
 
-    hfs_str key1Name = {0};
-    hfs_str key2Name = {0};
+    attruc_to_attrstr(&key1Name, &key1UniStr);
+    attruc_to_attrstr(&key2Name, &key2UniStr);
 
-    hfsuc_to_str(&key1Name, &key1UniStr);
-    hfsuc_to_str(&key2Name, &key2UniStr);
-
-    trace("compare: key1 (%p) (%u, %u, '%s'), key2 (%p) (%u, %u, '%s')",
-          (void *)key1, key1->fileID, key1->attrNameLen, key1Name,
-          (void *)key2, key2->fileID, key2->attrNameLen, key2Name);
+    trace("compare: key1 (%p) (%u, %u, '%s' (%u)), key2 (%p) (%u, %u, '%s' (%u))",
+          (void *)key1, key1->fileID, key1->startBlock, key1Name, key1->attrNameLen,
+          (void *)key2, key2->fileID, key2->startBlock, key2Name, key2->attrNameLen);
 
     if ( (result = cmp(key1->fileID, key2->fileID)) != 0) {
         trace("* %d: File ID difference.", result);
@@ -84,10 +81,15 @@ int hfsplus_attributes_compare_keys (const HFSPlusAttrKey* key1, const HFSPlusAt
 
     // The shared prefix sorted the same, so the shorter one wins.
     if ((result = cmp(key1->attrNameLen, key2->attrNameLen)) != 0) {
-        trace("* %d: Shorter wins.", result);
+        trace("* %d: Shorter attrName wins.", result);
         return result;
     }
 
+    // If names are equal, compare startBlock
+    if ((result = cmp(key1->startBlock, key2->startBlock)) != 0) {
+        trace("* %d: startBlock difference.", result);
+        return result;
+    }
     return 0;
 }
 
@@ -129,3 +131,83 @@ int hfsplus_attributes_get_node(BTreeNodePtr* out_node, const BTreePtr bTree, bt
     return 0;
 }
 
+int hfsplus_attributes_get_xattrlist_for_cnid(XAttrList* list, hfs_cnid_t cnid, const HFSPlus* hfs)
+{
+    BTreePtr       bTree       = NULL;
+    BTreeNodePtr   node        = NULL;
+    BTRecNum       recordID    = 0;
+    HFSPlusAttrKey key         = {0};
+
+    if (hfsplus_get_attributes_btree(&bTree, hfs) < 0) {
+        printf("failed to get the Attributes B-Tree!\n");
+        return -1;
+    }
+
+    // we want a key that will sort before anything else, so use a NULL attrName...
+    int result = 0;
+    if ( (result = hfsplus_attributes_make_key(&key, cnid, NULL)) < 0) {
+        printf("hfsplus_attributes_make_key() returned %d\n", result);
+        return result;
+    }
+
+    btree_search(&node, &recordID, bTree, &key);
+
+    // Iterate through the records finding those with our CNID
+    while (1) {
+        BTNodeRecord btRecord = {0};
+        debug("Loading record %u", recordID);
+        BTGetBTNodeRecord(&btRecord, node, recordID);
+
+        HFSPlusAttrKey*     attrKey     = (HFSPlusAttrKey*)btRecord.key;
+        debug("%u, %u", cnid, attrKey->fileID);
+
+        if (attrKey->fileID > cnid) {
+            break;
+
+        } else if (attrKey->fileID == cnid) {
+            xattrlist_add_record(list, attrKey, (HFSPlusAttrRecord*)btRecord.value);
+        }
+
+        if (++recordID >= node->nodeDescriptor->numRecords) {
+            bt_nodeid_t nextNodeID = node->nodeDescriptor->fLink;
+            debug("Loading node %u", nextNodeID);
+            BTFreeNode(node);
+            recordID  = 0;
+            BTGetNode(&node, bTree, nextNodeID);
+        }
+    }
+    return 0;
+}
+
+int hfsplus_attributes_make_key(HFSPlusAttrKey* key, hfs_cnid_t cnid, const char *attrName)
+{
+    int result = 0;
+
+    key->fileID = cnid;
+    key->pad = 0;
+    key->startBlock = 0;
+
+    if (attrName) {
+        HFSPlusAttrStr127 name = {0};
+        if ( (result = attrstr_to_attruc(&name, (const uint8_t*)attrName)) < 0) {
+            return result;
+        }
+
+        key->attrNameLen = name.attrNameLen;
+        memcpy(key->attrName, &name.attrName, name.attrNameLen * sizeof(uint16_t));
+        key->keyLength = kHFSPlusAttrKeyMinimumLength + key->attrNameLen * sizeof(uint16_t);
+
+    } else {
+        key->attrNameLen = 0;
+        key->keyLength = kHFSPlusAttrKeyMinimumLength;
+    }
+
+    return 0;
+}
+
+HFSPlusAttrStr127 HFSPlusAttrKeyGetStr(const HFSPlusAttrKey* key)
+{
+    HFSPlusAttrStr127 str = { .attrNameLen = key->attrNameLen, {0}};
+    memcpy(&str.attrName, key->attrName, key->attrNameLen * sizeof(uint16_t));
+    return str;
+}

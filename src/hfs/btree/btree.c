@@ -473,9 +473,25 @@ int btree_search(BTreeNodePtr* node, BTRecNum* recordID, const BTreePtr btree, c
         }
         debug("Next node is %d", currentNode);
 
-        if (btree->keyCompare(searchKey, currentKey) == -1) {
-            error("Search failed. Returned record's key is higher than the search key.");
-            break;
+        // This is a hack to allow some leeway for Attribute tree searches where we don't have the full key
+        if (btree->treeID == kHFSAttributesFileID) {
+            if (btree->keyCompare(searchKey, currentKey) == -1) {
+                HFSPlusAttrKey* attrSearchKey = (HFSPlusAttrKey*)searchKey;
+                HFSPlusAttrKey* attrCurrentKey = (HFSPlusAttrKey*)currentKey;
+
+                // If the keys have the same fileID, that's good enough for us
+                if (attrSearchKey->fileID == attrCurrentKey->fileID) {
+                    debug("Ignoring returned record's key that sorts higher than search key.");
+                } else {
+                    error("Search failed. Returned record's key is higher than the search key.");
+                    break;
+                }
+            }
+        } else {
+            if (btree->keyCompare(searchKey, currentKey) == -1) {
+                error("Search failed. Returned record's key is higher than the search key.");
+                break;
+            }
         }
 
         btree_free_node(searchNode);

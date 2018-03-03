@@ -50,6 +50,7 @@
 		9BDB3BBD1AAF51C5000E8995 /* FastUnicodeCompare.c in Sources */ = {isa = PBXBuildFile; fileRef = 9BDB3BBC1AAF51C5000E8995 /* FastUnicodeCompare.c */; };
 		C1113D2F20176BD500CBBDB4 /* hfs_inspect_blocks.c in Sources */ = {isa = PBXBuildFile; fileRef = C1113D2E20176BD500CBBDB4 /* hfs_inspect_blocks.c */; };
 		C13A1D5A2023C9EA005367CB /* hfs_hotfiles.c in Sources */ = {isa = PBXBuildFile; fileRef = C13A1D592023C9EA005367CB /* hfs_hotfiles.c */; };
+		C19FD75520473BEF00BC0A07 /* hfsplus_xattrlist.c in Sources */ = {isa = PBXBuildFile; fileRef = C19FD75320473BEF00BC0A07 /* hfsplus_xattrlist.c */; };
 		C1A06CC81FF96EB300D642AF /* hfs_fragmentation.c in Sources */ = {isa = PBXBuildFile; fileRef = C1A06CC71FF96EB300D642AF /* hfs_fragmentation.c */; };
 /* End PBXBuildFile section */
 
@@ -171,6 +172,8 @@
 		9BDB3BBC1AAF51C5000E8995 /* FastUnicodeCompare.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FastUnicodeCompare.c; sourceTree = "<group>"; };
 		C1113D2E20176BD500CBBDB4 /* hfs_inspect_blocks.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hfs_inspect_blocks.c; sourceTree = "<group>"; };
 		C13A1D592023C9EA005367CB /* hfs_hotfiles.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hfs_hotfiles.c; sourceTree = "<group>"; };
+		C19FD75320473BEF00BC0A07 /* hfsplus_xattrlist.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hfsplus_xattrlist.c; sourceTree = "<group>"; };
+		C19FD75420473BEF00BC0A07 /* hfsplus_xattrlist.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hfsplus_xattrlist.h; sourceTree = "<group>"; };
 		C1A06CC71FF96EB300D642AF /* hfs_fragmentation.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hfs_fragmentation.c; sourceTree = "<group>"; };
 		C1A06CC91FFBF5F300D642AF /* hfsinspect.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = hfsinspect.1; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.man; };
 /* End PBXFileReference section */
@@ -290,6 +293,8 @@
 				9B1937231A941E9D000E8995 /* hotfiles.c */,
 				9B1937261A941E9D000E8995 /* journal.h */,
 				9B1937251A941E9D000E8995 /* journal.c */,
+				C19FD75420473BEF00BC0A07 /* hfsplus_xattrlist.h */,
+				C19FD75320473BEF00BC0A07 /* hfsplus_xattrlist.c */,
 			);
 			path = hfsplus;
 			sourceTree = "<group>";
@@ -485,6 +490,7 @@
 				9B1937691A941EC5000E8995 /* catalog.c in Sources */,
 				9B19376C1A941EC5000E8995 /* hfs_btree.c in Sources */,
 				9B19377B1A941ED6000E8995 /* attributes.c in Sources */,
+				C19FD75520473BEF00BC0A07 /* hfsplus_xattrlist.c in Sources */,
 				9B1937771A941ED6000E8995 /* hfs_summary.c in Sources */,
 				9B1D0C061A941F4C000E8995 /* utilities.c in Sources */,
 				9B1D0C051A941F4C000E8995 /* output.c in Sources */,
