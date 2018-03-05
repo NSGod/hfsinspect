@@ -23,6 +23,7 @@ void swap_HFSExtentDescriptor       (HFSExtentDescriptor* record) __attribute__(
 void swap_HFSPlusVolumeHeader       (HFSPlusVolumeHeader* vh) __attribute__((nonnull));
 void swap_JournalInfoBlock          (JournalInfoBlock* record) __attribute__((nonnull));
 void swap_journal_header            (journal_header* record) __attribute__((nonnull));
+void swap_decmpfs_disk_header       (decmpfs_disk_header* record) __attribute__((nonnull));
 void swap_HFSPlusForkData           (HFSPlusForkData* fork) __attribute__((nonnull));
 void swap_HFSUniStr255              (HFSUniStr255* unistr) __attribute__((nonnull));
 void swap_HFSPlusExtentRecord       (HFSPlusExtentDescriptor record[]) __attribute__((nonnull));

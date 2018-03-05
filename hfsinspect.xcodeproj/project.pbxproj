@@ -172,6 +172,7 @@
 		9BDB3BBC1AAF51C5000E8995 /* FastUnicodeCompare.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FastUnicodeCompare.c; sourceTree = "<group>"; };
 		C1113D2E20176BD500CBBDB4 /* hfs_inspect_blocks.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hfs_inspect_blocks.c; sourceTree = "<group>"; };
 		C13A1D592023C9EA005367CB /* hfs_hotfiles.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hfs_hotfiles.c; sourceTree = "<group>"; };
+		C148B4B5204C2C31001BE3BA /* decmpfs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = decmpfs.h; sourceTree = "<group>"; };
 		C19FD75320473BEF00BC0A07 /* hfsplus_xattrlist.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hfsplus_xattrlist.c; sourceTree = "<group>"; };
 		C19FD75420473BEF00BC0A07 /* hfsplus_xattrlist.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hfsplus_xattrlist.h; sourceTree = "<group>"; };
 		C1A06CC71FF96EB300D642AF /* hfs_fragmentation.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hfs_fragmentation.c; sourceTree = "<group>"; };
@@ -239,6 +240,7 @@
 			children = (
 				9B1936EC1A941E9D000E8995 /* APPLE_LICENSE */,
 				9BDB3BBC1AAF51C5000E8995 /* FastUnicodeCompare.c */,
+				C148B4B5204C2C31001BE3BA /* decmpfs.h */,
 				9B1936ED1A941E9D000E8995 /* hfs_format.h */,
 				9B1936EE1A941E9D000E8995 /* hfs_macos_defs.h */,
 				9B1936EF1A941E9D000E8995 /* hfs_types.h */,

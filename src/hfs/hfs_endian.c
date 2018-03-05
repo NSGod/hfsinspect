@@ -150,6 +150,15 @@ void swap_journal_header(journal_header* record)
     }
 }
 
+void swap_decmpfs_disk_header(decmpfs_disk_header* record)
+{
+    if (record->compression_magic != DECMPFS_MAGIC) {
+        Swap32(record->compression_magic);
+        Swap32(record->compression_type);
+        Swap64(record->uncompressed_size);
+    }
+}
+
 void swap_HFSPlusForkData(HFSPlusForkData* record)
 {
     // trace("record (%p)", record);

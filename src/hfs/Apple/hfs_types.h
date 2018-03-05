@@ -17,6 +17,7 @@
 #include "hfs/Apple/hfs_unistr.h"
 #include "hfs/Apple/vfs_journal.h"
 #include "hfs/Apple/hfs_format.h"
+#include "hfs/Apple/decmpfs.h"
 
 #pragma GCC diagnostic pop
 

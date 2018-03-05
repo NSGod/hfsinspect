@@ -83,7 +83,13 @@ VolumeSummary* createVolumeSummary(HIOptions* options)
                     if (HFSPlusCatalogRecordIsCompressed(record)) summary->compressedFileCount++;
 
                     // file sizes
-                    if ((file->dataFork.logicalSize == 0) && (file->resourceFork.logicalSize == 0)) { summary->emptyFileCount++; continue; }
+                    if ((file->dataFork.logicalSize == 0) && (file->resourceFork.logicalSize == 0)) {
+                        // if it's "empty", perhaps it's just compressed (with data in a 'com.apple.decmpfs' extended attribute)
+                        if ( !(HFSPlusCatalogRecordIsCompressed(record) && file->flags & kHFSHasAttributesMask)) {
+                            // TODO: actually confirm presence of a `com.apple.decmpfs` attribute?
+                            summary->emptyFileCount++; continue;
+                        }
+                    }
 
                     if (file->dataFork.logicalSize)
                         generateForkSummary(options, &summary->dataFork, file, &file->dataFork, HFSDataForkType);

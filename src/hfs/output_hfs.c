@@ -925,10 +925,53 @@ void PrintHFSPlusAttributes(out_ctx* ctx, uint32_t cnid, HFSPlus* hfs)
         return;
     }
 
-    BeginSection(ctx, "Extended Attributes");
-    PrintXAttrList(ctx, list);
-    EndSection(ctx); // extended ettributes
-    
+    // Print file compression info if applicable
+    XAttr* xattr = NULL;
+
+    uint32_t xattrCount = 0;
+
+    TAILQ_FOREACH(xattr, list, xattrs) {
+        HFSPlusAttrStr127 ucName = HFSPlusAttrKeyGetStr(&xattr->key);
+        hfs_attr_str attr_name = "";
+        attruc_to_attrstr(&attr_name, &ucName);
+
+        if (strcmp((const char*)attr_name, DECMPFS_XATTR_NAME) == 0) {
+            HFSPlusAttrRecord* record = xattr->record;
+            if (record->recordType != kHFSPlusAttrInlineData || record->attrData.attrSize < sizeof(decmpfs_disk_header)) {
+                continue;
+            }
+            
+            decmpfs_disk_header header = {0};
+            decmpfs_disk_header* headerPtr = &header;
+            memcpy(headerPtr, record->attrData.attrData, sizeof(decmpfs_disk_header));
+            swap_decmpfs_disk_header(headerPtr);
+            
+            BeginSection            (ctx, "File Compression Info");
+            PrintUIChar             (ctx, headerPtr, compression_magic);
+            
+            PrintLabeledConstIfEqual(ctx, headerPtr, compression_type, kAppleFSCompressionUncompressedType);
+            PrintLabeledConstIfEqual(ctx, headerPtr, compression_type, kAppleFSCompressionZlibType3);
+            PrintLabeledConstIfEqual(ctx, headerPtr, compression_type, kAppleFSCompressionZlibType4);
+            PrintLabeledConstIfEqual(ctx, headerPtr, compression_type, kAppleFSCompressionDatalessType);
+            PrintLabeledConstIfEqual(ctx, headerPtr, compression_type, kAppleFSCompressionLZVNType7);
+            PrintLabeledConstIfEqual(ctx, headerPtr, compression_type, kAppleFSCompressionLZVNType8);
+            PrintLabeledConstIfEqual(ctx, headerPtr, compression_type, kAppleFSCompressionLZVNType9);
+            PrintLabeledConstIfEqual(ctx, headerPtr, compression_type, kAppleFSCompressionLZVNType10);
+
+            _PrintDataLength        (ctx, "compressed_size", record->attrData.attrSize);
+            PrintDataLength         (ctx, headerPtr, uncompressed_size);
+            
+            EndSection(ctx); // file compression info
+        }
+        xattrCount++;
+    }
+
+    if (xattrCount) {
+        BeginSection(ctx, "Extended Attributes");
+        PrintXAttrList(ctx, list);
+        EndSection(ctx); // extended ettributes
+    }
+
     xattrlist_free(list);
 }
 

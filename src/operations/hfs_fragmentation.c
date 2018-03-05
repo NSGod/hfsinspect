@@ -29,7 +29,6 @@ VolumeFragmentationSummary* createVolumeFragmentationSummary(HIOptions *options)
         SALLOC(summary->topFragementedFiles, summary->topFragementedFilesCount * sizeof(FragmentedFile));
     }
 
-
     /*
        Walk the leaf catalog nodes and gather various stats about the volume as a whole.
      */
@@ -88,7 +87,13 @@ VolumeFragmentationSummary* createVolumeFragmentationSummary(HIOptions *options)
                     if (HFSPlusCatalogRecordIsCompressed(record)) summary->compressedFileCount++;
 
                     // file sizes
-                    if ((file->dataFork.logicalSize == 0) && (file->resourceFork.logicalSize == 0)) { summary->emptyFileCount++; continue; }
+                    if ((file->dataFork.logicalSize == 0) && (file->resourceFork.logicalSize == 0)) {
+                        // if it's "empty", perhaps it's just compressed (with data in a 'com.apple.decmpfs' extended attribute)
+                        if ( !(HFSPlusCatalogRecordIsCompressed(record) && file->flags & kHFSHasAttributesMask)) {
+                            // TODO: actually confirm presence of a `com.apple.decmpfs` attribute?
+                            summary->emptyFileCount++; continue;
+                        }
+                    }
 
                     summary->dataForksLogicalSize += file->dataFork.logicalSize;
                     summary->resourceForksLogicalSize += file->resourceFork.logicalSize;
@@ -178,8 +183,8 @@ VolumeFragmentationSummary* createVolumeFragmentationSummary(HIOptions *options)
         btree_free_node(node);
     }
 
-    if (options->verbose) EndSection(ctx); // Volume Fragmentation Details
 
+    if (options->verbose) EndSection(ctx); // volume fragmentation details
     return summary;
 }
 

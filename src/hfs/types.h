@@ -118,4 +118,19 @@ struct FndrExtendedFileInfo {
 
  */
 
+enum {
+    /* introduced in OS X 10.7 Lion */
+    kAppleFSCompressionUncompressedType = 1,
+    kAppleFSCompressionZlibType3        = 3,
+    kAppleFSCompressionZlibType4        = 4,
+    kAppleFSCompressionDatalessType     = 5,
+
+    /* introduced in OS X 10.9 Mavericks */
+    kAppleFSCompressionLZVNType7        = 7,
+    kAppleFSCompressionLZVNType8        = 8,
+    kAppleFSCompressionLZVNType9        = 9,
+    kAppleFSCompressionLZVNType10       = 10,
+
+};
+
 #endif
