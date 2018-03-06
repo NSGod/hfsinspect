@@ -3,4 +3,4 @@
 	url = https://bitbucket.org/codepoet/memdmp
 [submodule "src/vendor/crc-32c"]
 	path = vendor/crc32c
-	url = https://bitbucket.org/codepoet/crc-32c
+	url = https://github.com/NSGod/crc32c.git
