@@ -72,7 +72,7 @@ bool resolveDeviceAndPath(char* path_in, char* device_out, char* path_out)
 #if defined(__APPLE__)
     char* path = realpath(path_in, NULL);
     if (path == NULL) {
-        die(1, path_in);
+        die(EXIT_FAILURE, path_in);
         return false;
     }
 
@@ -146,21 +146,21 @@ void loadBTree(HIOptions* options)
     // Load the tree
     if (options->tree_type == BTreeTypeCatalog) {
         if ( hfsplus_get_catalog_btree(&options->tree, options->hfs) < 0)
-            die(1, "Could not get Catalog B-Tree!");
+            die(EXIT_FAILURE, "Could not get Catalog B-Tree!");
 
     } else if (options->tree_type == BTreeTypeExtents) {
         if ( hfsplus_get_extents_btree(&options->tree, options->hfs) < 0)
-            die(1, "Could not get Extents B-Tree!");
+            die(EXIT_FAILURE, "Could not get Extents B-Tree!");
 
     } else if (options->tree_type == BTreeTypeAttributes) {
         if ( hfsplus_get_attributes_btree(&options->tree, options->hfs) < 0)
-            die(1, "Could not get Attributes B-Tree!");
+            die(EXIT_FAILURE, "Could not get Attributes B-Tree!");
 
     } else if (options->tree_type == BTreeTypeHotfiles) {
         if ( hfs_get_hotfiles_btree(&options->tree, options->hfs) < 0)
-            die(1, "Hotfiles B-Tree not found. Target must be a hard drive with a copy of Mac OS X that has successfully booted to create this file (it will not be present on SSDs).");
+            die(EXIT_FAILURE, "Hotfiles B-Tree not found. Target must be a hard drive with a copy of Mac OS X that has successfully booted to create this file (it will not be present on SSDs).");
     } else {
-        die(1, "Unsupported tree: %u", options->tree_type);
+        die(EXIT_FAILURE, "Unsupported tree: %u", options->tree_type);
     }
 }
 
@@ -616,13 +616,13 @@ OPEN:
     Volume* tmp = hfsplus_find(vol);
     if (tmp == NULL) {
         // No HFS Plus volumes found.
-        die(1, "No HFS+ filesystems found.");
+        die(EXIT_FAILURE, "No HFS+ filesystems found.");
     } else {
         vol = tmp;
     }
 
     if (hfs_open(options.hfs, vol) < 0) {
-        die(1, "hfs_open");
+        die(EXIT_FAILURE, "hfs_open");
     }
 
     uid_t    uid = 99;
@@ -632,7 +632,7 @@ OPEN:
     if (check_mode(&options, HIModeExtractFile) || check_mode(&options, HIModeYankFS)) {
         char* dir = strdup(dirname(options.extract_path));
         if ( !strlen(dir) ) {
-            die(1, "Output file directory does not exist: %s", dir);
+            die(EXIT_FAILURE, "Output file directory does not exist: %s", dir);
         }
 
         struct stat dirstat = {0};
@@ -651,8 +651,8 @@ OPEN:
     // If we're root, drop down.
     if (geteuid() == 0) {
         debug("Dropping privs");
-        if (setegid(gid) != 0) die(1, "Failed to drop group privs.");
-        if (seteuid(uid) != 0) die(1, "Failed to drop user privs.");
+        if (setegid(gid) != 0) die(EXIT_FAILURE, "Failed to drop group privs.");
+        if (seteuid(uid) != 0) die(EXIT_FAILURE, "Failed to drop user privs.");
         info("Was running as root.  Now running as %u/%u.", geteuid(), getegid());
     }
 
@@ -824,12 +824,12 @@ NOPE:
             if (options.hfs->vh.journalInfoBlock != 0) {
                 JournalInfoBlock block   = {0};
                 bool             success = hfsplus_get_JournalInfoBlock(&block, options.hfs);
-                if (!success) die(1, "Could not get the journal info block!");
+                if (!success) die(EXIT_FAILURE, "Could not get the journal info block!");
                 PrintJournalInfoBlock(ctx, &block);
 
                 journal_header   header  = {0};
                 success = hfsplus_get_journalheader(&header, &block, options.hfs);
-                if (!success) die(1, "Could not get the journal header!");
+                if (!success) die(EXIT_FAILURE, "Could not get the journal header!");
                 PrintJournalHeader(ctx, &header);
 
             } else {
@@ -911,7 +911,7 @@ NOPE:
             BeginSection(ctx, "Hotfiles B-Tree Header");
 
         } else {
-            die(1, "Unknown tree type: %d", options.tree_type);
+            die(EXIT_FAILURE, "Unknown tree type: %d", options.tree_type);
         }
 
         PrintTreeNode(ctx, options.tree, 0);
@@ -937,7 +937,7 @@ NOPE:
             BeginSection(ctx, "Hotfiles B-Tree Node %d", options.node_id);
 
         } else {
-            die(1, "Unknown tree type: %u", options.tree_type);
+            die(EXIT_FAILURE, "Unknown tree type: %u", options.tree_type);
         }
 
         bool showHex = 0;

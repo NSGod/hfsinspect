@@ -142,11 +142,11 @@ void inspectBlockRange(HIOptions* options)
 	
     // Sanity checks
     if (blockRange.count < 1) {
-        die(1, "Invalid request size: %zu blocks", blockRange.count);
+        die(EXIT_FAILURE, "Invalid request size: %zu blocks", blockRange.count);
     }
 
     if (blockRange.start > hfs->block_count) {
-        die(1, "Invalid range: specified start block would begin beyond the end of the volume (start block: %zu; volume block count: %u blocks).", blockRange.start, hfs->block_count);
+        die(EXIT_FAILURE, "Invalid range: specified start block would begin beyond the end of the volume (start block: %zu; volume block count: %u blocks).", blockRange.start, hfs->block_count);
     }
 
     if ( range_max(blockRange) > hfs->block_count ) {

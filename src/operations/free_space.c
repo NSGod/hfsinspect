@@ -29,7 +29,7 @@ void showFreeSpace(HIOptions* options)
 {
     HFSPlusFork* fork = NULL;
     if ( hfsplus_get_special_fork(&fork, options->hfs, kHFSAllocationFileID) < 0 )
-        die(1, "Couldn't get a reference to the volume allocation file.");
+        die(EXIT_FAILURE, "Couldn't get a reference to the volume allocation file.");
 
     char*        data = NULL;
     SALLOC(data, fork->logicalSize);

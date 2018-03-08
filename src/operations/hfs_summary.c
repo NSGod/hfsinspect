@@ -45,7 +45,7 @@ VolumeSummary* createVolumeSummary(HIOptions* options)
         BTreeNodePtr node = NULL;
         if ( BTGetNode(&node, catalog, cnid) < 0) {
             perror("get node");
-            die(1, "There was an error fetching node %d", cnid);
+            die(EXIT_FAILURE, "There was an error fetching node %d", cnid);
         }
 
         // Process node
@@ -187,7 +187,7 @@ void generateForkSummary(HIOptions* options, ForkSummary* forkSummary, const HFS
 
     HFSPlusFork* hfsfork;
     if ( hfsfork_make(&hfsfork, options->hfs, *fork, type, file->fileID) < 0 ) {
-        die(1, "Could not create fork reference for fileID %u", file->fileID);
+        die(EXIT_FAILURE, "Could not create fork reference for fileID %u", file->fileID);
     }
 
     ExtentList* extents = hfsfork->extents;

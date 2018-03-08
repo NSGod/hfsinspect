@@ -31,7 +31,7 @@ off_t extractFork(const HFSPlusFork* fork, const char* extractPath)
     // Open output stream
     f_out = fopen(extractPath, "w");
     if (f_out == NULL) {
-        die(1, "could not open %s", extractPath);
+        die(EXIT_FAILURE, "could not open %s", extractPath);
     }
 
     f_in       = fopen_hfsfork((HFSPlusFork*)fork);
@@ -73,12 +73,12 @@ void extractHFSPlusCatalogFile(const HFSPlus* hfs, const HFSPlusCatalogFile* fil
     if (file->dataFork.logicalSize > 0) {
         HFSPlusFork* fork = NULL;
         if ( hfsfork_make(&fork, hfs, file->dataFork, HFSDataForkType, file->fileID) < 0 ) {
-            die(1, "Could not create fork for fileID %u", file->fileID);
+            die(EXIT_FAILURE, "Could not create fork for fileID %u", file->fileID);
         }
         off_t      size = extractFork(fork, extractPath);
         if (size < 0) {
             perror("extract");
-            die(1, "Extract data fork failed.");
+            die(EXIT_FAILURE, "Extract data fork failed.");
         }
         hfsfork_free(fork);
     }
@@ -87,16 +87,16 @@ void extractHFSPlusCatalogFile(const HFSPlus* hfs, const HFSPlusCatalogFile* fil
         SALLOC(outputPath, FILENAME_MAX);
         off_t size;
         size = strlcpy(outputPath, extractPath, FILENAME_MAX);
-        if (size < 1) die(1, "Could not create destination filename.");
+        if (size < 1) die(EXIT_FAILURE, "Could not create destination filename.");
         size = strlcat(outputPath, ".rsrc", FILENAME_MAX);
-        if (size < 1) die(1, "Could not create destination filename.");
+        if (size < 1) die(EXIT_FAILURE, "Could not create destination filename.");
 
         HFSPlusFork* fork = NULL;
         if ( hfsfork_make(&fork, hfs, file->resourceFork, HFSResourceForkType, file->fileID) < 0 )
-            die(1, "Could not create fork for fileID %u", file->fileID);
+            die(EXIT_FAILURE, "Could not create fork for fileID %u", file->fileID);
 
         size = extractFork(fork, extractPath);
-        if (size < 0) die(1, "Extract resource fork failed.");
+        if (size < 0) die(EXIT_FAILURE, "Extract resource fork failed.");
 
         hfsfork_free(fork);
 

@@ -48,7 +48,7 @@ VolumeFragmentationSummary* createVolumeFragmentationSummary(HIOptions *options)
         BTreeNodePtr node = NULL;
         if ( BTGetNode(&node, catalog, cnid) < 0) {
             perror("get node");
-            die(1, "There was an error fetching node %u", cnid);
+            die(EXIT_FAILURE, "There was an error fetching node %u", cnid);
         }
 
         // Process node
@@ -239,7 +239,7 @@ void countFragmentsInFork(HIOptions* options, FragmentedFile* fragmentedFile, co
     assert(forkType == HFSDataForkType || forkType == HFSResourceForkType);
     HFSPlusFork* hfsfork = NULL;
     if ( hfsfork_make(&hfsfork, options->hfs, (forkType == HFSDataForkType ? file->dataFork : file->resourceFork), forkType, file->fileID) ) {
-        die(1, "Could not create fork reference for fileID %u", file->fileID);
+        die(EXIT_FAILURE, "Could not create fork reference for fileID %u", file->fileID);
     }
 
     uint32_t fragmentCount = 0;

@@ -44,7 +44,7 @@ void showHotFiles(HIOptions* options)
         BTreeNodePtr node = NULL;
         if ( BTGetNode(&node, hotfiles, cnid) < 0) {
             perror("get node");
-            die(1, "There was an error fetching node %u", cnid);
+            die(EXIT_FAILURE, "There was an error fetching node %u", cnid);
         }
 
         for (unsigned recNum = 0; recNum < node->nodeDescriptor->numRecords; recNum++) {
