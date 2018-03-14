@@ -1,4 +1,4 @@
-.Dd January 16, 2018
+.Dd March 11, 2018
 .Dt HFSINSPECT 1
 .Os
 .Sh NAME
@@ -11,10 +11,11 @@ Forthcoming.
 .Nm
 .Op Fl hvDjlrSB
 .Op Fl d Ar DEV | Fl V Ar VOLUME
-.Op Fl sf0 Fl t Ar TOP
+.Op Fl sf0H Fl t Ar TOP
 .Op Fl o Ar outpath
-.Op Fl b Ar attributes | Ar catalog | Ar extents | Ar hotfile
+.Op Fl b Ar attributes | Ar catalog | Ar extents | Ar hotfiles
 .Op Fl n Ar NNUM
+.Op Fl T Ar TYPE
 .Op Fl c Ar CNID | Fl F Ar parent:name
 .Op Fl p Ar localpath | Fl P Ar virtualpath
 .Op Fl y Ar DIR
@@ -124,9 +125,33 @@ Display the volume's journal structure.
 .It Fl b , Cm --btree Ar NAME
 Specify which HFS+ B-Tree to work with. Supported options: attributes, catalog, extents, or hotfile.
 .It Fl n , Cm --node Ar NNUM
-Dump an HFS+ B-Tree node by ID (must specify tree with
+Dump an HFS+ B-Tree node by ID (must specify tree with the
 .Fl b
-).
+/
+.Fl -btree
+option).
+.It Fl T , Cm --type Ar TYPE
+Show a list of B-Tree leaf node records of the specified
+.Ar TYPE
+(must specify tree with the
+.Fl b
+/
+.Fl -btree
+option).
+.Ar TYPE
+should be one of the following:
+.Bl -hang indent -width "Attributes B-Tree:"
+.It Sy Catalog B-Tree:
+"file", "folder", "filethread", "folderthread", or "any"
+.It Sy Extents B-Tree:
+"extents" or "any"
+.It Sy Hotfiles B-Tree:
+"hotfile", "hotfilethread", or "any"
+.It Sy Attributes B-Tree:
+"any"
+.El
+.Pp
+Specifying "any" will list all available record types.
 .El
 .Ss FILE AND DIRECTORY INFORMATION
 .Bl -tag -offset indent -width "123456789012345"

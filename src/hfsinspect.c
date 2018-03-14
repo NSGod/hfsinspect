@@ -116,7 +116,7 @@ bool resolveDeviceAndPath(char* path_in, char* device_out, char* path_out)
 #endif
 }
 
-void die(int val, char* format, ...) __printflike(2, 3);
+__attribute__((noreturn)) void die(int val, char* format, ...) __printflike(2, 3);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-security"
@@ -173,14 +173,6 @@ void show_version()
 
 /* hfsdebug-lite args remaining...
    -e,        --examples      display some usage examples
-   -l TYPE,   --list=TYPE     specify an HFS+ B-Tree's leaf nodes' type, where
-                                 TYPE is one of "file", "folder", "filethread", or
-                                 "folderthread" for the Catalog B-Tree; one of
-                                 "hfcfile" or "hfcthread" for the Hot Files B-Tree
-                                 B-Tree; or "extents" for the Extents B-Tree
-                                 You can use the type "any" if you wish to display
-                                 all node types. Currently, "any" is the only
-                                 type supported for the Attributes B-Tree
    -m,        --mountdata     display a mounted volume's in-memory data
    -S,        --summary_rsrc  calculate and display volume usage summary
    -x FILTERDYLIB, --filter=FILTERDYLIB
@@ -195,7 +187,7 @@ void show_version()
 
 void print_usage()
 {
-    char* help = "[-hv] [-d path | -p path | -V fspath] [-DjlrSB] [-0sf [-v] [-t top]] [-b btree [-n nid]] [-P path] [-c cnid]\n"
+    char* help = "[-hv] [-d path | -p path | -V fspath] [-DjlrSB] [-0sf [-v] [-t top]] [-b btree [-n nid] [-T type]] [-P path] [-c cnid]\n"
                  "                    [-i startBlock:blockCount] [-F parent:name] [-o file] path";
     fprintf(stderr, "usage: %s %s\n", PROGRAM_NAME, help);
 }
@@ -235,16 +227,23 @@ void print_help()
                  "                                   list with the -t/--top option).\n"
                  "    -t TOP,     --top TOP       Specify the number of largest contiguous freespace segments to display (when used with the -0/--freespace option),\n"
                  "                                   the number of largest files to display (when used with the -s/--summary option),\n"
-                 "                                   the number of most fragmented files to display (when used with the -f/--fragmentation option).\n"
+                 "                                   the number of most fragmented files to display (when used with the -f/--fragmentation option), or\n"
                  "                                   the number of hottest files to display (when used with the -H/--hotfiles option).\n"
-                 "    -i RANGE,   --inspect RANGE Inspect a block range on a volume and lists the files or freespace found within.\n"
+                 "    -i RANGE,   --inspect RANGE Inspect a block range on a volume and list the files or freespace found within.\n"
                  "                                   RANGE should be of the form startBlock:blockCount (eg. 10000000:800000).\n"
                  "                                   The blockCount operand is optional, and can be omitted to search to the end\n"
                  "                                   of the volume (eg. 10000000:).\n"
                  "    -r,         --volumeheader  Dump the volume header.\n"
                  "    -j,         --journal       Dump the volume's journal info block structure.\n"
-                 "    -b NAME,    --btree NAME    Specify which HFS+ B-Tree to work with. Supported options: attributes, catalog, extents, or hotfiles.\n"
-                 "    -n ID,      --node ID       Dump an HFS+ B-Tree node by ID (must specify tree with -b).\n"
+                 "    -b NAME,    --btree NAME    Specify which HFS+ B-Tree to work with. Supported options: \"attributes\", \"catalog\", \"extents\", or \"hotfiles\".\n"
+                 "    -n ID,      --node ID       Dump an HFS+ B-Tree node by ID (must specify tree with -b/--btree).\n"
+                 "    -T,         --type TYPE     Show a list of B-Tree leaf node records of the specified TYPE (must specify tree with -b/--btree).\n"
+                 "                                   TYPE should be one of the following:\n"
+                 "                                   Catalog B-Tree: \"file\", \"folder\", \"filethread\", \"folderthread\", or \"any\"\n"
+                 "                                   Extents B-Tree: \"extents\" or \"any\"\n"
+                 "                                   Hotfiles B-Tree: \"hotfile\", \"hotfilethread\", or \"any\"\n"
+                 "                                   Attributes B-Tree: \"any\"\n"
+                 "                                   Specifying \"any\" will list all available record types.\n"
                  "    -c CNID,    --cnid CNID     Lookup and display a record by its catalog node ID.\n"
                  "    -F FSSpec   --fsspec FSSpec Locate a record by Carbon-style FSSpec (parent:name).\n"
                  "    -P path     --vol-path path Locate a record by its path on the given device's filesystem.\n"
@@ -304,6 +303,7 @@ int main (int argc, char* const* argv)
 
         { "btree",          required_argument,      NULL,                   'b' },
         { "node",           required_argument,      NULL,                   'n' },
+        { "type",           required_argument,      NULL,                   'T' },
         { "cnid",           required_argument,      NULL,                   'c' },
         { "fsspec",         required_argument,      NULL,                   'F' },
         { "vol-path",       required_argument,      NULL,                   'P' },
@@ -314,7 +314,7 @@ int main (int argc, char* const* argv)
     };
 
     /* short options */
-    char*         shortopts = "0ShvjlrsDd:n:b:p:P:F:V:c:o:y:LBft:i:H";
+    char*         shortopts = "0ShvjlrsDd:n:b:p:P:F:V:c:o:y:LBft:i:HT:";
 
     int           opt;
     while ((opt = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1) {
@@ -427,6 +427,21 @@ int main (int argc, char* const* argv)
                 break;
             }
 
+            case 'T':
+            {
+                set_mode(&options, HIModeListBTreeNodeType);
+                if (strcmp(optarg, BTreeListOptionFile) == 0) set_list_type(&options, BTreeListTypeFile);
+                else if (strcmp(optarg, BTreeListOptionFolder) == 0) set_list_type(&options, BTreeListTypeFolder);
+                else if (strcmp(optarg, BTreeListOptionFileThread) == 0) set_list_type(&options, BTreeListTypeFileThread);
+                else if (strcmp(optarg, BTreeListOptionFolderThread) == 0) set_list_type(&options, BTreeListTypeFolderThread);
+                else if (strcmp(optarg, BTreeListOptionHotfile) == 0) set_list_type(&options, BTreeListTypeHotfile);
+                else if (strcmp(optarg, BTreeListOptionHotfileThread) == 0) set_list_type(&options, BTreeListTypeHotfileThread);
+                else if (strcmp(optarg, BTreeListOptionExtents) == 0) set_list_type(&options, BTreeListTypeExtents);
+                else if (strcmp(optarg, BTreeListOptionAny) == 0) set_list_type(&options, BTreeListTypeAny);
+                else fatal("option -T/--type must be one of: file, folder, filethread, folderthread, hotfile, hotfilethread, extents, or any (not %s).", optarg);
+                break;
+            }
+
             case 'F':
             {
                 set_mode(&options, HIModeShowCatalogRecord);
@@ -501,9 +516,9 @@ int main (int argc, char* const* argv)
                 set_mode(&options, HIModeInspectBlockRange);
 
                 char* option, * tofree;
-                option = tofree = strdup(optarg);
+                option = tofree     = strdup(optarg);
                 char* blockStart    = strsep(&option, ":");
-                char* blockCount      = strsep(&option, ":");
+                char* blockCount    = strsep(&option, ":");
 
                 if (blockStart && strlen(blockStart))   sscanf(blockStart, "%zu", &options.blockRangeStart);
                 if (blockCount && strlen(blockCount))   sscanf(blockCount, "%zu", &options.blockRangeCount);
@@ -786,6 +801,52 @@ NOPE:
         if (!options.topCount) fatal("option -H/--hotfiles requires the -t/--top option to be specified");
     }
 
+    if (check_mode(&options, HIModeListBTreeNodeType)) {
+        // If we're listing a leaf node type, then unset showing B-Tree info.
+        clear_mode(&options, HIModeShowBTreeInfo);
+
+        switch (options.tree_type) {
+            case BTreeTypeCatalog:
+            {
+                if ( !(check_list_type(&options, BTreeListTypeFile) || check_list_type(&options, BTreeListTypeFolder)
+                       || check_list_type(&options, BTreeListTypeFileThread) || check_list_type(&options, BTreeListTypeFolderThread)) ) {
+                    fatal("option -b/--btree catalog requires a -T/--type of either \"file\", \"folder\", \"filethread\", \"folderthread\", or \"any\"");
+                }
+                break;
+            }
+
+            case BTreeTypeExtents:
+            {
+                if ( !(check_list_type(&options, BTreeListTypeExtents)) ) {
+                    fatal("option -b/--btree extents requires a -T/--type of either \"extents\" or \"any\"");
+                }
+                break;
+            }
+        
+             case BTreeTypeAttributes:
+            {
+                if ( !(check_list_type(&options, BTreeListTypeAny)) ) {
+                    fatal("option -b/--btree attributes requires a -T/--type of \"any\"");
+                }
+                break;
+            }
+
+            case BTreeTypeHotfiles:
+            {
+                if ( !(check_list_type(&options, BTreeListTypeHotfile) || check_list_type(&options, BTreeListTypeHotfileThread)) ) {
+                    fatal("option -b/--btree hotfiles requires a -T/--type of either \"hotfile\", \"hotfilethread\", or \"any\"");
+                }
+                break;
+            }
+        
+            default:
+            {
+                die(EXIT_FAILURE, "Unknown tree type: %u", options.tree_type);
+            }
+                break;
+        }
+    }
+
 #pragma mark Volume Requests
 
     // Always detail what volume we're working on at the very least
@@ -957,6 +1018,13 @@ NOPE:
 
         EndSection(ctx);
 
+    }
+
+    // List a specific type or types of B-Tree nodes
+    if (check_mode(&options, HIModeListBTreeNodeType)) {
+        debug("Listing tree node types.");
+        loadBTree(&options);
+        listNodeTypes(&options);
     }
 
 #pragma mark Extract File Requests

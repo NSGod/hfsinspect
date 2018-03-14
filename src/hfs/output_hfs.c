@@ -713,6 +713,44 @@ void PrintHotFilesInfo(out_ctx* ctx, const HotFilesInfo* record)
     EndSection(ctx);
 }
 
+void PrintPartialHotFileKey(out_ctx* ctx, const HotFileKey* record)
+{
+    PrintUI             (ctx, record, keyLength);
+    PrintAttribute      (ctx, "forkType", "%#x (%s)", record->forkType, (record->forkType == HFSResourceForkType ? "rsrc" : "data"));
+    PrintUI             (ctx, record, pad);
+    if (record->temperature == HFC_LOOKUPTAG) {
+        PrintAttribute  (ctx, "temperature", "%#x (HFC_LOOKUPTAG)", record->temperature);
+    } else {
+        PrintUI         (ctx, record, temperature);
+    }
+}
+
+void PrintHotFileThreadRecord(out_ctx* ctx, const HotFileThreadRecord* record)
+{
+    PrintPartialHotFileKey  (ctx, &record->key);
+    PrintAttribute          (ctx, "data (temperature)", "%u", record->temperature);
+    PrintAttribute          (ctx, "fileID", "%u", record->key.fileID);
+    PrintPath               (ctx, "path", record->key.fileID);
+}
+
+void PrintHotFileRecord(out_ctx* ctx, const HotFileRecord* record)
+{
+    PrintPartialHotFileKey  (ctx, &record->key);
+    _PrintUIChar            (ctx, "data", record->data, sizeof(record->data));
+    PrintAttribute          (ctx, "fileID", "%u", record->key.fileID);
+    PrintPath               (ctx, "path", record->key.fileID);
+}
+
+void PrintHFSPlusExtentKey(out_ctx* ctx, const HFSPlusExtentKey* record)
+{
+    PrintUI             (ctx, record, keyLength);
+    PrintAttribute      (ctx, "forkType", "%#x (%s)", record->forkType, (record->forkType == HFSResourceForkType ? "rsrc" : "data"));
+    PrintUI             (ctx, record, pad);
+    PrintUI             (ctx, record, fileID);
+    PrintUI             (ctx, record, startBlock);
+    PrintPath           (ctx, "path", record->fileID);
+}
+
 void PrintHFSPlusAttrKey(out_ctx* ctx, const HFSPlusAttrKey* record)
 {
     PrintUI(ctx, record, keyLength);
@@ -870,7 +908,7 @@ void PrintHFSPlusAttrExtents(out_ctx* ctx, const HFSPlusAttrExtents* record)
 
 void PrintHFSPlusAttrData(out_ctx* ctx, const HFSPlusAttrData* record)
 {
-    PrintUI(ctx, record, attrSize);
+    PrintDataLength(ctx, record, attrSize);
     PrintAttribute(ctx, "attrData", "");
     VisualizeData((char*)&record->attrData, record->attrSize);
 }
@@ -1126,6 +1164,49 @@ void VisualizeHFSBTreeNodeRecord(out_ctx* ctx, const char* label, BTHeaderRec he
     VisualizeData((char*)record.value, MIN(record.recordLen, record.valueLen));
 }
 
+void VisualizeHotFileKey(out_ctx* ctx, const HotFileKey* record, const char* label, bool oneLine)
+{
+    char tempStr[15] = "";
+
+    if (record->temperature == HFC_LOOKUPTAG) {
+        strlcpy(tempStr, "HFC_LOOKUPTAG", 15);
+    } else {
+        sprintf(tempStr, "%u", record->temperature);
+    }
+
+    if (oneLine) {
+        Print(ctx, "%s: %s:%-6u; %s:%-4u; %s:%-3u; %s:%-13s; %s:%-10u",
+              label,
+              "length",
+              record->keyLength,
+              "fork",
+              record->forkType,
+              "pad",
+              record->pad,
+              "temperature",
+              tempStr,
+              "fileID",
+              record->fileID
+              );
+    } else {
+        Print(ctx, "%s", label);
+        Print(ctx, "+--------------------------------------------------+");
+        Print(ctx, "| %-6s | %-4s | %-3s | %-13s | %-10s |",
+              "length",
+              "fork",
+              "pad",
+              "temperature",
+              "fileID");
+        Print(ctx, "| %-6u | %-4u | %-3u | %-13s | %-10u |",
+              record->keyLength,
+              record->forkType,
+              record->pad,
+              tempStr,
+              record->fileID);
+        Print(ctx, "+--------------------------------------------------+");
+    }
+}
+
 #pragma mark - Node Print Functions
 
 void PrintTreeNode(out_ctx* ctx, const BTreePtr tree, uint32_t nodeID)
@@ -1149,7 +1230,7 @@ void PrintNode(out_ctx* ctx, const BTreeNodePtr node)
 {
     debug("PrintNode");
 
-    BeginSection(ctx, "Node %u (offset %lld; length: %zu)", node->nodeNumber, node->nodeOffset, node->nodeSize);
+    BeginSection(ctx, "Node %u (offset %lld; length: %zu bytes)", node->nodeNumber, node->nodeOffset, node->nodeSize);
     PrintBTNodeDescriptor(ctx, node->nodeDescriptor);
 
 //    uint16_t *records = ((uint16_t*)(node->data + node->bTree->headerRecord.nodeSize) - node->nodeDescriptor->numRecords);
@@ -1329,6 +1410,9 @@ void PrintNodeRecord(out_ctx* ctx, const BTreeNodePtr node, int recordNumber)
         return;
     }
 
+    bt_nodeid_t hotfilesTreeID = hfs_hotfiles_get_tree_id();
+
+    // Index nodes (done)
     if (node->nodeDescriptor->kind == kBTIndexNode) {
         if (node->bTree->treeID == kHFSExtentsFileID) {
             if (recordNumber == 0) {
@@ -1367,11 +1451,20 @@ void PrintNodeRecord(out_ctx* ctx, const BTreeNodePtr node, int recordNumber)
             Print(ctx, "%-3u %-12u %-5u %-12u %s", recordNumber, next_node, key->keyLength, key->fileID, attrName);
 
             return;
-        }
+        } else if (hotfilesTreeID && node->bTree->treeID == hotfilesTreeID) {
+            if (recordNumber == 0) {
+                BeginSection(ctx, "Hotfiles B-Tree Index Records");
+                Print(ctx, "%-3s %-12s %-12s %13s", "#", "nodeID", "fileID", "temperature");
+            }
+            bt_nodeid_t     next_node = *(bt_nodeid_t*)record->value;
+            HotFileKey*     key       = (HotFileKey*)record->key;
 
+            Print(ctx, "%-3u %-12u %-12u %13u", recordNumber, next_node, key->fileID, key->temperature);
+            return;
+        }
     }
 
-    BeginSection(ctx, "Record ID %u (%u/%u) (length: %u) (Node %u)",
+    BeginSection(ctx, "Record ID %u (%u/%u) (length: %u bytes) (Node %u)",
                  recordNumber,
                  recordNumber + 1,
                  node->nodeDescriptor->numRecords,
@@ -1394,8 +1487,19 @@ void PrintNodeRecord(out_ctx* ctx, const BTreeNodePtr node, int recordNumber)
                 case 1:
                 {
                     PrintAttribute(ctx, "recordType", "userData (reserved)");
-                    VisualizeData(record->record, record->recordLen);
-                    break;
+                    /*
+                     Currently, only the Hotfiles B-Tree uses the userData record to store data.
+                     */
+
+                    if (hotfilesTreeID && node->treeID == hotfilesTreeID) {
+                        HotFilesInfo hotfileInfo = *( (HotFilesInfo*) record->record);
+                        swap_HotFilesInfo(&hotfileInfo);
+                        PrintHotFilesInfo(ctx, &hotfileInfo);
+                        break;
+                    } else {
+                        VisualizeData(record->record, record->recordLen);
+                        break;
+                    }
                 }
 
                 case 2:
@@ -1417,8 +1521,11 @@ void PrintNodeRecord(out_ctx* ctx, const BTreeNodePtr node, int recordNumber)
 
         default:
         {
+            bt_nodeid_t treeID = node->bTree->treeID;
+
             // Handle all keyed node records
-            switch (node->bTree->treeID) {
+            // first print the key
+            switch (treeID) {
                 case kHFSCatalogFileID:
                 {
                     HFSPlusCatalogKey* keyStruct = (HFSPlusCatalogKey*) record->key;
@@ -1453,8 +1560,23 @@ void PrintNodeRecord(out_ctx* ctx, const BTreeNodePtr node, int recordNumber)
                 }
 
                 default:
-                    goto INVALID_KEY;
+                {
+                    if (treeID == hotfilesTreeID) {
+                        HotFileKey* keyStruct = (HotFileKey*) record->key;
+                        VisualizeHotFileKey(ctx, keyStruct, "Hotfile Key", 0);
+                        
+                        if (keyStruct->keyLength != HFC_KEYLENGTH)
+                            goto INVALID_KEY;
+
+                        break;
+                    } else {
+                        goto INVALID_KEY;
+
+                    }
+                }
             }
+        
+            // second, print the record (value)
 
             switch (node->nodeDescriptor->kind) {
                 case kBTIndexNode:
@@ -1466,7 +1588,7 @@ void PrintNodeRecord(out_ctx* ctx, const BTreeNodePtr node, int recordNumber)
 
                 case kBTLeafNode:
                 {
-                    switch (node->bTree->treeID) {
+                    switch (treeID) {
                         case kHFSCatalogFileID:
                         {
                             uint16_t type = ((HFSPlusCatalogRecord*)record->value)->record_type;
@@ -1519,6 +1641,23 @@ void PrintNodeRecord(out_ctx* ctx, const BTreeNodePtr node, int recordNumber)
                         case kHFSAttributesFileID:
                         {
                             PrintHFSPlusAttrRecord(ctx, (HFSPlusAttrRecord*)record->value);
+                        }
+                            
+                        default:
+                        {
+                            if (treeID == hotfilesTreeID) {
+                                HotFileKey* keyStruct = (HotFileKey*)record->key;
+                                if (keyStruct->temperature == HFC_LOOKUPTAG) {
+                                    // it's a thread record
+                                    BeginSection(ctx, "Hotfiles Thread Record");
+                                    PrintHotFileThreadRecord(ctx, (const HotFileThreadRecord*)record->record);
+                                    EndSection(ctx);
+                                } else {
+                                    BeginSection(ctx, "Hotfiles File Record");
+                                    PrintHotFileRecord(ctx, (const HotFileRecord*)record->record);
+                                    EndSection(ctx);
+                                }
+                            }
                         }
                     }
 

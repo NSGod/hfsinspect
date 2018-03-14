@@ -23,6 +23,26 @@ extern char* BTreeOptionExtents;
 extern char* BTreeOptionAttributes;
 extern char* BTreeOptionHotfiles;
 
+extern char* BTreeListOptionFile;
+extern char* BTreeListOptionFolder;
+extern char* BTreeListOptionFileThread;
+extern char* BTreeListOptionFolderThread;
+extern char* BTreeListOptionHotfile;
+extern char* BTreeListOptionHotfileThread;
+extern char* BTreeListOptionExtents;
+extern char* BTreeListOptionAny;
+
+typedef enum BTreeListType {
+    BTreeListTypeFile               = 0,
+    BTreeListTypeFolder             = 1,
+    BTreeListTypeFileThread         = 2,
+    BTreeListTypeFolderThread       = 3,
+    BTreeListTypeHotfile            = 4,
+    BTreeListTypeHotfileThread      = 5,
+    BTreeListTypeExtents            = 6,
+    BTreeListTypeAny                = 0x7F,
+} BTreeListType;
+
 typedef enum BTreeTypes {
     BTreeTypeCatalog = 0,
     BTreeTypeExtents,
@@ -47,6 +67,7 @@ enum HIModes {
     HIModeShowFragmentation,
     HIModeInspectBlockRange,
     HIModeShowHotFiles,
+    HIModeListBTreeNodeType,
 };
 
 // Configuration context
@@ -62,15 +83,16 @@ typedef struct HIOptions {
     bt_nodeid_t         cnid;                           // 4
     bt_nodeid_t         node_id;                        // 4
     BTreeTypes          tree_type;                      // 4
+    BTreeListType       list_type;                      // 4
 
     char                device_path[PATH_MAX];          // 1024
     char                file_path[PATH_MAX];            // 1024
     char                record_filename[PATH_MAX];      // 1024
     char                extract_path[PATH_MAX];         // 1024
 
-    uint32_t            topCount;                       // 4
     size_t              blockRangeStart;                // 4/8
     size_t              blockRangeCount;                // 4/8
+    uint32_t            topCount;                       // 4
     
     bool                verbose;                        // 1
 } HIOptions;
@@ -78,6 +100,10 @@ typedef struct HIOptions {
 void set_mode (HIOptions* options, int mode);
 void clear_mode (HIOptions* options, int mode);
 bool check_mode (HIOptions* options, int mode);
+
+void set_list_type(HIOptions* options, BTreeListType type);
+void clear_list_type(HIOptions* options, BTreeListType type);
+bool check_list_type(HIOptions* options, BTreeListType type);
 
 void die(int val, char* format, ...) __attribute__(( noreturn ));
 
@@ -88,6 +114,7 @@ off_t   extractFork(const HFSPlusFork* fork, const char* extractPath);
 void    extractHFSPlusCatalogFile(const HFSPlus* hfs, const HFSPlusCatalogFile* file, const char* extractPath);
 void    inspectBlockRange(HIOptions* options);
 void    showHotFiles(HIOptions* options);
+void    listNodeTypes(HIOptions* options);
 
 // For volume statistics
 typedef struct Rank {

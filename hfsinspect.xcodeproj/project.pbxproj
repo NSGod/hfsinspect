@@ -52,6 +52,7 @@
 		C13A1D5A2023C9EA005367CB /* hfs_hotfiles.c in Sources */ = {isa = PBXBuildFile; fileRef = C13A1D592023C9EA005367CB /* hfs_hotfiles.c */; };
 		C19FD75520473BEF00BC0A07 /* hfsplus_xattrlist.c in Sources */ = {isa = PBXBuildFile; fileRef = C19FD75320473BEF00BC0A07 /* hfsplus_xattrlist.c */; };
 		C1A06CC81FF96EB300D642AF /* hfs_fragmentation.c in Sources */ = {isa = PBXBuildFile; fileRef = C1A06CC71FF96EB300D642AF /* hfs_fragmentation.c */; };
+		C1BAFA4A203874410024BD15 /* hfs_list_node_types.c in Sources */ = {isa = PBXBuildFile; fileRef = C1BAFA49203874410024BD15 /* hfs_list_node_types.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -176,7 +177,8 @@
 		C19FD75320473BEF00BC0A07 /* hfsplus_xattrlist.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hfsplus_xattrlist.c; sourceTree = "<group>"; };
 		C19FD75420473BEF00BC0A07 /* hfsplus_xattrlist.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hfsplus_xattrlist.h; sourceTree = "<group>"; };
 		C1A06CC71FF96EB300D642AF /* hfs_fragmentation.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hfs_fragmentation.c; sourceTree = "<group>"; };
-		C1A06CC91FFBF5F300D642AF /* hfsinspect.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = hfsinspect.1; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.man; };
+		C1A06CC91FFBF5F300D642AF /* hfsinspect.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; lineEnding = 0; path = hfsinspect.1; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.man; };
+		C1BAFA49203874410024BD15 /* hfs_list_node_types.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hfs_list_node_types.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -280,6 +282,7 @@
 				9B1937181A941E9D000E8995 /* hfs_summary.c */,
 				C1A06CC71FF96EB300D642AF /* hfs_fragmentation.c */,
 				C13A1D592023C9EA005367CB /* hfs_hotfiles.c */,
+				C1BAFA49203874410024BD15 /* hfs_list_node_types.c */,
 				9B19371B1A941E9D000E8995 /* path_info.c */,
 			);
 			path = operations;
@@ -532,6 +535,7 @@
 				C1A06CC81FF96EB300D642AF /* hfs_fragmentation.c in Sources */,
 				C1113D2F20176BD500CBBDB4 /* hfs_inspect_blocks.c in Sources */,
 				C13A1D5A2023C9EA005367CB /* hfs_hotfiles.c in Sources */,
+				C1BAFA4A203874410024BD15 /* hfs_list_node_types.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

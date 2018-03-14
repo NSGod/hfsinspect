@@ -56,6 +56,7 @@ void PrintHFSPlusCatalogFile        (out_ctx* ctx, const HFSPlusCatalogFile* rec
 void PrintHFSPlusFolderThreadRecord (out_ctx* ctx, const HFSPlusCatalogThread* record) _NONNULL;
 void PrintHFSPlusFileThreadRecord   (out_ctx* ctx, const HFSPlusCatalogThread* record) _NONNULL;
 void PrintHFSPlusCatalogThread      (out_ctx* ctx, const HFSPlusCatalogThread* record) _NONNULL;
+void PrintHFSPlusExtentKey          (out_ctx* ctx, const HFSPlusExtentKey* record) _NONNULL;
 void PrintHFSPlusAttrKey            (out_ctx* ctx, const HFSPlusAttrKey* record) _NONNULL;
 void PrintHFSPlusAttrRecord         (out_ctx* ctx, const HFSPlusAttrRecord* record) _NONNULL;
 void PrintXAttrList                 (out_ctx* ctx, const XAttrList* list) _NONNULL;
@@ -64,6 +65,7 @@ void VisualizeHFSPlusExtentKey      (out_ctx* ctx, const HFSPlusExtentKey* recor
 void VisualizeHFSPlusCatalogKey     (out_ctx* ctx, const HFSPlusCatalogKey* record, const char* label, bool oneLine) _NONNULL;
 void VisualizeHFSPlusAttrKey        (out_ctx* ctx, const HFSPlusAttrKey* record, const char* label, bool oneLine) _NONNULL;
 void VisualizeHFSBTreeNodeRecord    (out_ctx* ctx, const char* label, BTHeaderRec headerRecord, const BTreeNodePtr node, BTRecNum recNum) _NONNULL;
+void VisualizeHotFileKey            (out_ctx* ctx, const HotFileKey* record, const char* label, bool oneLine) _NONNULL;
 
 void PrintTreeNode                  (out_ctx* ctx, const BTreePtr tree, uint32_t nodeID) _NONNULL;
 void PrintNode                      (out_ctx* ctx, const BTreeNodePtr node) _NONNULL;
@@ -76,6 +78,9 @@ void PrintHFSUniStr255              (out_ctx* ctx, const char* label, const HFSU
 void PrintHFSPlusAttrStr127         (out_ctx* ctx, const char* label, const HFSPlusAttrStr127* record) _NONNULL;
 
 void PrintHotFilesInfo              (out_ctx* ctx, const HotFilesInfo* record) _NONNULL;
+void PrintHotFileThreadRecord       (out_ctx* ctx, const HotFileThreadRecord* record) _NONNULL;
+void PrintHotFileRecord             (out_ctx* ctx, const HotFileRecord* record) _NONNULL;
+
 int format_hfs_timestamp            (out_ctx* ctx, char* out, uint32_t timestamp, size_t length) _NONNULL;
 
 #endif
