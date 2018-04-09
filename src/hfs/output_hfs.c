@@ -183,7 +183,7 @@ void PrintVolumeHeader(out_ctx* ctx, const HFSPlusVolumeHeader* vh)
     PrintUIFlagIfMatch  (ctx, vh->attributes, kHFSVolumeSoftwareLockMask);
     PrintUIFlagIfMatch  (ctx, vh->attributes, kHFSUnusedNodeFixMask);
     PrintUIFlagIfMatch  (ctx, vh->attributes, kHFSContentProtectionMask);
-    PrintUIFlagIfMatch  (ctx, vh->attributes, kHFSMDBAttributesMask);
+//    PrintUIFlagIfMatch  (ctx, vh->attributes, kHFSMDBAttributesMask);
 
     PrintUIChar         (ctx, vh, lastMountedVersion);
     PrintUI             (ctx, vh, journalInfoBlock);

@@ -17,6 +17,7 @@ int hfsuc_to_str(hfs_str* str, const HFSUniStr255* hfs)
 {
     int    result    = 0;
     size_t utf8_size = 0;
+#warning should this be ':' instead of '/'?
 
     result = utf8_encodestr(hfs->unicode, hfs->length*2, *str, &utf8_size, 1024, '/', 0);
     if (result < 0) {
@@ -30,6 +31,7 @@ int str_to_hfsuc(HFSUniStr255* hfs, const hfs_str str)
     int    result = 0;
     size_t ucslen = 0;
 
+#warning should this be ':' instead of '/'?
     result      = utf8_decodestr(str, strlen((char*)str)+1, hfs->unicode, &ucslen, 256, '/', UTF_DECOMPOSED);
     hfs->length = (uint16_t)(ucslen/2);
     if (result < 0) {

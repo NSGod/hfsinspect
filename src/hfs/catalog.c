@@ -390,6 +390,18 @@ int HFSPlusGetCNIDPath(hfs_str* path, FSSpec spec)
                 hfs_str itemName = "";
                 hfsuc_to_str(&itemName, &catalogRecord.catalogThread.nodeName);
 
+                /*
+                 If the file/folder name has a '\r' in it (e.g. "Icon\r", ".HFS+ Private Directory Data\r"), replace the single-char raw value
+                 with the 2-char "\r" escape sequence representation of it for display purposes. Otherwise, it screws up printing.
+                 TODO: other non-printing control characters...
+                 */
+                size_t len = strlen((const char *)itemName);
+                if (itemName[len - 1] == '\r' && (len + 1 < PATH_MAX)) {
+                    itemName[len - 1] = '\\';
+                    itemName[len]     = 'r';
+                    itemName[len + 1] = '\0';
+                }
+
                 char tempPath[PATH_MAX+1] = "";
 
                 (void)strlcpy(tempPath, (const char *)itemName, PATH_MAX);
@@ -619,6 +631,11 @@ int HFSPlusGetCatalogInfoByCNID(FSSpec* out_spec, HFSPlusCatalogRecord* out_cata
     HFSPlusCatalogRecord catalogRecord = {0};
 
     trace("out_spec (%p), out_catalogRecord (%p), hfs (%p), cnid %u", (void *)out_spec, (void *)out_catalogRecord, (void *)hfs, cnid);
+/*
+    "Finding a file or folder by its CNID is a two-step process. The first step is to use the CNID
+    to look up the thread record for the file or folder. This yields the file or folder's parent folder ID
+    and name. The second step is to use that information to look up the real file or folder record."
+*/
 
     if ( HFSPlusGetCatalogRecordByFSSpec(&catalogRecord, spec) < 0 )
         return -1;

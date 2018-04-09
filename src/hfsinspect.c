@@ -560,6 +560,15 @@ int main (int argc, char* const* argv)
         }
     }
 
+    if (log_level == L_TRACE) {
+        char argstrings[ARG_MAX] = "";
+        for (int i = 0; i < argc; i++) {
+            strlcat(argstrings, argv[i], ARG_MAX);
+            strlcat(argstrings, " ", ARG_MAX);
+        }
+        printf("%s\n", argstrings);
+    }
+
 #pragma mark Prepare Input and Outputs
 
     // If no device path was given, use the volume of the CWD.
